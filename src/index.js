@@ -45,7 +45,7 @@ class Board extends React.Component {
 
 class Game extends React.Component {
   constructor(props){
-    let boardValues = generateBoard(6)
+    let boardValues = generateBoard(4)
     super(props)
     this.state = {
       values: Array(boardValues.length).fill("*"),
@@ -154,4 +154,4 @@ function arrayEquals(a, b) {
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-//reportWebVitals();
+//reportWebVitals(console.log);
