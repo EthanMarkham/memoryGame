@@ -13,7 +13,7 @@ function Square(props) {
       alt={props.value}
       className="image"
       ></img>
-      <label>{props.civ}</label>
+      {/*<label>{props.civ}</label>*/}
     </button>
   );
 }
