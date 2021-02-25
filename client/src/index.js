@@ -13,6 +13,7 @@ function Square(props) {
       alt={props.value}
       className="image"
       ></img>
+      <label>{props.civ}</label>
     </button>
   );
 }
@@ -23,6 +24,7 @@ class Board extends React.Component {
     <Square 
       value={this.props.squares[i].value}
       image={this.props.squares[i].image}
+      civ={this.props.squares[i].civ}
       //this doesnt need to be called onclick just comes in handy 
       onClick= {()=> this.props.onClick(i)}
       key={i}
@@ -63,9 +65,8 @@ class Game extends React.Component {
     }
   }
   componentDidMount(){
-    fetch("/api/v1/gameBoard").then(response=> response.json()).then((data) => {
+    fetch("/api/v1/gameBoard/6").then(response=> response.json()).then((data) => {
       let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
-      console.log(data);
       this.setState({
         answerSquares: data,
         currentSquares: defaultSquares.slice(0),
@@ -78,10 +79,8 @@ class Game extends React.Component {
     let currentSquares = this.state.currentSquares,
         defaultSquares = this.state.defaultSquares,
         cardsShown = this.state.cardsShown,
-        lastGuess = this.state.lastGuess,
         round = this.state.round,
         message = "Guess a square"
-  console.log(defaultSquares)
 
    //if square or winner set do nothing
     if (this.state.waiting) return
@@ -89,34 +88,27 @@ class Game extends React.Component {
     if (currentSquares[i].value !== "*" || "*" !== defaultSquares[i].value) return
     //if game over do nothing
     if (arrayEquals(defaultSquares, this.state.answerSquares)) return
+    //if two cards shown do nothing
+    if (cardsShown === 2) return
 
-    //if two cards match check for winner and flip over
-    if (cardsShown === 2) {
-      currentSquares = defaultSquares.slice(0)
-      cardsShown = 0
-      round = round + 1
-      message = "Try Again!"
-    }
-
+    //set button to the click and cards shown to plus 1
     currentSquares[i] = this.state.answerSquares[i]
-    cardsShown = cardsShown + 1
+    cardsShown = cardsShown + 1 
+    let currentGuess = currentSquares[i].value
 
-    //have to check that cardshown is 2 otherwise it would be match if they selected 9, hid all squares and selected 9 again
-    if (lastGuess === currentSquares[i].value && cardsShown === 2) {
-      //record new match in default values
-      defaultSquares = currentSquares.slice(0)
-      message = "Nice Match!"
-    }
-    if (arrayEquals(defaultSquares, this.state.answerSquares)) {
-      message = "Good job!"
-    }
-    lastGuess = currentSquares[i].value
+    //if STATE last guess (not the local) == current guess update defaults/message
+    if (this.state.lastGuess === currentSquares[i].value) { this.recordMatch(); return; }
+    //if cards shown is 2 with no match reset board
+    else if (cardsShown === 2) { this.resetValues(); return; }
+    //if all answers are filled give completed message
+    if (arrayEquals(defaultSquares, this.state.answerSquares)) message = "Good job!"
+
 
     this.setState({
       currentSquares: currentSquares,
       defaultSquares: defaultSquares,
       cardsShown: cardsShown,
-      lastGuess: lastGuess,
+      lastGuess: currentGuess,
       round: round,
       message: message
     })
@@ -141,6 +133,44 @@ class Game extends React.Component {
       
     );
   }
+  //reset values 
+  resetValues = ()=>{
+    let round = this.state.round + 1,
+      defaultSquares = this.state.defaultSquares
+
+    this.setState({
+      cardsShown: 2,
+      lastGuess: -1,
+      round: round,
+      message: "No match!"
+    })
+    setTimeout(()=>{
+      this.setState({
+        currentSquares: defaultSquares.slice(),
+        defaultSquares: defaultSquares.slice(),
+        cardsShown: 0,
+        message: "Try Again!"
+      })
+    }, 1000)
+  }
+  //update match
+  recordMatch = ()=>{
+    const currentSquares = this.state.currentSquares,
+          message = "Nice Match!",
+          cardsShown = 0,
+          lastGuess = -1
+    let round = this.state.round + 1
+
+    this.setState({
+      currentSquares: currentSquares.slice(0),
+      defaultSquares: currentSquares.slice(0),
+      cardsShown: cardsShown,
+      lastGuess: lastGuess,
+      round: round,
+      message: message
+    })
+  }
+ 
 }
 
 // ========================================

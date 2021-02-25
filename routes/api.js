@@ -3,7 +3,7 @@ var router = express.Router();
 var gameBoard = require('../controllers/gameBoard')
 
 /* GET reviews */
-router.get('/gameBoard', gameBoard.generateBoard) 
+router.get('/gameBoard/:size', gameBoard.generateBoard) 
 
 
 module.exports = router;
