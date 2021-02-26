@@ -6,11 +6,6 @@ ol, ul {
   padding-left: 30px;
 }
 
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
-}
 .container{
   padding: 0;
 }
@@ -19,36 +14,35 @@ ol, ul {
 }
 
 .square {
+  flex: auto;
   width: 100%;
-  height: fit-content;
-  display: table;
+  overflow: hidden;
   background: #fff;
   border: 1px solid #999;
   padding: 0;
+
+  position: relative;
 }
 
 .square:focus {
   outline: none;
 }
 
-.square > .imageContainer > img{
-  width: 100%;
-  height: auto;
+.square > .image{
+  float: none;
+  width: auto;
+  height: 100%;
   object-fit: fill;
+  overflow: hidden;
 }
-.square > .imageContainer{
-  float: none;
-  display: table-cell;
-  top: 0px;
-  width: 90%;
-}
-.square > label{
-  float: none;
-  display: table-cell;
-  vertical-align: bottom;
-  width: 100%;
-  font-weight: bold;
 
+.square > label{
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  font-weight: bold;
+  color: red;
+  font-size: 0.8em;
 }
 
 .kbd-navigation .square:focus {
@@ -59,12 +53,19 @@ ol, ul {
 .game-board{
   display: flex;
   flex-direction: row;
-  width: 100%;
-  max-width: 600px;
-  height: 100%;
-  overflow: auto;
+  height: 80%;
+  overflow: hidden;
 }
-
+.game-board > .row {
+  display: flex; 
+  flex-direction: column;
+  height:100%;
+}
+.game-board > .row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
 .game-info {
   margin-left: 20px;
 }

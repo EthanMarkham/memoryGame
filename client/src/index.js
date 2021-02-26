@@ -1,30 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Container, Row, Col } from 'bootstrap-4-react';
 
 import './index.css';
 
 function Square(props) {
   return (
-    <Col col={props.colSize.toString()}>
       <button 
         className="square" 
-        onClick={props.onClick}>
-        <div class="imageContainer">
-          <img 
-            src={props.image} 
-            alt={props.civ}
-            className="image"
-            ></img>
-        </div>
+        onClick={props.onClick}
+        style={props.style}>
+        <img 
+          src={props.image} 
+          alt={props.civ}
+          className="image"
+          />
         <label>{props.civ}</label>
       </button>
-    </Col>
   );
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
+  renderSquare(i, squareHeight) {
+    let style = {
+      height:squareHeight
+    }
     return (
     <Square 
       value={this.props.squares[i].value}
@@ -32,8 +31,8 @@ class Board extends React.Component {
       civ={this.props.squares[i].civ}
       //this doesnt need to be called onclick just comes in handy 
       onClick= {()=> this.props.onClick(i)}
-      colSize = {12 / Math.sqrt(this.props.squares.length) | 0}
       key={i}
+      style={style}
     />
     )
   }
@@ -42,16 +41,18 @@ class Board extends React.Component {
     let board = [],
         root = Math.sqrt(size) | 0,
         squareIndex = 0
-
+    
+    const squareHeight = (100 / root).toString() + "%"
+    console.log(root, squareHeight)
     for (let row = 0; row < root; row++) {
       let children = [],
           nextIndex = squareIndex + root
       for (squareIndex; squareIndex < nextIndex; squareIndex++) {
-          children.push(this.renderSquare(squareIndex))
+          children.push(this.renderSquare(squareIndex, squareHeight))
       }
-      board.push(<Row noGutters>{children}</Row>)
+      board.push(<div className="row">{children}</div>)
     }
-    return <Container>{board}</Container>
+    return <div className="game-board"> {board} </div>
   }
 
   render() { return this.createBoard(this.props.squares.length) }
@@ -122,23 +123,15 @@ class Game extends React.Component {
 
   render() {
     return (
-      <Container>
-        <Row noGutters>
-          <Col col="10 sm-12 md-8">
-            <div className="game-board">
-              <Board 
-                squares = {this.state.currentSquares}
-                onClick = {(i) => this.handleClick(i)} />
-            </div>
-          </Col>
-          <Col col="2 sm-12 md-4">
-            <div className="game-info">
-              <div>{this.state.message}</div>
-              <ol>Guesses: {this.state.round}</ol>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+      <div className="container">
+        <Board 
+          squares = {this.state.currentSquares}
+          onClick = {(i) => this.handleClick(i)} />
+        <div className="game-info">
+          <div>{this.state.message}</div>
+          <ol>Guesses: {this.state.round}</ol>
+        </div>
+      </div>
     );
   }
   //reset values 
