@@ -1,7 +1,5 @@
-body {
-  font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
-  width: 100%;
+html, body, #root, .App, #root>div {
+  height: 100%;
 }
 
 ol, ul {
@@ -13,43 +11,58 @@ ol, ul {
   content: "";
   display: table;
 }
-
-.image{
-  width: 100%;
+.container{
+  padding: 0;
 }
 .status {
   margin-bottom: 10px;
 }
 
 .square {
+  width: 100%;
+  height: fit-content;
+  display: table;
   background: #fff;
   border: 1px solid #999;
-  float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 60px;
-  margin-right: -1px;
-  margin-top: -1px;
   padding: 0;
-  text-align: center;
-  width: 60px;
 }
 
 .square:focus {
   outline: none;
 }
 
+.square > .imageContainer > img{
+  width: 100%;
+  height: auto;
+  object-fit: fill;
+}
+.square > .imageContainer{
+  float: none;
+  display: table-cell;
+  top: 0px;
+  width: 90%;
+}
+.square > label{
+  float: none;
+  display: table-cell;
+  vertical-align: bottom;
+  width: 100%;
+  font-weight: bold;
+
+}
+
 .kbd-navigation .square:focus {
   background: #ddd;
 }
 
-.game {
+
+.game-board{
   display: flex;
   flex-direction: row;
-}
-.game-board{
   width: 100%;
+  max-width: 600px;
+  height: 100%;
+  overflow: auto;
 }
 
 .game-info {

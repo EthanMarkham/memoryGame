@@ -1,20 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Container, Row, Col } from 'bootstrap-4-react';
+
 import './index.css';
 
 function Square(props) {
   return (
-    <button 
-      className="square" 
-      onClick={props.onClick}
-    >
-    <img 
-      src={props.image} 
-      alt={props.value}
-      className="image"
-      ></img>
-      {/*<label>{props.civ}</label>*/}
-    </button>
+    <Col col={props.colSize.toString()}>
+      <button 
+        className="square" 
+        onClick={props.onClick}>
+        <div class="imageContainer">
+          <img 
+            src={props.image} 
+            alt={props.civ}
+            className="image"
+            ></img>
+        </div>
+        <label>{props.civ}</label>
+      </button>
+    </Col>
   );
 }
 
@@ -27,6 +32,7 @@ class Board extends React.Component {
       civ={this.props.squares[i].civ}
       //this doesnt need to be called onclick just comes in handy 
       onClick= {()=> this.props.onClick(i)}
+      colSize = {12 / Math.sqrt(this.props.squares.length) | 0}
       key={i}
     />
     )
@@ -43,12 +49,12 @@ class Board extends React.Component {
       for (squareIndex; squareIndex < nextIndex; squareIndex++) {
           children.push(this.renderSquare(squareIndex))
       }
-      board.push(<div className="board-row">{children}</div>)
+      board.push(<Row noGutters>{children}</Row>)
     }
-    return board
+    return <Container>{board}</Container>
   }
 
-  render() { return ( <div>{this.createBoard(this.props.squares.length)}</div> ) }
+  render() { return this.createBoard(this.props.squares.length) }
 }
 
 class Game extends React.Component {
@@ -116,21 +122,23 @@ class Game extends React.Component {
 
   render() {
     return (
-      <div>
-      <div className="game">
-        <div className="game-board">
-          <Board 
-            squares = {this.state.currentSquares}
-            onClick = {(i) => this.handleClick(i)}
-          />
-        </div>
-      </div>
-      <div className="game-info">
-          <div>{this.state.message}</div>
-          <ol>Guesses: {this.state.round}</ol>
-      </div>
-      </div>
-      
+      <Container>
+        <Row noGutters>
+          <Col col="10 sm-12 md-8">
+            <div className="game-board">
+              <Board 
+                squares = {this.state.currentSquares}
+                onClick = {(i) => this.handleClick(i)} />
+            </div>
+          </Col>
+          <Col col="2 sm-12 md-4">
+            <div className="game-info">
+              <div>{this.state.message}</div>
+              <ol>Guesses: {this.state.round}</ol>
+            </div>
+          </Col>
+        </Row>
+      </Container>
     );
   }
   //reset values 
