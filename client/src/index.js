@@ -72,7 +72,7 @@ class Game extends React.Component {
     }
   }
   componentDidMount(){
-    fetch("/api/v1/gameBoard/6").then(response=> response.json()).then((data) => {
+    fetch("/api/v1/gameBoard/8").then(response=> response.json()).then((data) => {
       let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
       this.setState({
         answerSquares: data,

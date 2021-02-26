@@ -41,7 +41,9 @@ ol, ul {
   bottom: 2px;
   left: 2px;
   font-weight: bold;
-  color: red;
+  background-color: black;
+  width: 100%;
+  color: white;
   font-size: 0.8em;
 }
 
