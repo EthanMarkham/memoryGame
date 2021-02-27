@@ -17,11 +17,15 @@ module.exports.generateBoard = (req, res) => {
     let shuffledArray = [...Array(_halfArray).keys()].flatMap(i => [{
         value: i,
         image: "http://" + req.headers.host + '/cards/paired/1/' + file1Names[i],
-        civ: ucFirst(file1Names[i].split('.')[0]) //Get civ name by looking at file name. 
+        civ: ucFirst(file1Names[i].split('.')[0]), //Get civ name by looking at file name. 
+        hidden: false,
+        back: "http://" + req.headers.host + "/cards/back.PNG"
     }, {
         value: i,
         image: "http://" + req.headers.host + '/cards/paired/2/' + file2Names[i],
-        civ: ucFirst(file1Names[i].split('.')[0]) 
+        civ: ucFirst(file1Names[i].split('.')[0]),
+        hidden: true,
+        back: "http://" + req.headers.host + "/cards/back.PNG"
     }]).sort(() => Math.random() - 0.5) 
 
     sendJSONresponse(res, 200, shuffledArray)

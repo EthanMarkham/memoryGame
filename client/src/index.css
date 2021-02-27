@@ -29,13 +29,22 @@ ol, ul {
 }
 
 .square > .image{
+  position: absolute;
   float: none;
   width: auto;
   height: 100%;
   object-fit: fill;
   overflow: hidden;
+  z-index: -1;
 }
-
+.square > .cardCover{
+  position: absolute;
+  width: auto;
+  height: 100%;
+  object-fit: fill;
+  overflow: hidden;
+  z-index: 2
+}
 .square > label{
   position: absolute;
   bottom: 2px;
@@ -45,6 +54,7 @@ ol, ul {
   width: 100%;
   color: white;
   font-size: 0.8em;
+  z-index: 1;
 }
 
 .kbd-navigation .square:focus {

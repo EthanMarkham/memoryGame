@@ -4,17 +4,28 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props) {
+  let showAnswer = {
+    display:(props.data.hidden) ? "block" : "none"
+  }
   return (
       <button 
         className="square" 
         onClick={props.onClick}
         style={props.style}>
+        {/*front of card*/}
         <img 
-          src={props.image} 
-          alt={props.civ}
+          src={props.data.image} 
+          alt={props.data.civ}
           className="image"
           />
-        <label>{props.civ}</label>
+        {/*back of card*/}
+        <img 
+          src={props.data.back} 
+          alt={props.data.civ}
+          className="cardCover"
+          style={showAnswer}
+        />
+        <label>{props.data.civ}</label>
       </button>
   );
 }
@@ -26,9 +37,7 @@ class Board extends React.Component {
     }
     return (
     <Square 
-      value={this.props.squares[i].value}
-      image={this.props.squares[i].image}
-      civ={this.props.squares[i].civ}
+      data={this.props.boardData[i]}
       //this doesnt need to be called onclick just comes in handy 
       onClick= {()=> this.props.onClick(i)}
       key={i}
@@ -55,16 +64,15 @@ class Board extends React.Component {
     return <div className="game-board"> {board} </div>
   }
 
-  render() { return this.createBoard(this.props.squares.length) }
+  render() { return this.createBoard(this.props.boardData.length) }
 }
 
 class Game extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      answerSquares: [],
-      currentSquares: [],
-      defaultSquares: [],
+      boardData: [],
+      hiddenIndex: [],
       cardsShown: 0,
       lastGuess: -1,
       round: 0,
@@ -73,50 +81,42 @@ class Game extends React.Component {
   }
   componentDidMount(){
     fetch("/api/v1/gameBoard/8").then(response=> response.json()).then((data) => {
-      let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
       this.setState({
-        answerSquares: data,
-        currentSquares: defaultSquares.slice(0),
-        defaultSquares: defaultSquares.slice(0),
+        boardData: data,
+        hiddenIndex: data.flatMap(i => i.hidden)
       })
-
     })
   }
   handleClick(i){
-    let currentSquares = this.state.currentSquares,
-        defaultSquares = this.state.defaultSquares,
+    let hiddenIndex = this.state.current,
+        boardData = this.state.boardData,
         cardsShown = this.state.cardsShown,
-        round = this.state.round,
         message = "Guess a square"
 
-   //if square or winner set do nothing
-    if (this.state.waiting) return
     //if square is already set do nothing
-    if (currentSquares[i].value !== "*" || "*" !== defaultSquares[i].value) return
+    if (!boardData[i].hidden) return
     //if game over do nothing
-    if (arrayEquals(defaultSquares, this.state.answerSquares)) return
+    if (!boardData.map(i => i.hidden).contains(true)) return
     //if two cards shown do nothing
     if (cardsShown === 2) return
 
-    //set button to the click and cards shown to plus 1
-    currentSquares[i] = this.state.answerSquares[i]
+    //set hidden to no
+    hiddenIndex[i] = false
     cardsShown = cardsShown + 1 
-    let currentGuess = currentSquares[i].value
+    let currentGuess = boardData[i].value
 
     //if STATE last guess (not the local) == current guess update defaults/message
-    if (this.state.lastGuess === currentSquares[i].value) { this.recordMatch(); return; }
+    if (this.state.lastGuess === currentGuess) { this.recordMatch(); return; }
     //if cards shown is 2 with no match reset board
     else if (cardsShown === 2) { this.resetValues(); return; }
     //if all answers are filled give completed message
-    if (arrayEquals(defaultSquares, this.state.answerSquares)) message = "Good job!"
+    if (!boardData.flatMap(i => i.hidden).contains(true)) message = "All done! Good job!"
 
 
     this.setState({
-      currentSquares: currentSquares,
-      defaultSquares: defaultSquares,
+      hiddenIndex: hiddenIndex,
       cardsShown: cardsShown,
       lastGuess: currentGuess,
-      round: round,
       message: message
     })
   }
@@ -125,7 +125,7 @@ class Game extends React.Component {
     return (
       <div className="container">
         <Board 
-          squares = {this.state.currentSquares}
+          boardData = {this.state.boardData}
           onClick = {(i) => this.handleClick(i)} />
         <div className="game-info">
           <div>{this.state.message}</div>
@@ -136,8 +136,7 @@ class Game extends React.Component {
   }
   //reset values 
   resetValues = ()=>{
-    let round = this.state.round + 1,
-      defaultSquares = this.state.defaultSquares
+    let round = this.state.round + 1
 
     this.setState({
       cardsShown: 2,
@@ -147,8 +146,7 @@ class Game extends React.Component {
     })
     setTimeout(()=>{
       this.setState({
-        currentSquares: defaultSquares.slice(),
-        defaultSquares: defaultSquares.slice(),
+        hiddenIndex: this.state.boardData.flatMap(i => i.hidden),
         cardsShown: 0,
         message: "Try Again!"
       })
@@ -156,15 +154,24 @@ class Game extends React.Component {
   }
   //update match
   recordMatch = ()=>{
-    const currentSquares = this.state.currentSquares,
+    const hiddenIndex = this.state.hiddenIndex,
           message = "Nice Match!",
           cardsShown = 0,
           lastGuess = -1
-    let round = this.state.round + 1
+    let round = this.state.round + 1,
+        newBoardData = this.state.boardData.map((d, i) => {
+          let newData = {
+            value: d.value,
+            image: d.image,
+            civ: d.civ,
+            hidden: hiddenIndex[i],
+            back: d.back
+          }
+          return newData
+        })
 
     this.setState({
-      currentSquares: currentSquares.slice(0),
-      defaultSquares: currentSquares.slice(0),
+      boardData: newBoardData,
       cardsShown: cardsShown,
       lastGuess: lastGuess,
       round: round,
@@ -180,13 +187,6 @@ ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
-
-function arrayEquals(a, b) {
-  return Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((val, index) => val === b[index]);
-}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
