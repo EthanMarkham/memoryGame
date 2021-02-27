@@ -1,5 +1,7 @@
 html, body, #root, .App, #root>div {
   height: 100%;
+  background-color: darkgray;
+
 }
 
 ol, ul {
@@ -9,19 +11,49 @@ ol, ul {
 .container{
   padding: 0;
 }
+
+
+.game-board{
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  margin: auto;
+  width: 90%;
+  height: 90%;
+  overflow: auto;
+  overflow-y: hidden;
+  align-content:center;
+}
+.game-info {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin: auto;
+  margin: auto;
+  margin-top: 10px;
+  width: 80%;
+  color: black;
+  font-weight: bold;
+  align-content: center;
+}
 .status {
+  flex: auto;
   margin-bottom: 10px;
+}
+.restartButton{
+  flex: auto;
+  width: auto;
 }
 
 .square {
   flex: auto;
-  width: 100%;
+  width: auto;
   overflow: hidden;
   background: #fff;
-  border: 1px solid #999;
+  border: 1px solid darkgray;
   padding: 0;
-
   position: relative;
+
 }
 
 .square:focus {
@@ -46,28 +78,10 @@ ol, ul {
   color: white;
   font-size: 0.8em;
 }
+.square:hover{
+  border: 2px solid lightgray;
 
+}
 .kbd-navigation .square:focus {
   background: #ddd;
-}
-
-
-.game-board{
-  display: flex;
-  flex-direction: row;
-  height: 80%;
-  overflow: auto;
-}
-.game-board > .row {
-  display: flex; 
-  flex-direction: column;
-  height:100%;
-}
-.game-board > .row:after {
-  clear: both;
-  content: "";
-  display: table;
-}
-.game-info {
-  margin-left: 20px;
 }

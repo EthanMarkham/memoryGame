@@ -16,11 +16,11 @@ module.exports.generateBoard = (req, res) => {
     const _halfArray = boardSize * boardSize / 2
     let shuffledArray = [...Array(_halfArray).keys()].flatMap(i => [{
         value: i,
-        image: "http://" + req.headers.host + '/cards/paired/1/' + file1Names[i],
+        image: '/cards/paired/1/' + file1Names[i],
         civ: ucFirst(file1Names[i].split('.')[0]) //Get civ name by looking at file name. 
     }, {
         value: i,
-        image: "http://" + req.headers.host + '/cards/paired/2/' + file2Names[i],
+        image: '/cards/paired/2/' + file2Names[i],
         civ: ucFirst(file1Names[i].split('.')[0]) 
     }]).sort(() => Math.random() - 0.5) 
 

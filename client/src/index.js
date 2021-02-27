@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import './index.css';
+import reportWebVitals from './reportWebVitals';
 
 function Square(props) {
   return (
@@ -22,8 +22,9 @@ function Square(props) {
 class Board extends React.Component {
   renderSquare(i, squareHeight) {
     let style = {
-      height:squareHeight
+      height:squareHeight,
     }
+    if (this.props.squares[i].matchColor != null) style['borderColor'] = this.props.squares[i].matchColor
     return (
     <Square 
       value={this.props.squares[i].value}
@@ -38,20 +39,12 @@ class Board extends React.Component {
   }
 
   createBoard = (size) => {
-    let board = [],
-        root = Math.sqrt(size) | 0,
-        squareIndex = 0
-    
-    const squareHeight = (100 / root).toString() + "%"
-    console.log(root, squareHeight)
-    for (let row = 0; row < root; row++) {
-      let children = [],
-          nextIndex = squareIndex + root
-      for (squareIndex; squareIndex < nextIndex; squareIndex++) {
-          children.push(this.renderSquare(squareIndex, squareHeight))
-      }
-      board.push(<div className="row">{children}</div>)
+    const squareHeight = (100 / (Math.sqrt(size) | 0)).toString() + "%"
+    let board = []
+    for (let squareIndex = 0; squareIndex < size; squareIndex++) {
+      board.push(this.renderSquare(squareIndex, squareHeight))
     }
+    
     return <div className="game-board"> {board} </div>
   }
 
@@ -72,15 +65,7 @@ class Game extends React.Component {
     }
   }
   componentDidMount(){
-    fetch("/api/v1/gameBoard/8").then(response=> response.json()).then((data) => {
-      let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
-      this.setState({
-        answerSquares: data,
-        currentSquares: defaultSquares.slice(0),
-        defaultSquares: defaultSquares.slice(0),
-      })
-
-    })
+    this.startNewGame()
   }
   handleClick(i){
     let currentSquares = this.state.currentSquares,
@@ -129,7 +114,11 @@ class Game extends React.Component {
           onClick = {(i) => this.handleClick(i)} />
         <div className="game-info">
           <div>{this.state.message}</div>
-          <ol>Guesses: {this.state.round}</ol>
+          <ol>Attempts: {this.state.round}</ol>
+          <button 
+            className="restartButton" 
+            onClick={this.startNewGame}>
+          Restart</button>
         </div>
       </div>
     );
@@ -152,16 +141,28 @@ class Game extends React.Component {
         cardsShown: 0,
         message: "Try Again!"
       })
-    }, 1000)
+    }, 1500)
   }
   //update match
   recordMatch = ()=>{
-    const currentSquares = this.state.currentSquares,
-          message = "Nice Match!",
-          cardsShown = 0,
-          lastGuess = -1
-    let round = this.state.round + 1
+    let message = "Nice Match!",
+        cardsShown = 0,
+        lastGuess = -1,
+        round = this.state.round + 1,
+        currentSquares = this.state.currentSquares.map(s => {
+          let output = {
+            value: s.value,
+            image: s.image,
+            civ: s.civ,
+          }
+          if (s.value !== "*" && !s.matchColor) {
+            output['matchColor'] = "green" //add in which team gets it later on
+            output['borderWidth'] = "2px"
 
+          }
+          return output
+        })
+    console.log(currentSquares)
     this.setState({
       currentSquares: currentSquares.slice(0),
       defaultSquares: currentSquares.slice(0),
@@ -171,7 +172,22 @@ class Game extends React.Component {
       message: message
     })
   }
- 
+ //start new game
+  startNewGame = ()=>{
+    fetch("/api/v1/gameBoard/8").then(response=> response.json()).then((data) => {
+      let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
+      this.setState({
+        answerSquares: data,
+        currentSquares: defaultSquares.slice(0),
+        defaultSquares: defaultSquares.slice(0),
+        cardsShown: 0,
+        lastGuess: -1,
+        round: 0,
+        message: "Guess a square"
+      })
+
+    })
+  }
 }
 
 // ========================================
@@ -191,5 +207,5 @@ function arrayEquals(a, b) {
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-//reportWebVitals(console.log);
+reportWebVitals(console.log);
 
