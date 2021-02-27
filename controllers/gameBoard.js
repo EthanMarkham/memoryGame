@@ -18,7 +18,7 @@ module.exports.generateBoard = (req, res) => {
         value: i,
         image: "http://" + req.headers.host + '/cards/paired/1/' + file1Names[i],
         civ: ucFirst(file1Names[i].split('.')[0]), //Get civ name by looking at file name. 
-        hidden: false,
+        hidden: true,
         back: "http://" + req.headers.host + "/cards/back.PNG"
     }, {
         value: i,

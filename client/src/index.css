@@ -29,8 +29,7 @@ ol, ul {
 }
 
 .square > .image{
-  position: absolute;
-  float: none;
+  display: block;
   width: auto;
   height: 100%;
   object-fit: fill;
@@ -38,7 +37,11 @@ ol, ul {
   z-index: -1;
 }
 .square > .cardCover{
+  display: block;
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   width: auto;
   height: 100%;
   object-fit: fill;

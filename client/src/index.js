@@ -4,9 +4,6 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 function Square(props) {
-  let showAnswer = {
-    display:(props.data.hidden) ? "block" : "none"
-  }
   return (
       <button 
         className="square" 
@@ -23,7 +20,7 @@ function Square(props) {
           src={props.data.back} 
           alt={props.data.civ}
           className="cardCover"
-          style={showAnswer}
+          style={props.hide}
         />
         <label>{props.data.civ}</label>
       </button>
@@ -34,12 +31,16 @@ class Board extends React.Component {
   renderSquare(i, squareHeight) {
     let style = {
       height:squareHeight
+    }, 
+    hide = {
+      display:(this.props.hiddenIndex[i]) ? "block" : "none"
     }
     return (
     <Square 
       data={this.props.boardData[i]}
       //this doesnt need to be called onclick just comes in handy 
       onClick= {()=> this.props.onClick(i)}
+      hide = {hide}
       key={i}
       style={style}
     />
@@ -88,15 +89,13 @@ class Game extends React.Component {
     })
   }
   handleClick(i){
-    let hiddenIndex = this.state.current,
+    let hiddenIndex = this.state.hiddenIndex,
         boardData = this.state.boardData,
         cardsShown = this.state.cardsShown,
         message = "Guess a square"
 
     //if square is already set do nothing
     if (!boardData[i].hidden) return
-    //if game over do nothing
-    if (!boardData.map(i => i.hidden).contains(true)) return
     //if two cards shown do nothing
     if (cardsShown === 2) return
 
@@ -110,8 +109,8 @@ class Game extends React.Component {
     //if cards shown is 2 with no match reset board
     else if (cardsShown === 2) { this.resetValues(); return; }
     //if all answers are filled give completed message
-    if (!boardData.flatMap(i => i.hidden).contains(true)) message = "All done! Good job!"
-
+    if (hiddenIndex.indexOf(true) === -1) message = "All done! Good job!"
+    console.log(hiddenIndex)
 
     this.setState({
       hiddenIndex: hiddenIndex,
@@ -126,6 +125,7 @@ class Game extends React.Component {
       <div className="container">
         <Board 
           boardData = {this.state.boardData}
+          hiddenIndex = {this.state.hiddenIndex}
           onClick = {(i) => this.handleClick(i)} />
         <div className="game-info">
           <div>{this.state.message}</div>
