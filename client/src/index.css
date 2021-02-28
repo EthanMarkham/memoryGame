@@ -10,62 +10,99 @@ ol, ul {
 
 .container{
   padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 
 .game-board{
   display: flex;
   flex-wrap: wrap;
-  flex-direction: column;
-  margin: auto;
-  width: 90%;
+  flex-direction: row;
+  width: 100%;
   height: 90%;
-  overflow: auto;
-  overflow-y: hidden;
-  align-content:center;
+  overflow-y: auto;
+  justify-content: center;
+  align-content:flex-start;
+  align-items: flex-start;
 }
 .game-info {
   display: flex;
-  flex-wrap: wrap;
   flex-direction: row;
   margin: auto;
-  margin: auto;
-  margin-top: 10px;
+  height: 8%;
   width: 80%;
+  margin-top: 2%;
+  padding-bottom: 20px;
   color: black;
   font-weight: bold;
-  align-content: center;
+  justify-content: space-between;
 }
-.status {
-  flex: auto;
-  margin-bottom: 10px;
+.game-info > .status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
-.restartButton{
-  flex: auto;
-  width: auto;
+.game-info > .status > .message {
+  width: 100%;
+  text-align: start;
+}
+
+.game-info > .status > .round {
+  width: 100%;
+  text-align: start;
+}
+.game-info > .restartBtn{
+  height: 50%;
+  border-radius: 25px;
 }
 
 .square {
-  flex: auto;
-  width: auto;
+  width: fit-content;
   overflow: hidden;
   background: #fff;
   border: 1px solid darkgray;
   padding: 0;
   position: relative;
-
 }
-
+@media screen and (min-width: 0px) {
+  .square {
+    flex-basis: 25%;
+  }
+}
+@media screen and (min-width: 500px) {
+  .square {
+    flex-basis: 15%;
+  }
+}
+@media screen and (min-width: 800px) {
+  .square {
+    flex-basis: 10%;
+  }
+}
+@media screen and (min-width: 1000px) {
+  .square {
+    flex-basis: 9%;
+  }
+}
+@media screen and (min-width: 1200px) {
+  .square {
+    flex-basis: 8%;
+  }
+}
+@media screen and (min-width: 1350px) {
+  .square {
+    flex-basis: 7%;
+  }
+}
 .square:focus {
   outline: none;
 }
 
 .square > .image{
-  float: none;
-  width: auto;
-  height: 100%;
-  object-fit: fill;
-  overflow: hidden;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .square > label{

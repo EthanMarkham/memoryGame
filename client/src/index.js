@@ -20,11 +20,11 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  renderSquare(i, squareHeight) {
-    let style = {
-      height:squareHeight,
-    }
+  renderSquare(i) {
+    //if match color not set set the match color to square match color
+    let style
     if (this.props.squares[i].matchColor != null) style['borderColor'] = this.props.squares[i].matchColor
+    //pass data to square props
     return (
     <Square 
       value={this.props.squares[i].value}
@@ -37,12 +37,11 @@ class Board extends React.Component {
     />
     )
   }
-
-  createBoard = (size) => {
-    const squareHeight = (100 / (Math.sqrt(size) | 0)).toString() + "%"
+  //function to create board
+  createBoard = () => {
     let board = []
-    for (let squareIndex = 0; squareIndex < size; squareIndex++) {
-      board.push(this.renderSquare(squareIndex, squareHeight))
+    for (let squareIndex = 0; squareIndex < this.props.squares.length; squareIndex++) {
+      board.push(this.renderSquare(squareIndex))
     }
     
     return <div className="game-board"> {board} </div>
@@ -113,10 +112,12 @@ class Game extends React.Component {
           squares = {this.state.currentSquares}
           onClick = {(i) => this.handleClick(i)} />
         <div className="game-info">
-          <div>{this.state.message}</div>
-          <ol>Attempts: {this.state.round}</ol>
+          <div className="status">
+            <span className="message">{this.state.message}</span>
+            <span className="round">Attempts: {this.state.round}</span>
+          </div>
           <button 
-            className="restartButton" 
+            className="restartBtn" 
             onClick={this.startNewGame}>
           Restart</button>
         </div>
@@ -174,7 +175,7 @@ class Game extends React.Component {
   }
  //start new game
   startNewGame = ()=>{
-    fetch("/api/v1/gameBoard/8").then(response=> response.json()).then((data) => {
+    fetch("/api/v1/gameBoard").then(response=> response.json()).then((data) => {
       let defaultSquares = Array(data.length).fill({value:"*", image:"/cards/back.PNG"})
       this.setState({
         answerSquares: data,
