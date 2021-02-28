@@ -22,7 +22,7 @@ function Square(props) {
 class Board extends React.Component {
   renderSquare(i) {
     //if match color not set set the match color to square match color
-    let style
+    let style = {}
     if (this.props.squares[i].matchColor != null) style['borderColor'] = this.props.squares[i].matchColor
     //pass data to square props
     return (
