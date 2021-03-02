@@ -109,7 +109,7 @@ class Game extends React.Component {
   render() {
     return (
       <div className="container">
-        <header><h1>AOE Memory</h1></header>
+        <header><h1>AOE2 Memory</h1></header>
         <Board 
           squares = {this.state.currentSquares}
           onClick = {(i) => this.handleClick(i)} 

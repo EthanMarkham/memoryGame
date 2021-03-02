@@ -3,12 +3,37 @@ html, body, #root, .App, #root>div {
   background-color: darkgray;
 
 }
-
-ol, ul {
-  padding-left: 30px;
+.game-info {
+  display: flex;
+  flex-direction: row;
+  margin: auto;
+  height: 8%;
+  width: 100%;
+  margin-top: 2%;
+  color: black;
+  font-weight: bold;
+  text-align: start;
+  justify-content: space-between;
 }
-h1{
-  height: 10%;
+
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+
+.game-info > button{
+  border-radius: 25px;
+  padding: 10px;
+}
+
+header{
+  height: 5%;
+  align-items: center;
+}
+header > h1 {
+  margin: 0;
 }
 .container{
   padding: 0;
@@ -31,31 +56,7 @@ h1{
   overflow-y: auto;
   justify-content: center;
 }
-.game-info {
-  display: flex;
-  flex-direction: row;
-  margin: auto;
-  height: 8%;
-  width: 100%;
-  margin-top: 2%;
-  padding-bottom: 20px;
-  color: black;
-  font-weight: bold;
-  text-align: start;
-  justify-content: space-between;
-}
 
-.col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-}
-
-
-.game-info > button{
-  border-radius: 25px;
-  padding: 10px;
-}
 
 .square {
   width: 100%;
@@ -67,34 +68,20 @@ h1{
 }
 @media screen and (min-width: 0px) {
   .square {
-    flex-basis: 25%;
+    flex: 0 3 50px;
   }
 }
-@media screen and (min-width: 500px) {
+@media screen and (min-width: 900px) {
   .square {
-    flex-basis: 15%;
+    flex: 0 3 100px;
   }
 }
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 1600px) {
   .square {
-    flex-basis: 10%;
+   flex: 0 3 120px;  
   }
 }
-@media screen and (min-width: 1000px) {
-  .square {
-    flex-basis: 9%;
-  }
-}
-@media screen and (min-width: 1200px) {
-  .square {
-    flex-basis: 8%;
-  }
-}
-@media screen and (min-width: 1350px) {
-  .square {
-    flex-basis: 7%;
-  }
-}
+
 .square:focus {
   outline: none;
 }
@@ -116,8 +103,4 @@ h1{
 }
 .square:hover{
   border: 2px solid lightgray;
-
-}
-.kbd-navigation .square:focus {
-  background: #ddd;
 }
