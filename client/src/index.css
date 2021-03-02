@@ -7,12 +7,17 @@ html, body, #root, .App, #root>div {
 ol, ul {
   padding-left: 30px;
 }
-
+h1{
+  height: 10%;
+}
 .container{
   padding: 0;
-  width: 100%;
+  width: 95%;
   height: 100%;
   overflow: hidden;
+  margin: auto;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 
@@ -21,47 +26,40 @@ ol, ul {
   flex-wrap: wrap;
   flex-direction: row;
   width: 100%;
-  height: 90%;
+  height:80%;
   overflow-y: auto;
   justify-content: center;
-  align-content:flex-start;
-  align-items: flex-start;
 }
 .game-info {
   display: flex;
   flex-direction: row;
   margin: auto;
   height: 8%;
-  width: 80%;
+  width: 100%;
   margin-top: 2%;
   padding-bottom: 20px;
   color: black;
   font-weight: bold;
+  text-align: start;
   justify-content: space-between;
 }
-.game-info > .status {
+
+.col {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-}
-.game-info > .status > .message {
-  width: 100%;
-  text-align: start;
+  justify-content: space-evenly;
 }
 
-.game-info > .status > .round {
-  width: 100%;
-  text-align: start;
-}
-.game-info > .restartBtn{
-  height: 50%;
+
+.game-info > button{
   border-radius: 25px;
+  padding: 10px;
 }
 
 .square {
-  width: fit-content;
+  width: 100%;
   overflow: hidden;
-  background: #fff;
+  background: darkgray;
   border: 1px solid darkgray;
   padding: 0;
   position: relative;

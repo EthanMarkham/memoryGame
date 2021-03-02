@@ -14,15 +14,16 @@ function Square(props) {
           alt={props.civ}
           className="image"
           />
-        <label>{props.civ}</label>
+        {props.showLabels && <label>{props.civ}</label>}
       </button>
   );
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
+  renderSquare(i, showLabels) {
     //if match color not set set the match color to square match color
     let style = {}
+
     if (this.props.squares[i].matchColor != null) style['borderColor'] = this.props.squares[i].matchColor
     //pass data to square props
     return (
@@ -31,7 +32,8 @@ class Board extends React.Component {
       image={this.props.squares[i].image}
       civ={this.props.squares[i].civ}
       //this doesnt need to be called onclick just comes in handy 
-      onClick= {()=> this.props.onClick(i)}
+      onClick={()=> this.props.onClick(i)}
+      showLabels={this.props.showLabels}
       key={i}
       style={style}
     />
@@ -53,10 +55,12 @@ class Board extends React.Component {
 class Game extends React.Component {
   constructor(props){
     super(props)
-    this.state = {
+    //init all state vars
+    this.state = { 
       answerSquares: [],
       currentSquares: [],
       defaultSquares: [],
+      showLabels: true,
       cardsShown: 0,
       lastGuess: -1,
       round: 0,
@@ -78,7 +82,7 @@ class Game extends React.Component {
     //if square is already set do nothing
     if (currentSquares[i].value !== "*" || "*" !== defaultSquares[i].value) return
     //if game over do nothing
-    if (arrayEquals(defaultSquares, this.state.answerSquares)) return
+    if (defaultSquares.map(s=>s.value).indexOf('*') === -1) return
     //if two cards shown do nothing
     if (cardsShown === 2) return
 
@@ -91,9 +95,6 @@ class Game extends React.Component {
     if (this.state.lastGuess === currentSquares[i].value) { this.recordMatch(); return; }
     //if cards shown is 2 with no match reset board
     else if (cardsShown === 2) { this.resetValues(); return; }
-    //if all answers are filled give completed message
-    if (arrayEquals(defaultSquares, this.state.answerSquares)) message = "Good job!"
-
 
     this.setState({
       currentSquares: currentSquares,
@@ -108,18 +109,34 @@ class Game extends React.Component {
   render() {
     return (
       <div className="container">
+        <header><h1>AOE Memory</h1></header>
         <Board 
           squares = {this.state.currentSquares}
-          onClick = {(i) => this.handleClick(i)} />
+          onClick = {(i) => this.handleClick(i)} 
+          showLabels = {this.state.showLabels}
+        />
         <div className="game-info">
-          <div className="status">
+          <div className="col">
             <span className="message">{this.state.message}</span>
             <span className="round">Attempts: {this.state.round}</span>
           </div>
-          <button 
-            className="restartBtn" 
-            onClick={this.startNewGame}>
-          Restart</button>
+          <div className="col">
+            <button 
+              className="restartBtn" 
+              onClick={() => {
+                let showLabels = !this.state.showLabels
+                this.setState({
+                  showLabels:showLabels
+                })
+              }}>
+              Toggle Labels
+              </button>
+              <button 
+                onClick={this.startNewGame}>
+                Restart
+              </button>
+          </div>
+
         </div>
       </div>
     );
@@ -163,7 +180,8 @@ class Game extends React.Component {
           }
           return output
         })
-    console.log(currentSquares)
+    //if all answers are filled game over completed message
+    if (currentSquares.map(s=>s.value).indexOf('*') === -1) message = `Good job! It took you ${round} guesses`
     this.setState({
       currentSquares: currentSquares.slice(0),
       defaultSquares: currentSquares.slice(0),
@@ -197,13 +215,6 @@ ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
-
-function arrayEquals(a, b) {
-  return Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((val, index) => val === b[index]);
-}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
