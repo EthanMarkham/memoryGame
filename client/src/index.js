@@ -55,18 +55,31 @@ class Board extends React.Component {
 class Game extends React.Component {
   constructor(props){
     super(props)
-    //init all state vars
     this.state = { 
       answerSquares: [],
       currentSquares: [],
       defaultSquares: [],
+      user: null,
       showLabels: true,
       cardsShown: 0,
       lastGuess: -1,
       round: 0,
       message: "Guess a square"
     }
+    //get user id if not redirect to login
+    fetch('/users/me')
+    .then(response => response.json())
+    .then((u) => {
+      console.log(u)
+      if (u._id) {
+        this.setState({user:u})
+      }
+      else {
+        //window.location.href = "http://localhost:5000/users/login"
+      }
+    })
   }
+  
   componentDidMount(){
     this.startNewGame()
   }
@@ -211,7 +224,7 @@ class Game extends React.Component {
 
 // ========================================
 
-ReactDOM.render(
+ReactDOM.hydrate(
   <Game />,
   document.getElementById('root')
 );
