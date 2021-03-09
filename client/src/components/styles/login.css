@@ -1,0 +1,14 @@
+@media all and (min-width: 480px) {
+    .loginContainer {
+      width: 80%;
+      margin: auto;
+      padding-bottom: 10px;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+    .btnHolder {
+        display: flex;
+        justify-content: center;
+        width: auto;
+    }
+  }

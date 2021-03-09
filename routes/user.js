@@ -5,43 +5,37 @@ var userController = require('../controllers/user.controller')
 const User = require("../model/user.model");
 
 //routes
-router.get('/register', (req, res) => {
-    res.render('login', {action: "register"})
-})
-router.get('/login', (req, res) => {
-    res.render('login', {action: "login"})
-})
 router.post("/register",
     [
         validator.check("username", "Please Enter a Valid Username")
         .not()
         .isEmpty(),
-        validator.check("password", "Please enter a valid password").isLength({
-            min: 4
-        })
+        validator.check("username", "Username Must be at least 4 chars!")
+        .isLength({min: 4}),
+        validator.check("password", "Password must be at least 4 chars!")
+        .isLength({min: 4})
     ], userController.signUp)
     
 router.post(
   "/login",
   [
-    validator.check("username", "Please enter a valid email").not()
+    validator.check("username", "Please enter a valid username").not()
     .isEmpty(),
-    validator.check("password", "Please enter a valid password").isLength({
-      min: 4
-    })
-  ], userController.login)
+    validator.check("password", "Enter your password!").not()
+    .isEmpty()
+  ], userController.login
+)
 
-router.get('/logout', userController.logout, (req, res) => res.redirect('/users/login'))
 
-router.get("/me", userController.verifyToken, async (req, res) => {
+router.get("/me/:jwtToken", userController.verifyToken, async (req, res) => {
     console.log(req.userId)
     try {
         // request.user is getting fetched from Middleware after token authentication
         const user = await User.findById(req.userId);
         console.log(user)
-        res.json(user);
+        res.json({username: user.username, token: req.params.jwtToken});
     } catch (e) {
-        res.send({ message: "Error in Fetching user" });
+        res.status(200).send({ message: "Error in Fetching user" });
     }
-    });
+});
 module.exports = router;

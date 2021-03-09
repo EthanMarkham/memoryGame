@@ -1,0 +1,32 @@
+/* Basic styling */
+nav {
+    display: flex;
+    flex-direction: row;
+    padding: 0 15px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+nav > h1 {
+    font-size: x-large;
+    color: rgb(34, 29, 14);
+    margin: 0px;
+    letter-spacing: 0.7em;
+}
+nav > .navItems {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-basis: auto;
+    justify-self: flex-end;
+    justify-content: space-between;
+    width: fit-content;
+}
+
+nav > .navItems > .item {
+    padding: 10px;
+}
+nav > .navItems > .item > a{
+    color: rgb(25, 90, 121);
+}

@@ -1,4 +1,3 @@
-var mongoose = require('mongoose');
 const validator = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -10,7 +9,8 @@ module.exports.signUp = async (req, res) => {
     const errors = validator.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
-            errors: errors.array()
+            error: true,
+            messages: errors.errors.map(e=>e.msg)
         });
     }
 
@@ -24,7 +24,8 @@ module.exports.signUp = async (req, res) => {
         });
         if (user) {
             return res.status(400).json({
-                msg: "User Already Exists"
+                error: true,
+                messages: ["User Already Exists"]
             });
         }
 
@@ -44,16 +45,11 @@ module.exports.signUp = async (req, res) => {
             }
         };
 
-        jwt.sign(
-            payload,
-            "randomString", {
-                expiresIn: 10000
-            },
+
+        jwt.sign(payload, config.secret, { expiresIn: '2 days' },
             (err, token) => {
                 if (err) throw err;
-                res.status(200).json({
-                    token
-                });
+                res.redirect(`/api/users/me/${token}`);
             }
         );
     } catch (err) {
@@ -67,8 +63,9 @@ module.exports.login = async (req, res) => {
 
     if (!errors.isEmpty()) {
         return res.status(400).json({
-            errors: errors.array()
-        });
+            error: true,
+            messages: errors.errors.map(e=>e.msg)
+        })
     }
 
     const {
@@ -79,13 +76,15 @@ module.exports.login = async (req, res) => {
         let user = await User.findOne({username});
         if (!user)
             return res.status(400).json({
-                message: "User Not Exist"
+                error: true,
+                messages: ["User Does Not Exist!!"]
             });
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
             return res.status(400).json({
-                message: "Incorrect Password !"
+                error: true,
+                messages: ["Incorrect Password!"]
             });
 
         const payload = {
@@ -94,11 +93,9 @@ module.exports.login = async (req, res) => {
             }
         };
 
-        var token = jwt.sign(payload, config.secret, { expiresIn: '1h' })
+        var token = jwt.sign(payload, config.secret, { expiresIn: '2 days' })
         
-        session.token = token
-        res.redirect('/users/me');
-
+        res.redirect(`/api/users/me/${token}`);
     } catch (e) {
         console.error(e);
         res.status(500).json({
@@ -106,15 +103,10 @@ module.exports.login = async (req, res) => {
         });
     }
 }
-//logout Middleware
-module.exports.logout = async (req, res, next) => {
-    delete req.session
-    next()
-}
+
 //Auth middleware
 module.exports.verifyToken = (req, res, next) => {
-    let token = session.token;
-
+    let token = req.params.jwtToken
     if (!token) {
         return res.status(403).send({
             auth: false, message: 'No token provided.'
