@@ -22,7 +22,10 @@ export default function App() {
         if (data.username) {
           console.log(data)
           setAuth(true)
-        } 
+        }
+        else {
+          localStorage.clear() //if user not set we had error and get rid of the token
+        }
       })
     }
 

@@ -4,7 +4,6 @@ import {Alert, Form, Row, Col, Button} from "react-bootstrap"
 import {
     useHistory
   } from "react-router-dom";
-import session from "express-session";
 
 function Login(props){
     const [username, setUserName] = useState("");

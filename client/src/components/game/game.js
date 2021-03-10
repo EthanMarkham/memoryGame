@@ -103,7 +103,7 @@ function Game() {
         return
       }
     }
-  }, [currentGuess])
+  }, [currentGuess, lastGuess])
 
   return ( 
     <div className = "game">

@@ -82,4 +82,7 @@ app.use(function (err, req, res, next) {
   })
 })
 
+//set storage for on-going games
+var games = []
+
 module.exports = app;
