@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from "react-router-dom";
-import { Alert, Form, Row, Col, Button } from "react-bootstrap"
+import { Alert, Button } from "react-bootstrap"
 import '../styles/game.css';
 import { socket } from "../../service/socket"
 

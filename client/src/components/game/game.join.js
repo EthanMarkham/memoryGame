@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { Alert, Form, Row, Col, Button } from "react-bootstrap"
-import {socket} from "../../service/socket"
+import { Alert, Form, Button } from "react-bootstrap"
+import { socket } from "../../service/socket"
 
 function GameJoiner(props) {
-  const [newGame, toggleNew] = useState(false)
   const history = useHistory();
+  const [redirctTo, setRedirctTo] = useState(""); // your state value to manipulate
+
+  const [newGame, toggleNew] = useState(false)
   const [gameName, setGameName] = useState("");
   const [playerCount, setPlayerCount] = useState(1);
   const [error, setError] = useState("");
   const [games, setGames] = useState([]);
 
-
-
+  //rewritting these to avoid dependencies in render and prevent memory leaks?
+  const toggleJoin = () => { toggleNew(!newGame) }
+  const updateGameName = (newName) => { setGameName(newName) }
+  const updatePlayerCount = (newCount) => { setPlayerCount(newCount) }
+  //redirect if not logged in
+  if (!props.isAuth) setRedirctTo('/login')
+  //sockets
   useEffect(() => {
-    if (!props.isAuth) history.push('/login')
-
     socket.emit("listGames");
-
     socket.on("games", data => {
       console.log(data)
       setGames(data)
@@ -26,9 +30,8 @@ function GameJoiner(props) {
     socket.on("joinSuccess", joinSuccess => {
       if (joinSuccess) {
         console.log("game joined redirecting to game")
-        history.push('/game')
+        setRedirctTo('/game')
       }
-
       else {
         console.log('join failed')
         console.log(joinSuccess)
@@ -37,31 +40,35 @@ function GameJoiner(props) {
     })
   }, [])
 
-  return (
-    <div className="container">
-      {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
+  //redirect down here so history not passed to useEffect
+  if (redirctTo !== "") {
+    history.push(redirctTo)
+  } else {
+    return (
+      <div className="container">
+        {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
 
-      <Button
-        variant="outline-secondary"
-        onClick={() => { toggleNew(!newGame) }}
-        block
-      >
-        {newGame ? "List Games" : "New Game"}
-      </Button>
+        <Button
+          variant="outline-secondary"
+          onClick={() => { toggleJoin() }}
+          block
+        >
+          {newGame ? "List Games" : "New Game"}
+        </Button>
 
 
-      {newGame
-        ? <NewGameForm
-          gameName={gameName}
-          setGameName={setGameName}
-          setPlayerCount={setPlayerCount}
-          playerCount={playerCount}
-        />
-        : <GameList games={games} />}
+        {newGame
+          ? <NewGameForm
+            gameName={gameName}
+            setGameName={updateGameName}
+            setPlayerCount={updatePlayerCount}
+            playerCount={playerCount}
+          />
+          : <GameList games={games} />}
 
-    </div>
-  )
-
+      </div>
+    )
+  }
 }
 function GameList(props) {
   return (
@@ -100,13 +107,13 @@ function NewGameForm(props) {
         <Form.Control
           as="select"
           onChange={(event) => { props.setPlayerCount(event.target.value) }}
-          value={props.playerCount}  
+          value={props.playerCount}
         >
-            <option value={1}>1</option>
-            <option value={2}>2</option>
-            <option value={3}>3</option>
-            <option value={4}>4</option>
-            <option value={5}>5</option>
+          <option value={1}>1</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+          <option value={4}>4</option>
+          <option value={5}>5</option>
         </Form.Control>
       </Form.Group>
       <br />
