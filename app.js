@@ -7,12 +7,11 @@ const cors = require('cors')
 // Initiate Mongo Server
 require('./config/database.config')
 
-const gameRouter = require('./routes/game')
+const gameManager = require('./modules/gameManager').GameManager()
 const usersRouter = require('./routes/user');
 
 var app = express();
 const server = require('http').createServer(app); 
-var gameManager = require('./model/gameManager').GameManager()
 
 // enable Cross-Origin Resource Sharing
 app.use(cors())
@@ -25,7 +24,7 @@ const io = require("socket.io")(server, {
     credentials: true
     }
 })
-require('./socketEvents')(io, gameManager);
+require('./controllers/socket.controller')(io, gameManager);
 
 //Sends json so that it looks good
 app.set('json spaces', 2)
@@ -41,7 +40,6 @@ app.use(cookieParser());
 app.use(express.static('public'))
 
 //routes
-app.use('/api/game', gameRouter);
 app.use('/api/users', usersRouter);
 app.use(express.static(path.join(__dirname, 'client/build')))
 

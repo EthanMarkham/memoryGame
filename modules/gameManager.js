@@ -1,5 +1,5 @@
 const fs = require('fs')
-const User = require("./user.model");
+const User = require("../model/user.model");
 const shortid = require('shortid');
 //set storage for on-going this.games
 module.exports.GameManager = () => { return new GameManager() }

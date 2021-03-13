@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const config = require('./config/config.json');
+const config = require('../config/config.json');
 
 exports = module.exports = function (io, gameManager) {
   //set up auth middleware
