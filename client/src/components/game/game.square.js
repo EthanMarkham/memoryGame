@@ -4,10 +4,12 @@ function Square(props) {
   return (
       <button 
         className="square" 
-        onClick={props.onClick}
-        style={props.style}>
+        onClick={props.handleClick}
+        style={props.style}
+        disabled={props.disableClick()}  
+      >
         <img 
-          src={props.image} 
+          src={`http://localhost:5000/${props.image}`} 
           alt={props.civ}
           className="image"
           />

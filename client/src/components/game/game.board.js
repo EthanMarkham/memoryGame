@@ -1,7 +1,10 @@
 var React = require('react')
-var Square = require('./square').default
+var Square = require('./game.square').default
+var socket = require("../../service/socket").socket
 
 function Board(props){
+  const handleClick = (i) => {socket.emit("click", {index: i})}
+
   function renderSquare(i){
     //if match color not set set the match color to square match color
     let style = {}
@@ -15,9 +18,10 @@ function Board(props){
       civ={props.squares[i].civ}
       //this doesnt need to be called onclick just comes in handy 
       showLabels={props.showLabels}
-      onClick={()=> props.onClick(i)}
       key={i}
       style={style}
+      disableClick={props.disableClick}
+      handleClick={() => handleClick(i)}
     />
     )
   }

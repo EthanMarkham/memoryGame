@@ -1,15 +1,17 @@
 var express = require('express');
 var router = express.Router();
-var gameController = require('../controllers/game.controller')
+var gameManager = require('../model/gameManager')
 var userController = require('../controllers/user.controller')
 
 /* GET reviews */
-router.get('/join/:jwtToken', userController.verifyToken, gameController.joinGame, gameController.sendGameInfo) 
-
-router.get('/create/:jwtToken', userController.verifyToken, gameController.createGame, gameController.sendGameInfo) 
-
-router.get('/join/:jwtToken/:gameId', userController.verifyToken, gameController.joinGame, gameController.sendGameInfo) 
-
-router.get('/click/:jwtToken/:guess', userController.verifyToken, gameController.getGame, gameController.registerClick, gameController.sendGameInfo)
+router.get('/get/:jwtToken', userController.verifyToken, async (req, res) => {
+    const user = await User.findById(req.userId);
+    let index = gameManager.FindGameIndex(user);
+    if (!index) {
+        res.status(500).json({error: 'game not found'})
+        return
+    }
+    res.status(200).json({game: gameManager.GetUserData(index)})
+})
 
 module.exports = router;

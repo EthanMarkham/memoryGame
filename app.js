@@ -1,43 +1,34 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var session = require('express-session')
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors')
 
 // Initiate Mongo Server
-require('./config/config')
+require('./config/database.config')
 
-
-var gameRouter = require('./routes/game')
-//var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/user');
+const gameRouter = require('./routes/game')
+const usersRouter = require('./routes/user');
 
 var app = express();
+const server = require('http').createServer(app); 
+var gameManager = require('./model/gameManager').GameManager()
 
 // enable Cross-Origin Resource Sharing
-app.use(function (reg, res, next) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept')
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE')
-  next()
+app.use(cors())
+
+//socket stuff
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
+    }
 })
+require('./socketEvents')(io, gameManager);
 
 //Sends json so that it looks good
 app.set('json spaces', 2)
-
-//set up session
-app.use(session({
-  name: 'server-session-cookie-id',
-  secret: 'my express secret',
-  saveUninitialized: true,
-  resave: true,
-    cookie: {
-      secure: false,
-      maxAge: 2160000000,
-      httpOnly: false
-  }
-}));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -49,22 +40,17 @@ app.use(cookieParser());
 //route to static files
 app.use(express.static('public'))
 
-
-//set api rout
+//routes
 app.use('/api/game', gameRouter);
-//route to users
 app.use('/api/users', usersRouter);
-//route to react
 app.use(express.static(path.join(__dirname, 'client/build')))
 
-// catch 404 and forward to error handler
+//Errors
 app.use(function(req, res, next) {
   var err = new Error('Not Found')
   err.status = 404
   next(err);
 });
-
-// error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
@@ -82,7 +68,4 @@ app.use(function (err, req, res, next) {
   })
 })
 
-//set storage for on-going games
-var games = []
-
-module.exports = app;
+module.exports = { app: app, server: server, gameManager: gameManager }; 
