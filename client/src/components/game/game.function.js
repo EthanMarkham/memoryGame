@@ -45,8 +45,9 @@ function Game(props) {
   const toggleLables = () => {
     setLabels(!showLabels)
   }
-  const disableClick = () => {
-    return (cardsShowing >= 2 || users.find(u=>u.upNext).username !== localStorage.getItem('username'))
+  const disableClick = (i) => {
+    if (users.length === 0) return false //disable click because for some reason on reload its enabled
+    return (cardsShowing >= 2 || users.find(u=>u.upNext).username !== localStorage.getItem('username') || squares[i].value !== "*")
   }
   return (
     <div className="game">

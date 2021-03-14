@@ -20,7 +20,7 @@ function Board(props){
       showLabels={props.showLabels}
       key={i}
       style={style}
-      disableClick={props.disableClick}
+      disableClick={() => props.disableClick(i)}
       handleClick={() => handleClick(i)}
     />
     )

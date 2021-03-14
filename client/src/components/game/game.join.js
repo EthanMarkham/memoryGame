@@ -43,32 +43,33 @@ function GameJoiner(props) {
   //redirect down here so history not passed to useEffect
   if (redirctTo !== "") {
     history.push(redirctTo)
-  } else {
-    return (
-      <div className="container">
-        {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
-
-        <Button
-          variant="outline-secondary"
-          onClick={() => { toggleJoin() }}
-          block
-        >
-          {newGame ? "List Games" : "New Game"}
-        </Button>
-
-
-        {newGame
-          ? <NewGameForm
-            gameName={gameName}
-            setGameName={updateGameName}
-            setPlayerCount={updatePlayerCount}
-            playerCount={playerCount}
-          />
-          : <GameList games={games} />}
-
-      </div>
-    )
   }
+  
+  return (
+    <div className="container">
+      {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
+
+      <Button
+        variant="outline-secondary"
+        onClick={() => { toggleJoin() }}
+        block
+      >
+        {newGame ? "List Games" : "New Game"}
+      </Button>
+
+
+      {newGame
+        ? <NewGameForm
+          gameName={gameName}
+          setGameName={updateGameName}
+          setPlayerCount={updatePlayerCount}
+          playerCount={playerCount}
+        />
+        : <GameList games={games} />}
+
+    </div>
+  )
+
 }
 function GameList(props) {
   return (
