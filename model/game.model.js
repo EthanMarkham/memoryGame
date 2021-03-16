@@ -41,7 +41,6 @@ class Game {
         this.currentGuesses = []
         this.message = "Guess a Square"
         this.resetting = false
-        return
     }
 
     //handle a guess from user -- returns true or false to start a reset
@@ -61,6 +60,9 @@ class Game {
 
         //if guess at 2 look for match
         if (this.currentGuesses.length === 2) {
+            this.resetting = true
+            this.round++
+
             if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
                 this.message = "Nice Match!"
                 //set match colors for two squares
@@ -72,15 +74,11 @@ class Game {
                 this.users[userIndex].matches++
             } else {
                 this.message = "Oof! Try Again!"
+                let nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
+                this.users[userIndex].upNext = false
+                this.users[nextUserIndex].upNext = true
             }
-            let nextUserIndex = (userIndex + 1 < this.users.count) ? userIndex + 1 : 0
-            this.users[userIndex].upNext = false
-            this.users[nextUserIndex].upNext = true
-            this.round++
-            //start reset
-            this.resetting == true
         }
-        return
     }
     //get client info for game
     ClientInfo() {

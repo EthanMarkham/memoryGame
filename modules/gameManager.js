@@ -58,11 +58,10 @@ class GameManager {
     HandleClick(userID, guess) {
         const out = new Promise((resolve) => {
             const gameIndex = this.FindIndexByUserID(userID)
-            console.log(this.games[gameIndex])
             this.games[gameIndex].HandleClick(userID, guess)
             resolve({game: this.games[gameIndex], index: gameIndex})
         })
-        return out
+        return 
     }
 
     ResetCards(userID){

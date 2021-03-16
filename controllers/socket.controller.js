@@ -51,8 +51,8 @@ exports = module.exports = function (io, gameManager) {
     io.to('games').emit('games', openGames)
   }
   function checkReset(userID){
-    let gameInfo = GetGameInfo(userID)
-    if (gameInfo.game.resetting) return gameManager.ResetCards(userID).then(broadCastGameInfo(userID))
+    let gameInfo = gameManager.GetGameInfo(userID)
+    if (gameInfo.game.resetting) return gameManager.ResetCards(userID).then(() => broadCastGameInfo(userID))
     else return
   }
   function joinChannel(socket) {
