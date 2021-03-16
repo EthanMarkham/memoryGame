@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require('../config/config.json');
+const User = require("../model/user.model");
 
 exports = module.exports = function (io, gameManager) {
   //set up auth middleware
@@ -17,83 +18,64 @@ exports = module.exports = function (io, gameManager) {
   })
 
   io.on('connection', (socket) => {
-    console.log(`${socket.userID} connected`)
-    console.log()
-    socket.on("listGames", () => {
-      socket.join('games')
-      broadCastOpenGames(socket)
-    })
+
+    socket.on("listGames", () => joinGameList(socket))
 
     socket.on("addGame", (gameInfo) => {
-      const addGame = new Promise(async (resolve, reject) => {
-        const newGame = await gameManager.NewGame(socket.userID, gameInfo.playerCount)
-        if (newGame.error) {
-          socket.emit('error', newGame.error.message)
-          reject()
-        }
-        else {
-          socket.emit('joinSuccess', true)
-          resolve(newGame)
-        }
-      })
-      addGame.then(gameData => {
-        console.log(`Added Game. ID: ${gameData.id}. New Count: ${gameManager.GameCount()}`)
-        broadCastOpenGames()
-      })
+      User.findById(socket.userID)
+      .then(user => gameManager.NewGame(user, gameInfo.playerCount))
+      .then(() => joinSuccess(socket))
+      .catch(err => socket.emit('error', err.message))
     })
+
     socket.on("joinGameChannel", () => {
-      const gameIndex = gameManager.FindGameIndexByUserID(socket.userID)
-      const gameInfo = gameManager.GetGameByIndex(gameIndex)
-
-      if (gameIndex == -1) {
-        socket.emit('error', { error: { type: 'game', message: 'game not found' } })
-        return
-      }
-      console.log(`${socket.userID} joining channel for Game: ${gameInfo.id} at Index: ${gameIndex}`)
-
-      const joinGameChannel = new Promise((resolve, reject) => { resolve(socket.join(`game ${gameInfo.id}`)) })
-
-      if (gameInfo) {
-        joinGameChannel.then(() => { broadCastGameInfo(gameIndex) })
-      }
-      else {
-        socket.emit('error', { error: { type: 'game', message: 'game not found' } })
-      }
+      joinChannel(socket)
+      .catch(err => socket.emit('error', err.message))
     })
     socket.on("click", (guess) => {
-      const squareIndex = guess.index
-      console.log(`${socket.userID} is clicking ${squareIndex}`)
-      const clickResponse = gameManager.HandleClick(socket.userID, squareIndex)
-      if (clickResponse.error) {
-        socket.emit('error', { error: clickResponse.error })
-        return
-      }
-
-      broadCastGameInfo(clickResponse.gameIndex)
-
-      if (clickResponse.reset) {
-        console.log('resetting cards')
-        setTimeout(() => {
-          gameManager.ResetCards(clickResponse.gameIndex)
-          broadCastGameInfo(clickResponse.gameIndex)
-        }, 3000)
-      }
-
+      gameManager.HandleClick(socket.userID, guess.index)
+      .then(() => broadCastGameInfo(socket.userID))
+      .then(() => checkReset(socket.userID))
+      .catch(err => socket.emit('error', err.message))
     })
-
     socket.on('disconnecting', () => { console.log(socket.rooms) });
-  });
-  function broadCastGameInfo(gameIndex) {
-    const clientInfo = gameManager.ClientInfo(gameIndex)
-    if (!clientInfo) return
+  })
 
-    console.log(`Broadcasting Game ${clientInfo.id}`)
-    io.to(`game ${clientInfo.id}`).emit('gameInfo', clientInfo)
+  //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
+  function broadCastGameInfo(userID) {
+    game = gameManager.GetClientInfo(userID).game
+    io.to(`game:${game.id}`).emit('gameInfo', game)
   }
   function broadCastOpenGames() {
     const openGames = gameManager.GetOpenGames()
-    console.log(`Broadcasting ${openGames.length} Open Games`)
     io.to('games').emit('games', openGames)
+  }
+  function checkReset(userID){
+    let gameInfo = GetGameInfo(userID)
+    if (gameInfo.game.resetting) return gameManager.ResetCards(userID).then(broadCastGameInfo(userID))
+    else return
+  }
+  function joinChannel(socket) {
+    return new Promise((resolve) => { 
+      let gameInfo = gameManager.GetGameInfo(socket.userID)
+      socket.join(`game:${gameInfo.game.id}`)
+      broadCastGameInfo(socket.userID)
+      resolve()
+    })
+  }
+  function joinSuccess(socket){
+    return new Promise((resolve) => { 
+      socket.emit('joinSuccess', true)
+      broadCastOpenGames()
+      resolve()
+    })
+  }
+  function joinGameList(socket){
+    return new Promise((resolve) => { 
+      socket.join('games')
+      broadCastOpenGames()
+      resolve()
+    })
   }
 }
       /*

@@ -37,7 +37,7 @@ function Game(props) {
     })
     socket.on("error", data => {
       console.log(data)
-      setError(data.error.message)
+      setError(data)
       //setMessage(data.message);
       //setSquares(data.squares);
     })

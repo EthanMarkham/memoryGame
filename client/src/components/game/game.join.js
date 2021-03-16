@@ -22,10 +22,7 @@ function GameJoiner(props) {
   //sockets
   useEffect(() => {
     socket.emit("listGames");
-    socket.on("games", data => {
-      console.log(data)
-      setGames(data)
-    })
+    socket.on("games", data => setGames(data))
 
     socket.on("joinSuccess", joinSuccess => {
       if (joinSuccess) {
