@@ -41,12 +41,13 @@ class Game {
         this.currentGuesses = []
         this.message = "Guess a Square"
         this.resetting = false
+        return
     }
 
     //handle a guess from user -- returns true or false to start a reset
     HandleClick(userID, guess){
-        console.log(`Registering Click: User #${userIndex} is clicking ${guess} on game: ${this.id}`)
         const userIndex = this.users.findIndex(u => u.id == userID)
+        console.log(`Registering Click: User #${userIndex} is clicking ${guess} on game: ${this.id}`)
 
         //verify they can make a guess
         if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
@@ -79,6 +80,7 @@ class Game {
             //start reset
             this.resetting == true
         }
+        return
     }
     //get client info for game
     ClientInfo() {
