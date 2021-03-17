@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import "./styles/login.css";
+import "../styles/login.css";
+import React, { useState, useEffect } from 'react';
 import { Alert, Form, Row, Col, Button } from "react-bootstrap"
 import { useHistory } from "react-router-dom";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 function Login(props) {
     const [username, setUserName] = useState("");
@@ -9,10 +10,16 @@ function Login(props) {
     const [error, setError] = useState(null)
     const [action, setAction] = useState(true)
     const history = useHistory();
+    const [jwt, setJWT] = useLocalStorage("jwt", localStorage.getItem('jwt'));
 
     //if logged in get out of here
-    if (props.isAuth) history.push("/game");
+    useEffect(() => {
+        if (jwt) redirectToGame()
+    }, [jwt, setJWT])
 
+    const redirectToGame = () => {
+        history.push("/game");
+    }
     const validateForm = () => {
         if (!username && !password) return false
         else return username.length > 0 && password.length > 0;
@@ -43,19 +50,12 @@ function Login(props) {
                     return
                 } else {
                     setError(null) //else set errors to nada so we dont render old ones
-                    localStorage.setItem('jwtToken', data.token);
-                    props.setAuth(true);
-                    //history.push("/game");
+                    localStorage.setItem('jwt', '')
+                    setJWT(data.token)
                 }
             })
-
     }
 
-    useEffect(() => {
-        //let user = localStorage.getItem('user');
-        //if(!user) user = JSON.parse(user)
-        //console.log(user);
-    }, [])
 
     return (
         <div className="loginContainer">

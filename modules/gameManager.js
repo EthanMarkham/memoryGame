@@ -16,7 +16,7 @@ class GameManager {
     }
 
     FindIndexByUserID(userID) {
-        let output = this.games.filter(g => !g.completed).findIndex(g => g.users.map(u => u.id).indexOf(userID) != -1)
+        let output = this.games.findIndex(g => g.users.findIndex(u => u.id === userID) !== -1 && g.completed === false)
         if (output !== -1) return output
         else throw Error("Game not Found!")
     }
@@ -27,24 +27,26 @@ class GameManager {
     }
 
     GetClientInfo(userID) {    
-        const index = this.FindIndexByUserID(userID)
-        return {game: this.games[index].ClientInfo(), index: index}
+        let index = this.FindIndexByUserID(userID)
+        return this.games[index].ClientInfo()
     }
-    GetGameInfo(userID) {
-        const index = this.FindIndexByUserID(userID)
-        return {game: this.games[index], index: index}
+    GetGameOverInfo(gameID) {
+        let index = this.FindIndexByGameID(gameID)
+        return this.games[index].ClientInfo()
     }
+
     //create new game
     NewGame(user, playerCount) {
-        const out = new Promise((resolve, reject) => {
-            if (this.games.filter(g => g.completedAt == null).map(g => g.users.map(u => u.id)).indexOf(user.id) !== -1) reject("User already in a game!")
-            this.games.push(new Game(user, playerCount))
-            resolve({game: this.games[this.games.length - 1], index: this.games.length - 1})
+        let out = new Promise((resolve, reject) => {
+            if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
+            let newGame = new Game(user, playerCount, 4)
+            this.games.push(newGame)
+            resolve({game: newGame, index: this.games.length - 1})
         })
         return out
     }
     AddUser(user, gameID) {
-        const out = new Promise((resolve, reject) => {
+        let out = new Promise((resolve, reject) => {
             try {
                 let gameIndex = this.FindGameIndexByUserID(user.id)
                 this.games[gameIndex].AddUser(user)
@@ -56,20 +58,20 @@ class GameManager {
     }
     //handle a guess from user
     HandleClick(userID, guess) {
-        const out = new Promise((resolve) => {
-            const gameIndex = this.FindIndexByUserID(userID)
+        let out = new Promise((resolve) => {
+            let gameIndex = this.FindIndexByUserID(userID)
             this.games[gameIndex].HandleClick(userID, guess)
-            resolve({game: this.games[gameIndex], index: gameIndex})
+            resolve(this.games[gameIndex])
         })
-        return 
+        return out
     }
 
     ResetCards(userID){
-        const out = new Promise((resolve) => {
-            const gameIndex = this.FindIndexByUserID(userID)
+        let out = new Promise((resolve) => {
+            let gameIndex = this.FindIndexByUserID(userID)
             setTimeout(() => {
                 this.games[gameIndex].ResetCards()
-                resolve({game: this.games[gameIndex], index: gameIndex})
+                resolve(this.games[gameIndex])
             }, 3000)
         })
         return out 

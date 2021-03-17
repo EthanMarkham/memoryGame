@@ -1,3 +1,4 @@
+const { compareSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require('../config/config.json');
 const User = require("../model/user.model");
@@ -5,7 +6,7 @@ const User = require("../model/user.model");
 exports = module.exports = function (io, gameManager) {
   //set up auth middleware
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    let token = socket.handshake.auth.token;
     let userID = null
     if (token) {
       jwt.verify(token, config.secret, async (err, decoded) => {
@@ -23,7 +24,7 @@ exports = module.exports = function (io, gameManager) {
 
     socket.on("addGame", (gameInfo) => {
       User.findById(socket.userID)
-      .then(user => gameManager.NewGame(user, gameInfo.playerCount))
+      .then(user => { gameManager.NewGame(user, gameInfo.playerCount); console.log(user);})
       .then(() => joinSuccess(socket))
       .catch(err => socket.emit('error', err.message))
     })
@@ -32,37 +33,58 @@ exports = module.exports = function (io, gameManager) {
       joinChannel(socket)
       .catch(err => socket.emit('error', err.message))
     })
+
+    socket.on("leaveGame", () => leaveChannel(socket))
+    
     socket.on("click", (guess) => {
       gameManager.HandleClick(socket.userID, guess.index)
-      .then(() => broadCastGameInfo(socket.userID))
-      .then(() => checkReset(socket.userID))
+      .then((data) => handleResponses(socket.userID, data))
       .catch(err => socket.emit('error', err.message))
     })
+    
     socket.on('disconnecting', () => { console.log(socket.rooms) });
   })
 
   //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
   function broadCastGameInfo(userID) {
-    game = gameManager.GetClientInfo(userID).game
+    game = gameManager.GetClientInfo(userID)
     io.to(`game:${game.id}`).emit('gameInfo', game)
   }
   function broadCastOpenGames() {
-    const openGames = gameManager.GetOpenGames()
+    let openGames = gameManager.GetOpenGames()
     io.to('games').emit('games', openGames)
   }
-  function checkReset(userID){
-    let gameInfo = gameManager.GetGameInfo(userID)
-    if (gameInfo.game.resetting) return gameManager.ResetCards(userID).then(() => broadCastGameInfo(userID))
-    else return
+  function broadcastGameOver(gameID){
+    game = gameManager.GetGameOverInfo(gameID)
+    io.to(`game:${game.id}`).emit('gameOver', game)
   }
+  function broadcastReset(userID) {
+    broadCastGameInfo(userID)
+    return gameManager.ResetCards(userID).then(() => broadCastGameInfo(userID))
+  }
+
+  function handleResponses(userID, data){
+    if (data.resetting) return broadcastReset(userID)
+    else if (data.completed) return broadcastGameOver(data.id)
+    else return broadCastGameInfo(userID)
+  }
+
+
   function joinChannel(socket) {
     return new Promise((resolve) => { 
-      let gameInfo = gameManager.GetGameInfo(socket.userID)
-      socket.join(`game:${gameInfo.game.id}`)
+      let gameInfo = gameManager.GetClientInfo(socket.userID)
+      console.log('joining channel '+ gameInfo.id)
+      socket.join(`game:${gameInfo.id}`)
       broadCastGameInfo(socket.userID)
       resolve()
     })
   }
+
+  function leaveChannel(socket) {
+    socket.leave(`game:${game.id}`)
+    console.log('left the channel')
+  }
+
   function joinSuccess(socket){
     return new Promise((resolve) => { 
       socket.emit('joinSuccess', true)
@@ -70,6 +92,7 @@ exports = module.exports = function (io, gameManager) {
       resolve()
     })
   }
+
   function joinGameList(socket){
     return new Promise((resolve) => { 
       socket.join('games')

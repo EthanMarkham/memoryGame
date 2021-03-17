@@ -2,25 +2,25 @@ const fs = require('fs')
 const shortid = require('shortid');
 //set storage for on-going this.games
 
-class Game {
+module.exports.Game = class Game {
     constructor(user, playerCount, size) {
         console.log('Creating Game')
-        const newGameValues = getGameValues(size)
+        let newGameValues = getGameValues(size)
         this.id = shortid.generate(),
-        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
-        this.playerCount = playerCount,
-        this.inProgress = (playerCount !== 1) ? false : true,
-        this.completed = false, //will enter date time for completed at/auto delete
-        this.round = 0,
-        this.currentGuesses = [],
-        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
-        this.answers = newGameValues.answers
+            this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
+            this.playerCount = parseInt(playerCount),
+            this.inProgress = (this.playerCount !== 1) ? false : true,
+            this.completed = false, //will enter date time for completed at/auto delete
+            this.round = 0,
+            this.currentGuesses = [],
+            this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
+            this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
         this.resetting = false
     }
     //add user to game
-    AddUser(user){
+    AddUser(user) {
         if (this.users.length >= this.playerCount) throw Error("Game full")
         if (!user) throw Error("Invalid User")
 
@@ -35,7 +35,7 @@ class Game {
         }
     }
     //reset cards to default on game
-    ResetCards() { 
+    ResetCards() {
         console.log('Reseting Cards')
         this.currentSquares = this.defaultSquares.slice();
         this.currentGuesses = []
@@ -44,19 +44,21 @@ class Game {
     }
 
     //handle a guess from user -- returns true or false to start a reset
-    HandleClick(userID, guess){
+    HandleClick(userID, guess) {
         const userIndex = this.users.findIndex(u => u.id == userID)
         console.log(`Registering Click: User #${userIndex} is clicking ${guess} on game: ${this.id}`)
 
         //verify they can make a guess
         if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
         if (userIndex === -1) throw Error("You're not in this game?")
+        if (!this.inProgress) throw Error("Game not in progress!")
         if (!this.users[userIndex].upNext) throw Error("Wait your turn plz")
         if (this.currentSquares[guess].value !== "*") throw Error("You already guessed that brrr")
 
         //update new values
         this.currentSquares[guess] = this.answers[guess]
         this.currentGuesses.push({ index: guess, value: this.answers[guess].value })
+
 
         //if guess at 2 look for match
         if (this.currentGuesses.length === 2) {
@@ -72,6 +74,15 @@ class Game {
                 //update new default squares and inc user match count
                 this.defaultSquares = this.currentSquares.slice()
                 this.users[userIndex].matches++
+
+                //if default squares does not contain '*'' values were done
+                if (this.defaultSquares.findIndex(s => s.value === "*") === -1) {
+                    this.completed = true
+                    this.inProgress = false
+                    this.resetting = false
+                    let winner = this.users.sort((a, b) => { return a.matches - b.matches })
+                    this.message = `Game over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
+                }
             } else {
                 this.message = "Oof! Try Again!"
                 let nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
@@ -94,8 +105,6 @@ class Game {
         }
         return response
     }
-    
-    
 }
 //Helper functions
 function getGameValues(size) {
@@ -121,10 +130,9 @@ function getGameValues(size) {
 }
 
 function randomColor() {
-    return '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+    return '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
 }
 
 function ucFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-module.exports.Game = Game

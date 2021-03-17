@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
 import { Alert, Form, Button } from "react-bootstrap"
-import { socket } from "../../service/socket"
+import { socket } from "../../configs/socket.config"
+import { useHistory } from "react-router-dom";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 function GameJoiner(props) {
   const history = useHistory();
@@ -13,35 +14,41 @@ function GameJoiner(props) {
   const [error, setError] = useState("");
   const [games, setGames] = useState([]);
 
+  const [jwt] = useLocalStorage("jwt", localStorage.getItem('jwt'));
+
   //rewritting these to avoid dependencies in render and prevent memory leaks?
   const toggleJoin = () => { toggleNew(!newGame) }
   const updateGameName = (newName) => { setGameName(newName) }
   const updatePlayerCount = (newCount) => { setPlayerCount(newCount) }
   //redirect if not logged in
-  if (!props.isAuth) setRedirctTo('/login')
-  //sockets
-  useEffect(() => {
-    socket.emit("listGames");
-    socket.on("games", data => setGames(data))
-
-    socket.on("joinSuccess", joinSuccess => {
-      if (joinSuccess) {
-        console.log("game joined redirecting to game")
-        setRedirctTo('/game')
-      }
-      else {
-        console.log('join failed')
-        console.log(joinSuccess)
-        setError(joinSuccess.error)
-      }
-    })
-  }, [])
-
-  //redirect down here so history not passed to useEffect
+  if (!jwt) setRedirctTo('/login')
+    //redirect down here so history not passed to useEffect
   if (redirctTo !== "") {
     history.push(redirctTo)
   }
-  
+  //sockets
+  useEffect(() => {
+    let isMounted = true
+
+    if (isMounted) socket.emit("listGames");
+    socket.on("games", data => {if (isMounted) setGames(data)})
+    socket.on("joinSuccess", joinSuccess => {
+      if (isMounted) {
+        if (joinSuccess) {
+          console.log("game joined redirecting to game")
+          setRedirctTo('/game')
+        }
+        else {
+          console.log('join failed')
+          console.log(joinSuccess)
+          setError(joinSuccess.error)
+        }
+      }
+    })
+
+    return () => { isMounted = false }
+  }, [])
+
   return (
     <div className="container">
       {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}

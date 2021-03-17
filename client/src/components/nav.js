@@ -1,45 +1,48 @@
-import React, {
-  } from 'react';
-import {
-    Link,
-    useHistory
-  } from "react-router-dom";
-import {Button} from "react-bootstrap"
+import React, { useState, useEffect } from 'react';
+import {Link, useHistory} from "react-router-dom";
+import { Button } from "react-bootstrap"
+import { useLocalStorage } from "../hooks/useLocalStorage";
+import '../styles/nav.css';
 
-import './styles/nav.css';
 
-function Nav(props){
+function Nav(props) {
   const history = useHistory();
+  const [jwt, setJWT] = useLocalStorage("jwt", localStorage.getItem('jwt'));
 
-  return(
-  <nav>
-    <h1> AOE2 MEMORY </h1>
-    <div className="navItems">
-      <div className="item">
-        <Link to="/">Home</Link>
+  useEffect(() => {
+
+  }, [jwt, setJWT])
+
+  const Logout = () => {
+    localStorage.setItem('jwt', '')
+    setJWT('')
+    history.push('/login')
+  }
+  return (
+    <nav>
+      <h1> AOE2 MEMORY </h1>
+      <div className="navItems">
+        <div className="item">
+          <Link to="/">Home</Link>
+        </div>
+
+        <div className="item">
+          <Link to="/game">Game</Link>
+        </div>
+        <div className="item">
+          {jwt === ''
+           ? <Link to="/login">Login</Link>
+           : <Button
+              className="logoutBtn"
+              onClick={() => Logout()}>
+              Logout
+            </Button>
+
+          }
+        </div>
+
       </div>
-
-      <div className="item">
-        <Link to="/game">Game</Link>
-      </div>
-      <div className="item">
-      {!props.isAuth ? 
-        <Link to="/login">Login</Link>:
-        <Button 
-          className = "logoutBtn"
-          onClick = {() => {
-              localStorage.clear()
-              props.setAuth(false)
-              history.push('/login')
-          }}>
-          Logout
-        </Button>
-
-      }
-      </div>
-
-    </div>
-  </nav>
+    </nav>
   )
 }
 

@@ -1,6 +1,6 @@
 var React = require('react')
 var Square = require('./game.square').default
-var socket = require("../../service/socket").socket
+var socket = require("../../configs/socket.config").socket
 
 function Board(props){
   const handleClick = (i) => {socket.emit("click", {index: i})}
