@@ -81,11 +81,9 @@ module.exports.login = async (req, res) => {
     }
 }
 module.exports.me = async (req, res) => {
-    console.log(req.userId)
     try {
         // request.user is getting fetched from Middleware after token authentication
         const user = await User.findById(req.userId);
-        console.log(user)
         res.json({username: user.username, token: req.params.jwtToken});
     } catch (e) {
         res.status(200).send({ message: "Error in Fetching user" });

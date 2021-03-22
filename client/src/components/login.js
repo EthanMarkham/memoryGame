@@ -1,31 +1,21 @@
 import "../styles/login.css";
 import React, { useState, useEffect } from 'react';
 import { Alert, Form, Row, Col, Button } from "react-bootstrap"
-import { useHistory } from "react-router-dom";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 
 function Login(props) {
-    const [username, setUserName] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState(null)
-    const [action, setAction] = useState(true)
-    const history = useHistory();
-    const [jwt, setJWT] = useLocalStorage("jwt", localStorage.getItem('jwt'));
+    const {setAuth} = props.authState
 
-    //if logged in get out of here
-    useEffect(() => {
-        if (jwt) redirectToGame()
-    }, [jwt, setJWT])
+    const [user, setUser] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
+    const [action, setAction] = useState("Login")
 
-    const redirectToGame = () => {
-        history.push("/game");
-    }
     const validateForm = () => {
-        if (!username && !password) return false
-        else return username.length > 0 && password.length > 0;
+        if (!user && !password) return false
+        else return user.length > 0 && password.length > 0;
     }
 
-    function handleSubmit(event) {
+    function handleSubmit(event, ) {
         event.preventDefault();
         //instead of strings we just use bool for action. if true we want to login, if false we want to register
         let url = action ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
@@ -40,7 +30,7 @@ function Login(props) {
             },
             redirect: 'follow', // manual, *follow, error
             referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify({ username: username, password: password }) // body data type must match "Content-Type" header
+            body: JSON.stringify({ username: user, password: password }) // body data type must match "Content-Type" header
         })
             .then(response => response.json())
             .then((data) => {
@@ -49,25 +39,27 @@ function Login(props) {
                     setError(data)
                     return
                 } else {
-                    setError(null) //else set errors to nada so we dont render old ones
-                    localStorage.setItem('jwt', '')
-                    setJWT(data.token)
+                    setAuth(true, data)
                 }
             })
     }
 
+    function toggleMethod() {
+        let nextAction = (action === 'login') ? 'register' : 'login'
+        setAction(nextAction)
+    }
 
     return (
         <div className="loginContainer">
             <Form onSubmit={handleSubmit}>
                 {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
                 <Form.Group controlId="formBasicEmail">
-                    <Form.Label>Username</Form.Label>
+                    <Form.Label>user</Form.Label>
                     <Form.Control
                         type="text"
-                        placeholder="Enter username"
-                        onChange={(event) => { setUserName(event.target.value) }}
-                        value={username}
+                        placeholder="Enter user"
+                        onChange={(event) => { setUser(event.target.value)}}
+                        value={user}
                     />
                     <Form.Text className="text-muted">
                         Min. Requirement: 4
@@ -81,7 +73,7 @@ function Login(props) {
                     <Form.Control
                         type="password"
                         placeholder="Password"
-                        onChange={(event) => { setPassword(event.target.value) }}
+                        onChange={(event) => { setPassword(event.target.value)}}
                         value={password}
                     />
                     <Form.Text className="text-muted">
@@ -93,7 +85,7 @@ function Login(props) {
                     <Col>
                         <Button
                             variant="outline-secondary"
-                            onClick={() => { setAction(!action) }}>{action ? "Need an Account?" : "Already have an Account?"}
+                            onClick={() => {toggleMethod()}}>{action === 'login' ? "Have an Account?" : "Need an Account?"}
                         </Button>
                     </Col>
                     <Col>

@@ -105,6 +105,19 @@ module.exports.Game = class Game {
         }
         return response
     }
+    GameOverInfo(){
+        let response = {
+            squares: this.currentSquares,
+            users: this.users,
+            playerCount: this.playerCount,
+            inProgress: this.inProgress,
+            round: this.round,
+            cardsShowing: this.currentGuesses.length,
+            message: this.message,
+            id: this.id
+        }
+        return response
+    }
 }
 //Helper functions
 function getGameValues(size) {

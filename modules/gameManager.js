@@ -27,12 +27,14 @@ class GameManager {
     }
 
     GetClientInfo(userID) {    
-        let index = this.FindIndexByUserID(userID)
-        return this.games[index].ClientInfo()
+        return new Promise((resolve, reject) => {
+            let index = this.FindIndexByUserID(userID)
+            resolve(this.games[index].ClientInfo())
+        })
     }
     GetGameOverInfo(gameID) {
         let index = this.FindIndexByGameID(gameID)
-        return this.games[index].ClientInfo()
+        return this.games[index].GameOverInfo()
     }
 
     //create new game
@@ -41,7 +43,7 @@ class GameManager {
             if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
             let newGame = new Game(user, playerCount, 4)
             this.games.push(newGame)
-            resolve({game: newGame, index: this.games.length - 1})
+            resolve(newGame.ClientInfo())
         })
         return out
     }
@@ -58,12 +60,11 @@ class GameManager {
     }
     //handle a guess from user
     HandleClick(userID, guess) {
-        let out = new Promise((resolve) => {
+        return new Promise((resolve) => {
             let gameIndex = this.FindIndexByUserID(userID)
             this.games[gameIndex].HandleClick(userID, guess)
             resolve(this.games[gameIndex])
         })
-        return out
     }
 
     ResetCards(userID){

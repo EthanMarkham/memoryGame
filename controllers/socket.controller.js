@@ -1,4 +1,3 @@
-const { compareSync } = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require('../config/config.json');
 const User = require("../model/user.model");
@@ -6,126 +5,98 @@ const User = require("../model/user.model");
 exports = module.exports = function (io, gameManager) {
   //set up auth middleware
   io.use((socket, next) => {
-    let token = socket.handshake.auth.token;
+    let token = JSON.parse(socket.handshake.auth.token)
     let userID = null
     if (token) {
       jwt.verify(token, config.secret, async (err, decoded) => {
         if (!err) userID = decoded.user.id
+        else console.log(err)
       })
     }
-    if (!token || !userID) socket.error = { type: "auth", message: "auth failed" }
+    console.log(`${userID} just connected`)
+    if (!token || !userID) {
+      console.log('err')
+      socket.emit('AUTH_ERROR', "Token Expired")
+      next()
+      //socket.disconnect(0)
+    }
     else socket.userID = userID
     next()
   })
 
   io.on('connection', (socket) => {
 
-    socket.on("listGames", () => joinGameList(socket))
+    socket.on("LIST_GAMES", () => handleListGames(socket, io))
+    socket.on("ADD_GAME", gameInfo => handleAddGame(socket, gameInfo))
+    socket.on("GET_STATUS", () => handleCheckUserStatus(socket))
+    socket.on("JOIN_GAME", () => handleJoinChannel(socket))
+    socket.on("GET_GAME", () => broadCastGameInfo(socket))
+    socket.on("LEAVE_GAME", () => handleLeaveGame(socket))
+    socket.on("GAME_CLICK", (guess) => handleGameClick(socket, guess))
 
-    socket.on("addGame", (gameInfo) => {
-      User.findById(socket.userID)
-      .then(user => { gameManager.NewGame(user, gameInfo.playerCount); console.log(user);})
-      .then(() => joinSuccess(socket))
-      .catch(err => socket.emit('error', err.message))
-    })
-
-    socket.on("joinGameChannel", () => {
-      joinChannel(socket)
-      .catch(err => socket.emit('error', err.message))
-    })
-
-    socket.on("leaveGame", () => leaveChannel(socket))
-    
-    socket.on("click", (guess) => {
-      gameManager.HandleClick(socket.userID, guess.index)
-      .then((data) => handleResponses(socket.userID, data))
-      .catch(err => socket.emit('error', err.message))
-    })
-    
-    socket.on('disconnecting', () => { console.log(socket.rooms) });
+    socket.on('disconnecting', () => { console.log(socket.rooms) })
   })
 
   //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
-  function broadCastGameInfo(userID) {
-    game = gameManager.GetClientInfo(userID)
-    io.to(`game:${game.id}`).emit('gameInfo', game)
+  const handleJoinChannel = (socket) => {
+    console.log('Join Request')
+    gameManager.GetClientInfo(socket.userID)
+      .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
+      .then(() => socket.emit('JOIN_SUCCESS'))
+      .then(() => broadCastOpenGames())
+      .catch(err => socket.emit('JOIN_ERROR', err.message))
   }
-  function broadCastOpenGames() {
-    let openGames = gameManager.GetOpenGames()
-    io.to('games').emit('games', openGames)
+  const handleAddGame = (socket, newGameInfo) => {
+    User.findById(socket.userID)
+      .then(user => gameManager.NewGame(user, newGameInfo.playerCount))
+      .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
+      .then(() => socket.emit('JOIN_SUCCESS'))
+      .catch(err => socket.emit('ADD_ERROR', err.message))
   }
-  function broadcastGameOver(gameID){
-    game = gameManager.GetGameOverInfo(gameID)
-    io.to(`game:${game.id}`).emit('gameOver', game)
+  const handleListGames = (socket) => {
+    socket.join('games')
+    broadCastOpenGames()
   }
-  function broadcastReset(userID) {
-    broadCastGameInfo(userID)
-    return gameManager.ResetCards(userID).then(() => broadCastGameInfo(userID))
-  }
-
-  function handleResponses(userID, data){
-    if (data.resetting) return broadcastReset(userID)
-    else if (data.completed) return broadcastGameOver(data.id)
-    else return broadCastGameInfo(userID)
-  }
-
-
-  function joinChannel(socket) {
-    return new Promise((resolve) => { 
-      let gameInfo = gameManager.GetClientInfo(socket.userID)
-      console.log('joining channel '+ gameInfo.id)
-      socket.join(`game:${gameInfo.id}`)
-      broadCastGameInfo(socket.userID)
-      resolve()
-    })
-  }
-
-  function leaveChannel(socket) {
+  const handleLeaveGame = (socket) => {
     socket.leave(`game:${game.id}`)
-    console.log('left the channel')
+    socket.emit("LEAVE_SUCCESS")
+  }
+  const handleCheckUserStatus = (socket) => {
+    gameManager.GetClientInfo(socket.userID)
+    .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
+    .then(() => socket.emit('USER_STATUS', {game: true}))
+    .then(() => broadCastOpenGames())
+    .catch(() => socket.emit('USER_STATUS', {game: false}))
+  }
+  const handleGameClick = (socket, guess) => {
+    console.log('Clicking......')
+    gameManager.HandleClick(socket.userID, guess.index)
+      .then((data) => {
+        if (data.completed) broadCastGameOver(data)
+        else if (data.resetting) broadcastReset(socket)
+        else broadCastGameInfo(socket)
+      })
+      .catch(err => socket.emit('GAME_ERROR', err.message))
   }
 
-  function joinSuccess(socket){
-    return new Promise((resolve) => { 
-      socket.emit('joinSuccess', true)
-      broadCastOpenGames()
-      resolve()
-    })
+  //game broadCasts
+  const broadCastOpenGames = () => {
+    let openGames = gameManager.GetOpenGames()
+    io.to('games').emit('GAME_LIST', openGames)
   }
-
-  function joinGameList(socket){
-    return new Promise((resolve) => { 
-      socket.join('games')
-      broadCastOpenGames()
-      resolve()
-    })
+  const broadcastReset = (socket) => {
+    broadCastGameInfo(socket)
+    return gameManager.ResetCards(socket.userID).then(() => broadCastGameInfo(socket))
+  }
+  const broadCastGameInfo = (socket) => {
+    console.log('Request for Game Info')
+    gameManager.GetClientInfo(socket.userID)
+      .then(gameInfo => io.to(`game:${gameInfo.id}`).emit('GAME_INFO', gameInfo))
+      .catch(err => socket.emit('GAME_ERROR', err.message))
+  }
+  const broadCastGameOver = (game) => {
+    console.log('Broadcasting Game Over Info')
+    io.to(`game:${game.id}`).emit('GAME_OVER', gameManager.GetGameOverInfo(game.id))
   }
 }
-      /*
-socket.on('chat mounted', function(user) {
-// TODO: Does the server need to know the user?
-socket.emit('receive socket', socket.id)
-})
-socket.on('leave channel', function(channel) {
-socket.leave(channel)
-})
-socket.on('join channel', function(channel) {
-socket.join(channel.name)
-})
-socket.on('new message', function(msg) {
-socket.broadcast.to(msg.channelID).emit('new bc message', msg);
-});
-socket.on('new channel', function(channel) {
-socket.broadcast.emit('new channel', channel)
-});
-socket.on('typing', function (data) {
-socket.broadcast.to(data.channel).emit('typing bc', data.user);
-});
-socket.on('stop typing', function (data) {
-socket.broadcast.to(data.channel).emit('stop typing bc', data.user);
-});
-socket.on('new private channel', function(socketID, channel) {
-socket.broadcast.to(socketID).emit('receive private channel', channel);
-})
-*/
 

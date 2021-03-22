@@ -4,11 +4,11 @@ import reportWebVitals from './reportWebVitals';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/index.css';
-const Routes = require('./components/routes').default
+const App = require('./app').default
 
 render(
   <React.StrictMode>
-    <Routes />
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

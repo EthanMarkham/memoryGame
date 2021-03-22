@@ -24,6 +24,7 @@ const io = require("socket.io")(server, {
     credentials: true
     }
 })
+
 require('./controllers/socket.controller')(io, gameManager);
 
 //Sends json so that it looks good
