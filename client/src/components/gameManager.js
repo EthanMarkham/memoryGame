@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { SocketContext, socket } from '../context/socket';
-import '../styles/nav.css';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import {SocketContext} from '../context/socket';
 
 const GameJoiner = React.lazy(() => import('./game/game.join'))
 const Game = React.lazy(() => import('./game/game.function'))
@@ -10,6 +9,7 @@ const GameOver = React.lazy(() => import('./game/game.over'))
 
 function GameManager(props) {
   var isMounted = false
+  const socket = useContext(SocketContext);
 
   const [gameState, setGameState] = useState("LOADING")
   const [error, setError] = useState("")
@@ -53,7 +53,7 @@ function GameManager(props) {
   else if (gameState === "GAME_JOIN") child = <GameJoiner authState={props.authState} gameStates={gameStates} />
   else if (gameState === "GAME_NEW") child = <GameCreator gameStates={gameStates} />
 
-  return (<SocketContext.Provider value={socket}>{child}</SocketContext.Provider>)
+  return (<>{child}</>)
 }
 
 export default GameManager

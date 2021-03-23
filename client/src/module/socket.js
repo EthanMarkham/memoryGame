@@ -6,34 +6,35 @@ export function GetSocket() {
         socket: null,
         connecting: false,
         connected: false,
-        Connect: (token, callBack) => {
-            let tempToken = (token !== 'undefined' && token) ? token : localStorage.getItem('jwt')
-            console.log('connecting with ' + tempToken)
-            if (!SocketManager.connected && !SocketManager.connecting) {
-                console.log('test')
+        Connect: () => {
+            return new Promise((resolve, reject) => {
+                if (SocketManager.connected) reject('Already connected')
+                if (!SocketManager.connecting) reject('Currently Connecting')
+                console.log('connecting')
                 SocketManager.connecting = true
-                SocketManager.socket = io.connect("ws://localhost:5000/", { reconnectionDelayMax: 10000, auth: { token: JSON.stringify(tempToken) }, withCredentials: true })
+                SocketManager.socket = io.connect("ws://localhost:5000/", { reconnectionDelayMax: 10000, auth: { token: JSON.stringify(localStorage.getItem('jwt')) }, withCredentials: true })
+
                 SocketManager.socket.on('connected', () => {
                     SocketManager.connected = true
                     SocketManager.connecting = false
-                    if (callBack) callBack()
+                    resolve()
                 })
-            }
+            })
         },
-        Disconnect: (callBack) => {
-            if (SocketManager.connected) {
-                SocketManager.socket.emit('end')
-                SocketManager.socket.on('disconnect', () => {
+        Disconnect: () => {
+            return new Promise((resolve) => {
+                if (SocketManager.connected) {
+                    SocketManager.socket.emit('disconnecting')
                     SocketManager.connected = false
-                    SocketManager.socket = null
-                });
-            }
-            if (callBack) callBack()
+                    SocketManager.socket.off()
+                    resolve()
+                }
+            })
+
         },
-        Renew: (token, callBack) => {
-            let tempToken = (token !== 'undefined' && token) ? token : localStorage.getItem('jwt')
-            if (SocketManager.connected) SocketManager.Disconnect(() => SocketManager.Connect(tempToken))
-            else SocketManager.Connect(token, callBack)
+        Renew: () => {
+            SocketManager.Disconnect()
+                .then(() => SocketManager.Connect())
         }
     }
 

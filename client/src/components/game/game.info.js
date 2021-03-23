@@ -2,22 +2,26 @@ import React from 'react';
 
 function GameInfo(props) {
   return (
-    <div>
-      <div className="col">
-        <span className="message">{props.info.message}</span>
-        <span className="round" > Attempts: {props.info.round}</span>
+    <div className="row gameInfo">
+      <div className="col-6">
+        <div className="gameStats">
+          <div className="stat">{props.info.message}</div>
+          <div className="stat" > Attempts: {props.info.round}</div>
+        </div>
       </div>
-  
-      <div className="col">
+
+      <div className="col-3 text-center">
         <button
-          className="restartBtn"
+          className="gameButton btn"
           onClick={() => { props.setLabels() }}>Toggle Labels</button>
+      </div>
+      <div className="col-3 text-center">
         <button
-          className="restartBtn"
+          className="gameButton btn"
           onClick={() => {/*startNewGame()*/ }}>FF 11</button>
-      </div> 
+      </div>
     </div>
-    )
+  )
 }
 
 

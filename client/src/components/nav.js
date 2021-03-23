@@ -1,23 +1,24 @@
-import React  from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "react-bootstrap"
-import '../styles/nav.css';
-
 
 function Nav(props) {
   const { auth, setAuth } = props.authState
+  const [logoutBtn, showLogout] = useState(false)
   const Logout = () => {
     setAuth(false)
   }
+  useEffect(() => {
+    if (auth.isAuth) showLogout(true)
+  }, [auth, showLogout])
+
+  const logOut = <div className="item"><div className="logoutBtn btn" onClick={Logout}>Logout</div>
+  </div>
   return (
     <nav>
       <h1> AOE2 MEMORY </h1>
-      {auth.isAuth ??
-        <div className="navItems">
-          <div className="item">
-            <Button className="logoutBtn" onClick={Logout}>Logout</Button>
-          </div>
+      <div className="navItems">
+        {logoutBtn ? logOut : ' '}
         </div>
-      }
     </nav>
   )
 }

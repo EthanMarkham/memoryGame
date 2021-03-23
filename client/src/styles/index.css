@@ -1,9 +1,9 @@
-html, body, #root, .App, #root>div {
+
+html, body, #root, .App { /* 5F6AF9 */
   height: 100%;
-  background-color: rgb(148, 148, 148);
-
+  background-color: #E3F2FD;
+  text-emphasis-color:#6400e3;
 }
-
 
 header{
   height: 5%;
@@ -14,10 +14,11 @@ header > h1 {
 }
 .container{
   padding: 0;
+  padding-top: 10px;
   width: 95%;
   max-width: 95%;
   min-width: 95%;
-  height: 100%;
+  height: 90%;
   overflow: hidden;
   margin: auto;
   margin-top: 0;
@@ -26,4 +27,179 @@ header > h1 {
 
 
 
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Game Styles */
+@media screen and (min-width: 0px) {
+  .square {
+      flex: 0 3 50px;
+  }
+}
+  @media screen and (min-width: 900px) {
+  .square {
+      flex: 0 3 100px;
+  }
+}
+  @media screen and (min-width: 1600px) {
+  .square {
+      flex: 0 3 120px;  
+  }
+}
+.game-board{
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  width: 100%;
+  height:87%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: center;
+}
+
+.square {
+background-color: #E3F2FD;
+width: fit-content;
+height: fit-content;
+overflow: hidden;
+padding: 0;
+position: relative;
+border: 1px solid darkgray;
+}
+
+.square:focus {
+outline: none;
+}
+
+.square > .image{
+max-width: 100%;
+max-height: 100%;
+}
+
+.square > label{
+position: absolute;
+bottom: 2px;
+left: 2px;
+font-weight: bold;
+background-color: black;
+width: 100%;
+color: white;
+font-size: 0.8em;
+}
+.square:hover{
+border: 2px solid lightgray;
+}
+.gameInfo {
+margin: 0;
+height: 13%;
+width: 100%;
+padding-top: 2%;
+font-weight: bold;
+text-align: start;
+}
+
+.gameStats{
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px
+}
+.stat{
+  width: 100%;
+  height: 100%;
+}
+.gameButton{
+border-radius: 25px;
+padding: 10px;
+border: 1px solid #6200EA;
+border-radius: 30px;
+}
+/* Login Styles */
+.loginContainer {
+  width: 80%;
+  margin: auto;
+  padding-bottom: 10px;
+  max-width: 600px;
+  margin-top: 20px;
+}
+.btnHolder {
+    display: flex;
+    justify-content: center;
+    width: auto;
+}
+/*nav styles */
+nav {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  height: 10%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: #7986CB;
+  border-bottom: 5px solid #6200EA;
+}
+nav > h1 {
+  font-size: x-large;
+  margin: 0px;
+  letter-spacing: 0.7em;
+  color: #E3F2FD;
+
+}
+nav > .navItems {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-basis: auto;
+  justify-self: flex-end;
+  justify-content: space-between;
+  width: fit-content;
+}
+
+nav > .navItems > .item {
+  padding: 10px;
+}
+nav > .navItems > .item > a{
+  color: rgb(25, 90, 121);
+}
+/* Loader */
+.loader {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 

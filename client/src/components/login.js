@@ -1,4 +1,3 @@
-import "../styles/login.css";
 import React, { useState, useEffect } from 'react';
 import { Alert, Form, Row, Col, Button } from "react-bootstrap"
 

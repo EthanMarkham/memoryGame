@@ -25,15 +25,17 @@ exports = module.exports = function (io, gameManager) {
   })
 
   io.on('connection', (socket) => {
-
+    socket.emit('connected')
+    
     socket.on("LIST_GAMES", () => handleListGames(socket, io))
     socket.on("ADD_GAME", gameInfo => handleAddGame(socket, gameInfo))
     socket.on("GET_STATUS", () => handleCheckUserStatus(socket))
     socket.on("JOIN_GAME", () => handleJoinChannel(socket))
     socket.on("GET_GAME", () => broadCastGameInfo(socket))
-    socket.on("LEAVE_GAME", () => handleLeaveGame(socket))
+    socket.on("LEAVE_GAME", (gameID) => handleLeaveGame(socket, gameID))
     socket.on("GAME_CLICK", (guess) => handleGameClick(socket, guess))
 
+    socket.on("RENEW_TOKEN", (newToken) => socket = renewToken(socket, newToken))
     socket.on('disconnecting', () => { console.log(socket.rooms) })
   })
 
@@ -57,8 +59,8 @@ exports = module.exports = function (io, gameManager) {
     socket.join('games')
     broadCastOpenGames()
   }
-  const handleLeaveGame = (socket) => {
-    socket.leave(`game:${game.id}`)
+  const handleLeaveGame = (socket, gameID) => {
+    socket.leave(`game:${gameID}`)
     socket.emit("LEAVE_SUCCESS")
   }
   const handleCheckUserStatus = (socket) => {
@@ -97,6 +99,21 @@ exports = module.exports = function (io, gameManager) {
   const broadCastGameOver = (game) => {
     console.log('Broadcasting Game Over Info')
     io.to(`game:${game.id}`).emit('GAME_OVER', gameManager.GetGameOverInfo(game.id))
+  }
+
+  const renewToken = (socket, newToken) => {
+    console.log('Renewing Token: ' + newToken)
+    let token = JSON.parse(newToken)
+    let userID = null
+    if (newToken !== `""`) {
+      jwt.verify(token, config.secret, async (err, decoded) => {
+        if (!err) userID = decoded.user.id
+        else console.log(err)
+      })
+    }
+    if (!token || !userID) socket.userID =  "Guest"
+    else socket.user = userID
+    return socket
   }
 }
 

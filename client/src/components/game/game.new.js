@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from "react";
 import { Col, Row, Form, Button } from "react-bootstrap"
-import {SocketContext} from '../../context/socket';
+import { SocketContext } from '../../context/socket';
 
 function NewGameForm(props) {
   var isMounted = false
@@ -17,11 +17,11 @@ function NewGameForm(props) {
   })
 
   useEffect(() => {
-    if (!isMounted){
+    if (!isMounted) {
       isMounted = true
       socket.on("ADD_ERROR", (err) => handleError(err))
     }
-    return (() => { 
+    return (() => {
       isMounted = false
       socket.off("ADD_ERROR", (err) => handleError(err))
     })
@@ -34,40 +34,42 @@ function NewGameForm(props) {
   }
 
   return (
-    <Form onSubmit={addGame}>
-      <Form.Group>
-        <Form.Label>Name:</Form.Label>
-        <Form.Control
-          type="text"
-          size="lg"
-          placeholder="Enter Lobby Name"
-          onChange={(event) => { setGameName(event.target.value) }}
-          value={gameName}
-        />
-      </Form.Group>
-      <br />
+    <div className="container">
+      <Form onSubmit={addGame}>
+        <Form.Group>
+          <Form.Label>Name:</Form.Label>
+          <Form.Control
+            type="text"
+            size="lg"
+            placeholder="Enter Lobby Name"
+            onChange={(event) => { setGameName(event.target.value) }}
+            value={gameName}
+          />
+        </Form.Group>
+        <br />
 
-      <Form.Group controlId="exampleForm.ControlSelect1">
-        <Form.Label>Number of Players</Form.Label>
-        <Form.Control
-          as="select"
-          onChange={(event) => { setPlayerCount(event.target.value) }}
-          value={playerCount}
-        >
-          <option value={1}>1</option>
-          <option value={2}>2</option>
-          <option value={3}>3</option>
-          <option value={4}>4</option>
-          <option value={5}>5</option>
-        </Form.Control>
-      </Form.Group>
-      <br />
-      <Row>
-        <Col><Button onClick={() => { setGameState("GAME_JOIN") } } variant="secondary" type="submit" block>Join Game</Button></Col>
-        <Col><Button variant="primary" type="submit" disabled={gameName === ""} block>Create Game</Button></Col>
-      </Row>
+        <Form.Group controlId="exampleForm.ControlSelect1">
+          <Form.Label>Number of Players</Form.Label>
+          <Form.Control
+            as="select"
+            onChange={(event) => { setPlayerCount(event.target.value) }}
+            value={playerCount}
+          >
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+          </Form.Control>
+        </Form.Group>
+        <br />
+        <Row>
+          <Col><Button onClick={() => { setGameState("GAME_JOIN") }} variant="secondary" type="submit" block>Join Game</Button></Col>
+          <Col><Button variant="primary" type="submit" disabled={gameName === ""} block>Create Game</Button></Col>
+        </Row>
 
-    </Form>
+      </Form>
+    </div>
   )
 }
 export default NewGameForm;

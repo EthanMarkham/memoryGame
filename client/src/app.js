@@ -1,14 +1,19 @@
-import React, { Suspense, useEffect } from "react";
+import { ContextHandlerImpl } from "express-validator/src/chain";
+import React, { Suspense, useEffect, useState } from "react";
+import Loader from "react-loader-spinner";
 import { SocketContext, socket } from './context/socket';
+const useAuth = require('./hooks/useAuth').default
 
 const Login = require('./components/login').default
 const Nav = require('./components/nav').default
 const GameManager = require('./components/gameManager').default
-const useAuth = require('./hooks/useAuth').default
+
 
 export default function App() {
   const [auth, setAuth] = useAuth()
   const authState = { auth: auth, setAuth: setAuth }
+  const [loading, setLoading] = useState(true)
+  var child = ''
 
   let isMounted = false
   useEffect(() => {
@@ -20,24 +25,41 @@ export default function App() {
         fetch(`http://localhost:5000/api/users/me/${token}`)
           .then(response => response.json())
           .then(data => {
+            console.log(data)
             if (!data.error) setAuth(true, data)
+            else setAuth(false)
+            setLoading(false)
           })
+      }
+      else {
+        setLoading(false)
+        setAuth(false)
       }
     }
     return () => { isMounted = false }
   }, [])
 
-  return (
-    <SocketContext.Provider value={socket}>
-      <Suspense fallback={<div>Loading... </div>}>
+  useEffect(() => {
+    socket.emit("RENEW_TOKEN", JSON.stringify(localStorage.getItem('jwt')))
+  }, [auth])
+  
+  if (loading) child = <LoaderLazy />
+  if (!loading && !auth.isAuth) child = <Login authState={authState} />
+  else if (!loading && auth.isAuth) child = <GameManager authState={authState} />
+
+  const Wrapper = (props) => {
+    return (<SocketContext.Provider value={socket}>
+      <Suspense fallback={<LoaderLazy />}>
         <Nav authState={authState} />
-        {auth.isAuth
-          ? <GameManager authState={authState} />
-          : <Login authState={authState} />
-        }
+        {props.child}
       </Suspense>
-    </SocketContext.Provider>
-  );
+    </SocketContext.Provider>)
+  }
+  return ( <Wrapper child={child}/> )
 }
 
+
+function LoaderLazy(props) {
+  return <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />
+}
 

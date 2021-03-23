@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {SocketContext} from '../../context/socket';
 import { Alert, Button } from "react-bootstrap"
-import '../../styles/game.css';
 
 var Board = require('./game.board').default
 var GameInfo = require('./game.info').default
@@ -67,8 +66,9 @@ function Game(props) {
     console.log(board)
     console.log(info)
   }, [board, info])
+
   return (
-    <div className="game">
+    <div className="container">
       <Board
         me={props.me}
         board={board}

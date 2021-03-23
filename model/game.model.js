@@ -95,7 +95,7 @@ module.exports.Game = class Game {
     ClientInfo() {
         let response = {
             squares: this.currentSquares,
-            users: this.users,
+            users: this.users.map(u => ({username: u.username, color: u.color, matches: u.matches, upNext: u.upNext})),
             playerCount: this.playerCount,
             inProgress: this.inProgress,
             round: this.round,
@@ -108,7 +108,7 @@ module.exports.Game = class Game {
     GameOverInfo(){
         let response = {
             squares: this.currentSquares,
-            users: this.users,
+            users: this.users.map(u => ({username: u.username, color: u.color, matches: u.matches})),
             playerCount: this.playerCount,
             inProgress: this.inProgress,
             round: this.round,
