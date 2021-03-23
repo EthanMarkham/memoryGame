@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {SocketContext} from '../context/socket';
 
 const GameJoiner = React.lazy(() => import('./game/game.join'))
-const Game = React.lazy(() => import('./game/game.function'))
+const Game = React.lazy(() => import('./game/game.'))
 const GameCreator = React.lazy(() => import('./game/game.new'))
 const GameOver = React.lazy(() => import('./game/game.over'))
 

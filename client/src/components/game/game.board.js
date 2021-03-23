@@ -1,10 +1,27 @@
 var React = require('react')
-var Square = require('./game.square').default
 
 function Board(props) {
   const cantClick = (i) => {
     return (props.board.cardsShowing >= 2 && props.turn !== props.me && props.board.squares[i].value !== "*")
   }
+  const Square = (props) => {
+    return (
+        <button 
+          className="square" 
+          onClick={props.handleClick}
+          style={props.style}
+          disabled={props.disableClick()}  
+        >
+          <img 
+            src={`http://localhost:5000/${props.image}`} 
+            alt={props.civ}
+            className="image"
+            />
+          {props.showLabels && <label>{props.civ}</label>}
+        </button>
+    );
+  }
+  
   function renderSquare(i) {
     //if match color not set set the match color to square match color
     let style = {}
