@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React from 'react'
 import { Transition } from 'react-spring/renderprops'
 
 function Board(props) {
@@ -33,11 +33,11 @@ function Board(props) {
   return <div className="game-board">
     <Transition
       items={props.board.squares} keys={item => item.id}
-      initial={{ opacity: 0 }}
-      enter={{ opacity: 1 }}
+      initial={{ opacity: 0,  background: '#6400e3'}} //height: '0px'
+      enter={{ opacity: 1, background: '#E3F2FD'}} //height: '100%'
       leave={{ opacity: 0 }}
-      update={{ background: '#28b4d7' }}
-      trail={50}
+      update={{ background: '#6400e3' }}
+      trail={10}
       >
       {item => animated => <Square
         value={item.value}
@@ -45,7 +45,7 @@ function Board(props) {
         image={item.image}
         style={animated}
         civ={item.civ}
-        showLabels={item.labels}
+        showLabels={props.labels}
         borderColor={item.matchColor}
         handleClick={props.handleClick}
       />}

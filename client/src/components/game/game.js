@@ -36,24 +36,21 @@ function Game(props) {
       cardsShowing: data.cardsShowing,
       turn: data.users.find(u => u.upNext).username
     })
-  }, [])
+  }, [setBoard, setInfo])
 
-  const handleError = useCallback((err) => {
-    console.log(err)
-    setError(err)
-  })
+
   const handleClick = (id) => { console.log(id); socket.emit("GAME_CLICK", id) }
   
-  const toggleLables = useCallback(() => { setLabels(!labels) })
+  const toggleLables = () => {setLabels(!labels)}
 
   useEffect(() => {
     socket.emit("GET_GAME")
     socket.on("GAME_INFO", data => handleBoardInfo(data))
-    socket.on("GAME_ERROR", data => handleError(data))
+    socket.on("GAME_ERROR", data => setError(data))
 
     return () => {
       socket.off("GAME_INFO", data => handleBoardInfo(data))
-      socket.off("GAME_ERROR", data => handleError(data))
+      socket.off("GAME_ERROR", data => setError(data))
     }
   }, []);
 

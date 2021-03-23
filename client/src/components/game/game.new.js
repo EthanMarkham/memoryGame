@@ -13,7 +13,7 @@ function NewGameForm(props) {
   const handleError = useCallback((err) => {
     console.log(err)
     setError(err)
-  })
+  }, [setError])
 
   useEffect(() => {
     socket.on("ADD_ERROR", (err) => handleError(err))
