@@ -26,7 +26,10 @@ export default function App() {
           .then(response => response.json())
           .then(data => {
             console.log(data)
-            if (!data.error) setAuth(true, data)
+            if (!data.error) {
+              setAuth(true, data)
+              socket.emit('LOGIN', token)
+            }
             else setAuth(false)
             setLoading(false)
           })
@@ -35,13 +38,14 @@ export default function App() {
         setLoading(false)
         setAuth(false)
       }
+      socket.on("AUTH_ERROR", () => {setAuth(false)})
     }
-    return () => { isMounted = false }
+    return () => { 
+      socket.off("AUTH_ERROR", () => {setAuth(false)})
+      isMounted = false 
+    }
   }, [])
 
-  useEffect(() => {
-    socket.emit("RENEW_TOKEN", JSON.stringify(localStorage.getItem('jwt')))
-  }, [auth])
   
   if (loading) child = <LoaderLazy />
   if (!loading && !auth.isAuth) child = <Login authState={authState} />

@@ -24,9 +24,9 @@ export function GetSocket() {
         Disconnect: () => {
             return new Promise((resolve) => {
                 if (SocketManager.connected) {
-                    SocketManager.socket.emit('disconnecting')
+                    SocketManager.socket.emit('end')
                     SocketManager.connected = false
-                    SocketManager.socket.off()
+                    SocketManager.socket = null
                     resolve()
                 }
             })

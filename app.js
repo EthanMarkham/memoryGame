@@ -10,11 +10,17 @@ require('./config/database.config')
 const gameManager = require('./modules/gameManager').GameManager()
 const usersRouter = require('./routes/user');
 
-var app = express();
-const server = require('http').createServer(app); 
+var app = express(),
+    server = require('http').createServer(app),
+    session = require("express-session")({
+      secret: "my-secret",
+      resave: true,
+      saveUninitialized: true
+    }),
+    sharedsession = require("express-socket.io-session");
 
-// enable Cross-Origin Resource Sharing
 app.use(cors())
+app.use(session);
 
 //socket stuff
 const io = require("socket.io")(server, {
@@ -24,6 +30,7 @@ const io = require("socket.io")(server, {
     credentials: true
     }
 })
+io.use(sharedsession(session));
 
 require('./controllers/socket.controller')(io, gameManager);
 

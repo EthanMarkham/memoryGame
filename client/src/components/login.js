@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { Alert, Form, Row, Col, Button } from "react-bootstrap"
+import {SocketContext} from '../context/socket';
 
 function Login(props) {
     const {setAuth} = props.authState
-
+    const socket = useContext(SocketContext);
     const [user, setUser] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
@@ -38,6 +39,7 @@ function Login(props) {
                     setError(data)
                     return
                 } else {
+                    socket.emit("LOGIN", data.token)
                     setAuth(true, data)
                 }
             })
