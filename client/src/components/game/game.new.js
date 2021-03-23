@@ -3,7 +3,6 @@ import { Col, Row, Form, Button } from "react-bootstrap"
 import { SocketContext } from '../../context/socket';
 
 function NewGameForm(props) {
-  var isMounted = false
   const socket = useContext(SocketContext);
 
   const { setGameState } = props.gameStates
@@ -17,12 +16,8 @@ function NewGameForm(props) {
   })
 
   useEffect(() => {
-    if (!isMounted) {
-      isMounted = true
-      socket.on("ADD_ERROR", (err) => handleError(err))
-    }
+    socket.on("ADD_ERROR", (err) => handleError(err))
     return (() => {
-      isMounted = false
       socket.off("ADD_ERROR", (err) => handleError(err))
     })
   }, [])

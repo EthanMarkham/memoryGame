@@ -58,7 +58,7 @@ exports = module.exports = function (io, gameManager) {
     }
     const handleGameClick = (socket, guess) => {
       console.log('Clicking......')
-      gameManager.HandleClick(socket.handshake.session.userID, guess.index)
+      gameManager.HandleClick(socket.handshake.session.userID, guess)
         .then((data) => {
           if (data.completed) broadCastGameOver(data)
           else if (data.resetting) broadcastReset()

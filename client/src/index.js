@@ -3,7 +3,8 @@ import { render } from 'react-dom'
 import reportWebVitals from './reportWebVitals';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/index.css';
+import './styles/index.scss';
+
 const App = require('./app').default
 
 render(

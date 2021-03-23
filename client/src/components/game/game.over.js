@@ -19,7 +19,7 @@ export default function GameOver(props) {
   useEffect(() => {
     socket.on("LEAVE_SUCCESS", () => setGameState(nextState))
     return () => socket.off("LEAVE_SUCCESS", () => setGameState(nextState))
-  }, [nextState])
+  }, [nextState, setGameState, socket])
 
   return (
     <div className="container">

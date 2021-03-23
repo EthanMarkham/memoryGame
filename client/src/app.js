@@ -1,7 +1,7 @@
-import { ContextHandlerImpl } from "express-validator/src/chain";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loader from "react-loader-spinner";
 import { SocketContext, socket } from './context/socket';
+
 const useAuth = require('./hooks/useAuth').default
 
 const Login = require('./components/login').default
@@ -15,51 +15,45 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   var child = ''
 
-  let isMounted = false
   useEffect(() => {
-    if (!isMounted) {
-      isMounted = true
-      let token = localStorage.getItem('jwt')
-      if (token !== "undefined" && token) {
-        console.log(token)
-        fetch(`http://localhost:5000/api/users/me/${token}`)
-          .then(response => response.json())
-          .then(data => {
-            console.log(data)
-            if (!data.error) {
-              setAuth(true, data)
-              socket.emit('LOGIN', token)
-            }
-            else setAuth(false)
-            setLoading(false)
-          })
-      }
-      else {
-        setLoading(false)
-        setAuth(false)
-      }
-      socket.on("AUTH_ERROR", () => {setAuth(false)})
+    let token = localStorage.getItem('jwt')
+    if (token !== "undefined" && token) {
+      console.log(token)
+      fetch(`http://localhost:5000/api/users/me/${token}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          if (!data.error) {
+            setAuth(true, data)
+            socket.emit('LOGIN', token)
+          }
+          else setAuth(false)
+          setLoading(false)
+        })
     }
-    return () => { 
-      socket.off("AUTH_ERROR", () => {setAuth(false)})
-      isMounted = false 
+    else {
+      setLoading(false)
+      setAuth(false)
+    }
+    socket.on("AUTH_ERROR", () => { setAuth(false) })
+
+    return () => {
+      socket.off("AUTH_ERROR", () => { setAuth(false) })
     }
   }, [])
 
-  
+
   if (loading) child = <LoaderLazy />
   if (!loading && !auth.isAuth) child = <Login authState={authState} />
   else if (!loading && auth.isAuth) child = <GameManager authState={authState} />
 
   const Wrapper = (props) => {
     return (<SocketContext.Provider value={socket}>
-      <Suspense fallback={<LoaderLazy />}>
-        <Nav authState={authState} />
-        {props.child}
-      </Suspense>
+      <Nav authState={authState} />
+      {props.child}
     </SocketContext.Provider>)
   }
-  return ( <Wrapper child={child}/> )
+  return (<Wrapper child={child} />)
 }
 
 

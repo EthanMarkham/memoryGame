@@ -1,54 +1,56 @@
-var React = require('react')
+import React, { useCallback, useEffect } from 'react'
+import { Transition } from 'react-spring/renderprops'
 
 function Board(props) {
-  const cantClick = (i) => {
+
+  const randomDelays = props.board.squares.map(() => Math.random() * 1000 + 200)
+  console.log(randomDelays)
+  const cantClick = (id) => {
+    let i = props.board.squares.findIndex(sq => sq.id === id)
     return (props.board.cardsShowing >= 2 && props.turn !== props.me && props.board.squares[i].value !== "*")
   }
-  const Square = (props) => {
+  const Square = (poops) => {
     return (
-        <button 
-          className="square" 
-          onClick={props.handleClick}
-          style={props.style}
-          disabled={props.disableClick()}  
-        >
-          <img 
-            src={`http://localhost:5000/${props.image}`} 
-            alt={props.civ}
-            className="image"
-            />
-          {props.showLabels && <label>{props.civ}</label>}
-        </button>
+      <button
+        className="square"
+        onClick={() => poops.handleClick(poops.id)}
+        style={poops.style}
+        disabled={cantClick(poops.id)}
+      >
+        <img
+          src={`http://localhost:5000/${poops.image}`}
+          alt={poops.civ}
+          style={poops.style}
+          className="image"
+        />
+        {poops.showLabels && <label>{poops.civ}</label>}
+      </button>
     );
   }
-  
-  function renderSquare(i) {
-    //if match color not set set the match color to square match color
-    let style = {}
 
-    if (props.board.squares[i].matchColor != null) style['borderColor'] = props.board.squares[i].matchColor
-    //pass data to square props
-    return (
-      <Square
-        value={props.board.squares[i].value}
-        image={props.board.squares[i].image}
-        civ={props.board.squares[i].civ}
-        //this doesnt need to be called onclick just comes in handy 
-        showLabels={props.labels}
-        key={i}
-        style={style}
-        disableClick={() => cantClick(i)}
-        handleClick={() => props.handleClick(i)}
-      />
-    )
-  }
-  let board = []
 
-  for (let squareIndex = 0; squareIndex < props.board.squares.length; squareIndex++) {
-    board.push(renderSquare(squareIndex))
-  }
 
-  return <div className="game-board"> {board} </div>
+  return <div className="game-board">
+    <Transition
+      items={props.board.squares} keys={item => item.id}
+      initial={{ opacity: 0 }}
+      enter={{ opacity: 1 }}
+      leave={{ opacity: 0 }}
+      update={{ background: '#28b4d7' }}
+      trail={50}
+      >
+      {item => animated => <Square
+        value={item.value}
+        id={item.id}
+        image={item.image}
+        style={animated}
+        civ={item.civ}
+        showLabels={item.labels}
+        borderColor={item.matchColor}
+        handleClick={props.handleClick}
+      />}
+    </Transition>
+  </div>
 }
 
 export default Board;

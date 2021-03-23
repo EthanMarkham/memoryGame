@@ -7,16 +7,17 @@ module.exports.Game = class Game {
         console.log('Creating Game')
         let newGameValues = getGameValues(size)
         this.id = shortid.generate(),
-            this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
-            this.playerCount = parseInt(playerCount),
-            this.inProgress = (this.playerCount !== 1) ? false : true,
-            this.completed = false, //will enter date time for completed at/auto delete
-            this.round = 0,
-            this.currentGuesses = [],
-            this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
-            this.answers = newGameValues.answers
+        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
+        this.playerCount = parseInt(playerCount),
+        this.inProgress = (this.playerCount !== 1) ? false : true,
+        this.completed = false, //will enter date time for completed at/auto delete
+        this.round = 0,
+        this.currentGuesses = [],
+        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
+        this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
+        this.squareIDs = newGameValues.squareIDs
         this.resetting = false
     }
     //add user to game
@@ -47,17 +48,17 @@ module.exports.Game = class Game {
     HandleClick(userID, guess) {
         const userIndex = this.users.findIndex(u => u.id == userID)
         console.log(`Registering Click: User #${userIndex} is clicking ${guess} on game: ${this.id}`)
-
+        let guessIndex = this.squareIDs.findIndex(a => guess == a)
         //verify they can make a guess
         if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
         if (userIndex === -1) throw Error("You're not in this game?")
         if (!this.inProgress) throw Error("Game not in progress!")
         if (!this.users[userIndex].upNext) throw Error("Wait your turn plz")
-        if (this.currentSquares[guess].value !== "*") throw Error("You already guessed that brrr")
+        if (this.currentSquares[guessIndex].value !== "*") throw Error("You already guessed that brrr")
 
         //update new values
-        this.currentSquares[guess] = this.answers[guess]
-        this.currentGuesses.push({ index: guess, value: this.answers[guess].value })
+        this.currentSquares[guessIndex] = this.answers[guessIndex]
+        this.currentGuesses.push({ index: guessIndex, value: this.answers[guessIndex].value })
 
 
         //if guess at 2 look for match
@@ -69,7 +70,7 @@ module.exports.Game = class Game {
                 this.message = "Nice Match!"
                 //set match colors for two squares
                 this.currentSquares[this.currentGuesses[0].index].matchColor = this.users[userIndex].color
-                this.currentSquares[guess].matchColor = this.users[userIndex].color
+                this.currentSquares[guessIndex].matchColor = this.users[userIndex].color
 
                 //update new default squares and inc user match count
                 this.defaultSquares = this.currentSquares.slice()
@@ -94,8 +95,8 @@ module.exports.Game = class Game {
     //get client info for game
     ClientInfo() {
         let response = {
-            squares: this.currentSquares,
-            users: this.users.map(u => ({username: u.username, color: u.color, matches: u.matches, upNext: u.upNext})),
+            squares: this.currentSquares.map((sq, index) => ({id: this.squareIDs[index], ...sq })),
+            users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches, upNext: u.upNext })),
             playerCount: this.playerCount,
             inProgress: this.inProgress,
             round: this.round,
@@ -105,10 +106,10 @@ module.exports.Game = class Game {
         }
         return response
     }
-    GameOverInfo(){
+    GameOverInfo() {
         let response = {
             squares: this.currentSquares,
-            users: this.users.map(u => ({username: u.username, color: u.color, matches: u.matches})),
+            users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches })),
             playerCount: this.playerCount,
             inProgress: this.inProgress,
             round: this.round,
@@ -139,7 +140,9 @@ function getGameValues(size) {
         value: "*",
         image: "/cards/back.PNG"
     })
-    return { answers: answers, defaults: defaults, current: defaults.slice() }
+
+    let squareIDs = answers.map(() => shortid.generate())
+    return { answers: answers, defaults: defaults, current: defaults.slice(), squareIDs: squareIDs }
 }
 
 function randomColor() {

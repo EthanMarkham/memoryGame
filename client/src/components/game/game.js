@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import {SocketContext} from '../../context/socket';
-import { Alert, Button } from "react-bootstrap"
+import { SocketContext } from '../../context/socket';
 
 var Board = require('./game.board').default
 var GameInfo = require('./game.info').default
@@ -17,7 +16,6 @@ const initialInfoState = {
 }
 
 function Game(props) {
-  var isMounted = false
   const socket = useContext(SocketContext);
 
   const [board, setBoard] = useState(initialBoardState)
@@ -39,29 +37,26 @@ function Game(props) {
       turn: data.users.find(u => u.upNext).username
     })
   }, [])
-  
+
   const handleError = useCallback((err) => {
     console.log(err)
     setError(err)
   })
-  const handleClick = (i) => { console.log(1); socket.emit("GAME_CLICK", { index: i })}
-  const toggleLables = useCallback(() => {setLabels(!labels)})
+  const handleClick = (id) => { console.log(id); socket.emit("GAME_CLICK", id) }
   
-  useEffect(() => {
-    if (!isMounted) {
-      isMounted = true
-      socket.emit("GET_GAME")
+  const toggleLables = useCallback(() => { setLabels(!labels) })
 
-      socket.on("GAME_INFO", data => handleBoardInfo(data))
-      socket.on("GAME_ERROR", data=> handleError(data))
-    }
+  useEffect(() => {
+    socket.emit("GET_GAME")
+    socket.on("GAME_INFO", data => handleBoardInfo(data))
+    socket.on("GAME_ERROR", data => handleError(data))
+
     return () => {
       socket.off("GAME_INFO", data => handleBoardInfo(data))
       socket.off("GAME_ERROR", data => handleError(data))
-      isMounted = false
     }
   }, []);
- 
+
   useEffect(() => {
     console.log(board)
     console.log(info)

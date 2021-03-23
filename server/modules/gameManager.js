@@ -41,7 +41,7 @@ class GameManager {
     NewGame(user, playerCount) {
         let out = new Promise((resolve, reject) => {
             if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
-            let newGame = new Game(user, playerCount, 4)
+            let newGame = new Game(user, playerCount)
             this.games.push(newGame)
             resolve(newGame.ClientInfo())
         })
@@ -61,6 +61,7 @@ class GameManager {
     //handle a guess from user
     HandleClick(userID, guess) {
         return new Promise((resolve) => {
+            console.log(guess)
             let gameIndex = this.FindIndexByUserID(userID)
             this.games[gameIndex].HandleClick(userID, guess)
             resolve(this.games[gameIndex])

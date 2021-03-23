@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Alert, Row, Col, Button } from "react-bootstrap"
-import {SocketContext} from '../../context/socket';
+import { SocketContext } from '../../context/socket';
 
 
 function GameJoiner(props) {
@@ -8,20 +8,15 @@ function GameJoiner(props) {
   const [games, setGames] = useState([]);
   const socket = useContext(SocketContext);
 
-  let isMounted = false
-
   const handleGameList = useCallback(data => {
     setGames(data)
   }, [])
   useEffect(() => {
-    if (!isMounted) {
-      isMounted = true
-      socket.emit("listGames")
-      socket.on("GAME_LIST", data => handleGameList(data))
-    }
-    return () => { 
+    socket.emit("listGames")
+    socket.on("GAME_LIST", data => handleGameList(data))
+
+    return () => {
       socket.off("GAME_LIST", data => handleGameList(data))
-      isMounted = false; 
     }
   }, [])
 

@@ -1,8 +1,12 @@
+$backgroundColor:  #E3F2FD;
+$primaryColor: #6400e3;
+$secondaryColor: #7986CB;
+$textColor1: #E3F2FD;
 
 html, body, #root, .App { /* 5F6AF9 */
   height: 100%;
-  background-color: #E3F2FD;
-  text-emphasis-color:#6400e3;
+  background-color: $backgroundColor;
+  text-emphasis-color: $primaryColor;
 }
 
 header{
@@ -23,43 +27,6 @@ header > h1 {
   margin: auto;
   margin-top: 0;
   margin-bottom: 0;
-}
-
-
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Game Styles */
@@ -90,7 +57,7 @@ header > h1 {
 }
 
 .square {
-background-color: #E3F2FD;
+background-color: $backgroundColor;
 width: fit-content;
 height: fit-content;
 overflow: hidden;
@@ -115,7 +82,7 @@ left: 2px;
 font-weight: bold;
 background-color: black;
 width: 100%;
-color: white;
+color: $textColor1;
 font-size: 0.8em;
 }
 .square:hover{
@@ -140,9 +107,11 @@ text-align: start;
   height: 100%;
 }
 .gameButton{
-border-radius: 25px;
-padding: 10px;
-border: 1px solid #6200EA;
+border-radius: 10px;
+padding: 5px;
+background-color: $secondaryColor;
+box-shadow: $primaryColor;
+color: $textColor1;
 border-radius: 30px;
 }
 /* Login Styles */
@@ -168,14 +137,14 @@ nav {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: #7986CB;
-  border-bottom: 5px solid #6200EA;
+  background-color: $secondaryColor;
+  border-bottom: 5px solid $primaryColor;
 }
 nav > h1 {
   font-size: x-large;
   margin: 0px;
   letter-spacing: 0.7em;
-  color: #E3F2FD;
+  color: $textColor1;
 
 }
 nav > .navItems {
@@ -192,8 +161,9 @@ nav > .navItems > .item {
   padding: 10px;
 }
 nav > .navItems > .item > a{
-  color: rgb(25, 90, 121);
+  color: $secondaryColor;
 }
+
 /* Loader */
 .loader {
   width: 100%;

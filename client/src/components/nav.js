@@ -5,6 +5,7 @@ function Nav(props) {
   const { auth, setAuth } = props.authState
   const socket = useContext(SocketContext);
   const [logoutBtn, showLogout] = useState(false)
+  
   const Logout = () => {
     socket.emit("LOGOUT")
     setAuth(false)
