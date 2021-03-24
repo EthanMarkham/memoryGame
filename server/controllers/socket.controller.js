@@ -8,11 +8,12 @@ exports = module.exports = function (io, gameManager) {
 
     socket.on("LIST_GAMES", () => handleListGames())
     socket.on("ADD_GAME", gameInfo => handleAddGame(gameInfo))
-    socket.on("GET_STATUS", () => handleCheckUserStatus(socket))
-    socket.on("JOIN_GAME", () => handleJoinChannel(socket))
-    socket.on("GET_GAME", () => broadCastGameInfo(socket))
-    socket.on("LEAVE_GAME", (gameID) => handleLeaveGame(socket, gameID))
-    socket.on("GAME_CLICK", (guess) => handleGameClick(socket, guess))
+    socket.on("GET_STATUS", () => handleCheckUserStatus())
+    socket.on("JOIN_GAME", () => handleJoinChannel())
+    socket.on("ADD_ME_TO_GAME", (gameID) => handleJoinGame(gameID))
+    socket.on("GET_GAME", () => broadCastGameInfo())
+    socket.on("LEAVE_GAME", (gameID) => handleLeaveGame(gameID))
+    socket.on("GAME_CLICK", (guess) => handleGameClick(guess))
 
     socket.on("LOGIN", (token) => handleLogin(token))
     socket.on("LOGOUT", () => handleLogout())
@@ -21,12 +22,21 @@ exports = module.exports = function (io, gameManager) {
 
     //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
     const handleJoinChannel = () => {
-      console.log('Join Request')
+      console.log('Joining Channel')
       gameManager.GetClientInfo(socket.handshake.session.userID)
         .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
         .then(() => socket.emit('JOIN_SUCCESS'))
         .then(() => broadCastOpenGames())
         .catch(err => socket.emit('JOIN_ERROR', err.message))
+    }
+    const handleJoinGame = (gameID) => {
+      console.log('Joining Game')
+      User.findById(socket.handshake.session.userID)
+      .then(user => gameManager.AddUser(user, gameID))
+      .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
+      .then(() => socket.emit('JOIN_SUCCESS'))
+      .then(() => broadCastOpenGames())
+      .catch(err => socket.emit('JOIN_ERROR', err.message))  
     }
     const handleAddGame = (newGameInfo) => {
       if (socket.handshake.session.userID) {
@@ -43,7 +53,7 @@ exports = module.exports = function (io, gameManager) {
         broadCastOpenGames()
       }
     }
-    const handleLeaveGame = (socket, gameID) => {
+    const handleLeaveGame = (gameID) => {
       if (socket.handshake.session.userID) {
         socket.leave(`game:${gameID}`)
         socket.emit("LEAVE_SUCCESS")
@@ -56,7 +66,7 @@ exports = module.exports = function (io, gameManager) {
         .then(() => broadCastOpenGames())
         .catch(() => socket.emit('USER_STATUS', { game: false }))
     }
-    const handleGameClick = (socket, guess) => {
+    const handleGameClick = (guess) => {
       console.log('Clicking......')
       gameManager.HandleClick(socket.handshake.session.userID, guess)
         .then((data) => {

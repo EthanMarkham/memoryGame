@@ -25,8 +25,8 @@ module.exports.Game = class Game {
         if (this.users.length >= this.playerCount) throw Error("Game full")
         if (!user) throw Error("Invalid User")
 
-        this.users.push({ username: user.username, matches: 0, color: randomColor(), upNext: false })
-
+        this.users.push({ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: false })
+        console.log(this.users)
         if (this.users.length === this.playerCount) {
             this.inProgress = true
             this.message = `${user.username} just joined! Good luck!`

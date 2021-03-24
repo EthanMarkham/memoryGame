@@ -85,6 +85,7 @@ function Login(props) {
                 <Row>
                     <Col>
                         <Button
+                            type="button"
                             variant="outline-secondary"
                             onClick={() => {toggleMethod()}}>{action === 'login' ? "Have an Account?" : "Need an Account?"}
                         </Button>

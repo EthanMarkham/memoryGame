@@ -23,11 +23,11 @@ function GameJoiner(props) {
   }, [])
 
   const joinGame = (gameId) => {
-    socket.emit("JOIN_GAME", gameId)
+    socket.emit("ADD_ME_TO_GAME", gameId)
   }
   const GameInfo = (props) => {
     return (
-    <button className="row gameList" onClick={joinGame(props.game.id)}>
+    <button className="row gameList" onClick={() => {joinGame(props.game.id)}}>
       <div className="col-8"><h3>{props.game.id}</h3></div>
       <div className="col-4">
         <div className="gameStats">

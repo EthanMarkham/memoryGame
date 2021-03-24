@@ -55,15 +55,15 @@ class GameManager {
         return out
     }
     AddUser(user, gameID) {
-        let out = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
-                let gameIndex = this.FindGameIndexByUserID(user.id)
+                let gameIndex = this.FindIndexByGameID(gameID)
                 this.games[gameIndex].AddUser(user)
+                console.log('adding', this.games[gameIndex])
                 resolve(this.games[gameIndex])
             }
             catch (err) { reject(err) }
         })
-        return out
     }
     //handle a guess from user
     HandleClick(userID, guess) {

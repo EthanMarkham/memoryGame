@@ -13,7 +13,6 @@ export default function App() {
   const [auth, setAuth] = useAuth()
   const authState = { auth: auth, setAuth: setAuth }
   const [loading, setLoading] = useState(true)
-  var child = ''
 
   useEffect(() => {
     let token = localStorage.getItem('jwt')
@@ -42,22 +41,11 @@ export default function App() {
     }
   }, [])
 
-
-  if (loading) child = <LoaderLazy />
-  if (!loading && !auth.isAuth) child = <Login authState={authState} />
-  else if (!loading && auth.isAuth) child = <GameManager authState={authState} />
-
-  const Wrapper = (props) => {
-    return (<SocketContext.Provider value={socket}>
-      <Nav authState={authState} />
-      {props.child}
-    </SocketContext.Provider>)
-  }
-  return (<Wrapper child={child} />)
-}
-
-
-function LoaderLazy(props) {
-  return <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />
+  return (<SocketContext.Provider value={socket}>
+    <Nav authState={authState} />
+    {loading && <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />}
+    {(!loading && !auth) && <Login authState={authState} />}
+    {(!loading && auth) && <GameManager authState={authState} />}
+  </SocketContext.Provider>)
 }
 
