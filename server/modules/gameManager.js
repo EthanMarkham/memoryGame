@@ -12,7 +12,14 @@ class GameManager {
     }
     GetOpenGames() {
         if (!this.games) return null
-        else return (this.games.filter(g => !g.completed && g.users.length < g.playerCount))
+        let gameList = this.games.filter(g => !g.completed && g.users.length < g.playerCount)
+        let output = gameList.map(g => ({
+            players: g.users.length,
+            maxPlayers: g.playerCount,
+            id: g.id
+        }))
+        console.log(output)
+        return(output)
     }
 
     FindIndexByUserID(userID) {

@@ -114,6 +114,13 @@ box-shadow: $primaryColor;
 color: $textColor1;
 border-radius: 30px;
 }
+/* game List */
+.gameList{
+  height: 90%;
+  max-height: 90%;
+  overflow: auto;
+  width: 100%;
+}
 /* Login Styles */
 .loginContainer {
   width: 80%;
