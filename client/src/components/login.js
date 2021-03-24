@@ -18,7 +18,7 @@ function Login(props) {
     function handleSubmit(event, ) {
         event.preventDefault();
         //instead of strings we just use bool for action. if true we want to login, if false we want to register
-        let url = action ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
+        let url = (action === 'login')  ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
         fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin
@@ -96,7 +96,7 @@ function Login(props) {
                             disabled={!validateForm()}
                             block
                         >
-                            {action ? "Login" : "Register"}
+                            {action === 'login' ? "Login" : "Register"}
                         </Button>
                     </Col>
                 </Row>

@@ -23,7 +23,7 @@ function GameJoiner(props) {
   }, [])
 
   const joinGame = (gameId) => {
-
+    socket.emit("JOIN_GAME", gameId)
   }
   const GameInfo = (props) => {
     return (
