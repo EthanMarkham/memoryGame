@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { Alert, Form, Row, Col, Button } from "react-bootstrap"
-import {SocketContext} from '../context/socket';
+import { SocketContext } from '../context/socket';
 
 function Login(props) {
-    const {setAuth} = props.authState
+    const { setAuth } = props.authState
     const socket = useContext(SocketContext);
     const [user, setUser] = useState("")
     const [password, setPassword] = useState("")
@@ -15,10 +14,10 @@ function Login(props) {
         else return user.length > 0 && password.length > 0;
     }
 
-    function handleSubmit(event, ) {
+    function handleSubmit(event,) {
         event.preventDefault();
         //instead of strings we just use bool for action. if true we want to login, if false we want to register
-        let url = (action === 'login')  ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
+        let url = (action === 'login') ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
         fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin
@@ -52,56 +51,54 @@ function Login(props) {
 
     return (
         <div className="loginContainer">
-            <Form onSubmit={handleSubmit}>
-                {error && <Alert variant="danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></Alert>}
-                <Form.Group controlId="formBasicEmail">
-                    <Form.Label>user</Form.Label>
-                    <Form.Control
+            <form onSubmit={handleSubmit}>
+                {error && <div className="alert alert-danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></div>}
+                <div class="formGroup">
+                    <label for="username">Username</label>
+                    <input
                         type="text"
+                        className="form-control"
+                        id="username"
                         placeholder="Enter user"
-                        onChange={(event) => { setUser(event.target.value)}}
+                        onChange={(event) => { setUser(event.target.value) }}
                         value={user}
                     />
-                    <Form.Text className="text-muted">
-                        Min. Requirement: 4
-                    </Form.Text>
-                    <Form.Text className="text-muted">
-                        Appropriate or <b>BANNED</b>
-                    </Form.Text>
-                </Form.Group>
-                <Form.Group controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
+                    <small className="text-muted form-text text-muted">Min. Requirement: 4</small>
+                    <small className="text-muted form-text text-muted">Appropriate or <b>BANNED</b></small>
+                </div>
+                <div class="formGroup">
+                    <label for="password">Password</label>
+                    <input
                         type="password"
+                        className="form-control"
+                        id="password"
                         placeholder="Password"
-                        onChange={(event) => { setPassword(event.target.value)}}
+                        onChange={(event) => { setPassword(event.target.value) }}
                         value={password}
                     />
-                    <Form.Text className="text-muted">
-                        Min. Requirement: 4
-                    </Form.Text>
-                </Form.Group>
+                    <small className="text-muted form-text text-muted">Min. Requirement: 4</small>
+                </div>
                 <br />
-                <Row>
-                    <Col>
-                        <Button
+                <div className="row">
+                    <div className="col-6">
+                        <button
                             type="button"
-                            variant="outline-secondary"
-                            onClick={() => {toggleMethod()}}>{action === 'login' ? "Have an Account?" : "Need an Account?"}
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button
-                            variant="primary"
+                            className="btn btn-outline-secondary"
+                            onClick={() => { toggleMethod() }}>{action === 'login' ? "Have an Account?" : "Need an Account?"}
+                        </button>
+                    </div>
+                    <div className="col-6">
+                        <button
+                            className="btn btn-primary"
                             type="submit"
                             disabled={!validateForm()}
                             block
                         >
                             {action === 'login' ? "Login" : "Register"}
-                        </Button>
-                    </Col>
-                </Row>
-            </Form>
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     )
 }

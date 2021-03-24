@@ -35,7 +35,6 @@ export default function App() {
       setAuth(false)
     }
     socket.on("AUTH_ERROR", () => { setAuth(false) })
-
     return () => {
       socket.off("AUTH_ERROR", () => { setAuth(false) })
     }
@@ -44,8 +43,8 @@ export default function App() {
   return (<SocketContext.Provider value={socket}>
     <Nav authState={authState} />
     {loading && <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />}
-    {(!loading && !auth) && <Login authState={authState} />}
-    {(!loading && auth) && <GameManager authState={authState} />}
+    {(!loading && !auth.isAuth) && <Login authState={authState} />}
+    {(!loading && auth.isAuth) && <GameManager authState={authState} />}
   </SocketContext.Provider>)
 }
 
