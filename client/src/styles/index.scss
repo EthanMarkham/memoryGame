@@ -29,7 +29,7 @@ header > h1 {
   margin-bottom: 0;
 }
 
-/* Game Styles */
+/* Game Styles 
 @media screen and (min-width: 0px) {
   .square {
       flex: 0 3 50px;
@@ -44,30 +44,22 @@ header > h1 {
   .square {
       flex: 0 3 120px;  
   }
-}
+}*/
+
 .game-board{
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  width: 100%;
-  height:87%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  justify-content: center;
+  height: 87%;
+  max-height: 87%;
+
+  display: inline-grid;
 }
 
 .square {
 background-color: $backgroundColor;
-width: fit-content;
-height: fit-content;
 overflow: hidden;
 padding: 0;
 position: relative;
 border: 1px solid darkgray;
-}
-
-.square:focus {
-outline: none;
+flex-shrink: 1;
 }
 
 .square > .image{

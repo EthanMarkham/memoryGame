@@ -45,10 +45,10 @@ class GameManager {
     }
 
     //create new game
-    NewGame(user, playerCount) {
+    NewGame(user, playerCount, size) {
         let out = new Promise((resolve, reject) => {
             if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
-            let newGame = new Game(user, playerCount)
+            let newGame = new Game(user, playerCount, size)
             this.games.push(newGame)
             resolve(newGame.ClientInfo())
         })

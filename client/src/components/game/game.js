@@ -39,7 +39,7 @@ function Game(props) {
   }, [setBoard, setInfo])
 
 
-  const handleClick = (id) => { console.log(id); socket.emit("GAME_CLICK", id) }
+  const handleClick = id => socket.emit("GAME_CLICK", id)
   
   const toggleLables = () => {setLabels(!labels)}
 
@@ -54,10 +54,6 @@ function Game(props) {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(board)
-    console.log(info)
-  }, [board, info])
 
   return (
     <div className="container">
