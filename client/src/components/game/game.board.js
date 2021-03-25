@@ -38,16 +38,16 @@ function Board(props) {
 
 
 
-  return <div className="game-board" style={{"grid-template-columns": "auto ".repeat(gridSize[0]), "grid-template-rows": "auto ".repeat(gridSize[1])}}>
+  return <div className="game-board" style={{gridTemplateColumns: `repeat(${gridSize[0]}, minmax(20px, 1fr))`, gridTemplateRows: `repeat(${gridSize[1]}, minmax(20px, 1fr))`}}>
     <Transition
       items={props.board.squares} keys={item => item.id}
       initial={{ opacity: 0, background: '#6400e3' }} //height: '0px'
       enter={{ opacity: 1, background: '#E3F2FD' }} //height: '100%'
       leave={{ opacity: 0 }}
       update={{ background: '#6400e3' }}
-      trail={10}
+      trail={25}
     >
-      {item => animated => <div className="squareContainer"><Square
+      {item => animated =><Square
         value={item.value}
         id={item.id}
         image={item.image}
@@ -56,7 +56,7 @@ function Board(props) {
         showLabels={props.labels}
         borderColor={item.matchColor}
         handleClick={props.handleClick}
-      /></div>}
+      />}
     </Transition>
   </div>
 }
