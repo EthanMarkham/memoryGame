@@ -22,14 +22,14 @@ function Board(props) {
       <button
         className="square"
         onClick={() => poops.handleClick(poops.id)}
-        style={{ ...poops.style }}//;
+        //style={{ ...poops.style }}//;
         disabled={cantClick(poops.id)}
       >
         <img
           src={`http://localhost:5000/${poops.image}`}
           alt={poops.civ}
-          style={poops.style}
-          className="image"
+          //style={poops.style}
+          //className="image"
         />
         {poops.showLabels && <label>{poops.civ}</label>}
       </button>
@@ -38,7 +38,7 @@ function Board(props) {
 
 
 
-  return <div className="game-board" style={{"grid-template-columns": "auto ".repeat(gridSize[0])}}>
+  return <div className="game-board">
     <Transition
       items={props.board.squares} keys={item => item.id}
       initial={{ opacity: 0, background: '#6400e3' }} //height: '0px'

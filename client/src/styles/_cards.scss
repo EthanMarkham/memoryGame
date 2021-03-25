@@ -1,0 +1,44 @@
+@mixin board-layout($repeatColumn, $columnSize, $repeatRow, $rowSize) {
+  width: 100%;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat($repeatColumn, $columnSize);
+  grid-template-rows: repeat($repeatRow, $rowSize);
+  gap: 30px 10px;
+}
+
+.game-board {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+
+  .square{
+    margin: 10px;
+  }
+
+  button {
+    padding:0;
+    border: none;
+    background: transparent;
+
+    img {
+      width: 130px;
+      height: 180px;
+      box-shadow: 5px 8px 10px 4px rgba(0, 0, 0, 0.37);
+      border-radius: 25px;
+    }
+
+    label{
+      border: 2px solid black;
+      border-radius: 30px;
+      background-color: white;
+      margin: 4px 0;
+      font-weight: bold;
+      width: 100%;
+      height: 30px;
+    }
+  }
+
+  @include board-layout(10, 150px, 7, 200px);
+}

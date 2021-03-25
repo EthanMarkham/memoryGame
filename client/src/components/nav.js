@@ -21,7 +21,7 @@ function Nav(props) {
       <h1> AOE2 MEMORY </h1>
       <div className="navItems">
         {logoutBtn ? logOut : ' '}
-        </div>
+      </div>
     </nav>
   )
 }
