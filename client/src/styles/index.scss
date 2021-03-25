@@ -23,29 +23,6 @@ body {
 
 /*---------------------------------------*/
 
-<<<<<<< HEAD
-.game-board{
-  height: 87%;
-  width: 100%;
-  display: grid;
-  overflow: hidden;
-}
-
-.square {
-background-color: $backgroundColor;
-padding: 0;
-height: 100%;
-width: 100%;
-position: relative;
-
-}
-
-.square > .image{
-  height: 100%;
-  width: auto;
-  max-height: 100%;
-}
-=======
 /*Imports*/
 @import "nav";
 @import "login";
@@ -61,45 +38,6 @@ position: relative;
         font-size: $logoSize;
       }
       
-    }
-
-    .game-board {
-
-      button {
-    
-        img {
-          width: 120px - $imageWidth;
-          height: 180px - $imageHeight;
-          /*box-shadow: 5px 8px 10px 4px rgba(0, 0, 0, 0.37);*/
-          /*border-radius: 25px;*/
-        }
-    
-        label{
-          /*border-radius: 30px;*/
-          font-size: $labelFontSize;
-          height: $labelHeight;
-        }
-      }
->>>>>>> sass-style
-
-
-      @include board-layout($columns, 150px - $columnSize, $rows, 200px - $rowSize);
-    }
+    }    
   }
 }
-
-@include responsive(1600px, 3rem, 9, 8, 10px, 10px, 16px, 30px, 10px, 10px);
-
-@include responsive(1500px, 3rem, 8, 9, 20px, 20px, 16px, 30px, 10px, 10px);
-
-@include responsive(1300px, 3rem, 6, 10, 30px, 30px, 16px, 30px, 10px, 10px);
-
-@include responsive(1000px, 2rem, 5, 11, 40px, 40px, 16px, 30px, 10px, 10px);
-
-@include responsive(800px, 1.5rem, 4, 12, 50px, 50px, 16px, 30px, 10px, 10px);
-
-@include responsive(650px, 1rem, 3, 14, 60px, 60px, 16px, 30px, 10px, 10px);
-
-@include responsive(500px, 1rem, 1, 20, 70px, 70px, 16px, 30px, 10px, 10px);
-
-/*Breaks at 250px width*/

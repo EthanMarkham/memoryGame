@@ -40,8 +40,8 @@ function Game(props) {
 
 
   const handleClick = id => socket.emit("GAME_CLICK", id)
-  
-  const toggleLables = () => {setLabels(!labels)}
+
+  const toggleLables = () => { setLabels(!labels) }
 
   useEffect(() => {
     socket.emit("GET_GAME")
@@ -57,23 +57,20 @@ function Game(props) {
 
   return (
     <div className='gameContainer'>
-      <div className='boardContainer'>
-        <Board
-          me={props.me}
-          board={board}
-          labels={labels}
-          handleClick={handleClick}
-        />
-        
-      </div>
-      <GameInfo
-      me={props.me}
-      info={info}
-      setLabels={toggleLables}
-      turn={board.turn}
-    
+      <Board
+        me={props.me}
+        board={board}
+        labels={labels}
+        handleClick={handleClick}
       />
-  </div>
+      <GameInfo
+        me={props.me}
+        info={info}
+        setLabels={toggleLables}
+        turn={board.turn}
+
+      />
+    </div>
   );
 }
 

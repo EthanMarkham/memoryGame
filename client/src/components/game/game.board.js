@@ -22,7 +22,7 @@ function Board(props) {
       <button
         className="square"
         onClick={() => poops.handleClick(poops.id)}
-        //style={{ ...poops.style }}//;
+        style={{ ...poops.style }}//;
         disabled={cantClick(poops.id)}
       >
         <img
@@ -41,10 +41,10 @@ function Board(props) {
   return <div className="game-board" style={{gridTemplateColumns: `repeat(${gridSize[0]}, minmax(20px, 1fr))`, gridTemplateRows: `repeat(${gridSize[1]}, minmax(20px, 1fr))`}}>
     <Transition
       items={props.board.squares} keys={item => item.id}
-      initial={{ opacity: 0, background: '#6400e3' }} //height: '0px'
-      enter={{ opacity: 1, background: '#E3F2FD' }} //height: '100%'
+      initial={{ opacity: 0}} //height: '0px'
+      enter={{ opacity: 1}} //height: '100%'
       leave={{ opacity: 0 }}
-      update={{ background: '#6400e3' }}
+      update={{  }}
       trail={25}
     >
       {item => animated =><Square
