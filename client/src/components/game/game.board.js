@@ -22,14 +22,14 @@ function Board(props) {
       <button
         className="square"
         onClick={() => poops.handleClick(poops.id)}
-        style={{ ...poops.style }}//;
+        //style={{ ...poops.style }}//;
         disabled={cantClick(poops.id)}
       >
         <img
           src={`http://localhost:5000/${poops.image}`}
           alt={poops.civ}
-          style={poops.style}
-          className="image"
+          //style={poops.style}
+          //className="image"
         />
         {poops.showLabels && <label>{poops.civ}</label>}
       </button>

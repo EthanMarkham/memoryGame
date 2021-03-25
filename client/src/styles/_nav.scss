@@ -1,0 +1,41 @@
+//Import colors
+@import 'colors';
+
+@font-face {
+  font-family: "Academy Engraved";
+  src: url(../assets/fonts/academy_engraved.ttf) format("truetype");
+}
+
+nav {
+  font-family: "Academy Engraved", serif;
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  height: 10%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: url("../assets/images/navbar_background.jpg");
+  background-repeat: repeat;
+  border-bottom: 10px solid $golden;
+
+  h1{
+    font-size: 3rem;
+    margin: 0px;
+    letter-spacing: .5rem;
+    color: $golden;
+  }
+
+  .navItems{
+
+    .item{
+        .logoutBtn{
+            font-size: 1.5rem;
+            color: $golden;
+        }
+    }
+
+  }
+
+}
