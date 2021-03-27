@@ -5,7 +5,7 @@ import { SocketContext } from '../../context/socket';
 function NewGameForm(props) {
   const socket = useContext(SocketContext);
 
-  const { setGameState } = props.gameStates
+  const { setGameState } = props
   const [gameName, setGameName] = useState("");
   const [playerCount, setPlayerCount] = useState(1);
   const [error, setError] = useState("");

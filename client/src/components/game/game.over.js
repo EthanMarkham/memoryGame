@@ -5,7 +5,7 @@ import {SocketContext} from '../../context/socket';
 export default function GameOver(props) {
   const socket = useContext(SocketContext);
 
-  const { setGameState } = props.gameStates
+  const { setGameState } = props
   const { message, round, users } = props.gameInfo
   const [nextState, setNextState] = useState([])
 

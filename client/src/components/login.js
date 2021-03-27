@@ -35,7 +35,7 @@ function Login(props) {
             .then((data) => {
                 console.log(data)
                 if (data.error) {
-                    setError(data)
+                    setError(data.message)
                     return
                 } else {
                     socket.emit("LOGIN", data.token)
@@ -52,7 +52,7 @@ function Login(props) {
     return (
         <div className="loginContainer">
             <form onSubmit={handleSubmit}>
-                {error && <div className="alert alert-danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></div>}
+                {error && <div className="alert alert-danger"><b>Error!</b> {error}</div>}
                 <div class="formGroup">
                     <label for="username">Username</label>
                     <input

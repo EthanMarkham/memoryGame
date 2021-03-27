@@ -5,7 +5,7 @@ import { Transition } from 'react-spring/renderprops'
 
 
 function GameJoiner(props) {
-  const { error, setGameState } = props.gameStates
+  const { error, setGameState } = props
   const [games, setGames] = useState([]);
   const socket = useContext(SocketContext);
 

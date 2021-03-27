@@ -20,7 +20,7 @@ module.exports.signUp = async (req, res) => {
         if (user) {
             return res.status(400).json({
                 error: true,
-                messages: ["User Already Exists"]
+                message: "User Already Exists"
             });
         }
 
@@ -58,14 +58,14 @@ module.exports.login = async (req, res) => {
         if (!user)
             return res.status(400).json({
                 error: true,
-                messages: ["User Does Not Exist!!"]
+                message: "User Does Not Exist!!"
             });
 
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch)
             return res.status(400).json({
                 error: true,
-                messages: ["Incorrect Password!"]
+                message: "Incorrect Password!"
             })
 
         const payload = {user: {id: user.id}}
@@ -86,7 +86,7 @@ module.exports.me = async (req, res) => {
         const user = await User.findById(req.userId);
         res.json({username: user.username, token: req.params.jwtToken});
     } catch (e) {
-        res.status(200).send({ message: "Error in Fetching user" });
+        res.status(200).send({ error: true, message: "Error in Fetching user" });
     }
 }
 //Auth middleware
