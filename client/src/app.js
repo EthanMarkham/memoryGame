@@ -35,15 +35,14 @@ export default function App() {
     return getGridLayout(squares.length, windowSize)
   }, [squares.length, windowSize])
 
-  const handleAuthState = loginData => {
-    console.log(loginData)
+  const handleAuthState = useCallback(loginData => {
     if (loginData) {
       if (!loginData.error) {
         setAuth(true, loginData)
       }
     }
     else setAuth(false)
-  }
+  }, [setAuth])
 
   const handleGameState = useCallback((nextS, gameData) => {
     if (nextS === undefined) return
@@ -69,7 +68,6 @@ export default function App() {
 
   useEffect(() => {
     login().then(data => handleAuthState(data))
-      .catch(() => setState("LOGIN"))
     socket.on("AUTH_ERROR", () => handleAuthState(false))
     socket.on("USER_STATUS", status => (status.game) ? handleGameState("GAME_FOUND") : handleGameState("GAME_NEW"))
 

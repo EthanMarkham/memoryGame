@@ -20,9 +20,9 @@ function Game(props) {
 
   const Square = (props) => {
     return (
-      <a.button key={props.id} className="square" style={{ ...props.style }} onClick={() => handleClick(props.id)} disabled={cantClick(props.id)}>
-        <img  key={props.id + 'img'}  src={`http://localhost:5000/${props.image}`} alt={props.civ} />
-        {props.showLabels && <label>{props.civ}</label>}
+      <a.button className="square" key="cardButton" style={{ ...props.style }} onClick={() => handleClick(props.id)} disabled={cantClick(props.id)}>
+        <img  key="cardImage" src={`http://localhost:5000/${props.image}`} alt={props.civ} />
+        {props.showLabels && <label key="cardLabel">{props.civ}</label>}
       </a.button>
     );
   }
@@ -39,7 +39,7 @@ function Game(props) {
           //update={{opacity: 1}}
           trail={50}
         >
-          {item => animated => <Square showLabels={labels} {...item} style={animated} />}
+          {item => animated => <Square key={item.id} showLabels={labels} {...item} style={animated} />}
         </Transition>
       </div>
       <GameInfo
