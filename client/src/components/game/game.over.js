@@ -1,25 +1,18 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { Row, Col, Button } from "react-bootstrap"
 import {SocketContext} from '../../context/socket';
 
 export default function GameOver(props) {
   const socket = useContext(SocketContext);
-
-  const { setGameState } = props.gameStates
   const { message, round, users } = props.gameInfo
-  const [nextState, setNextState] = useState([])
-
+  const {handleGameState} = props
   const sortByMatches = (users) => {
     return users.sort((u1, u2) => (u1.matches < u2.matches) ? -1 : 1)
   }
   const leaveGame = (nextState) => {
-    setNextState(nextState)
+    handleGameState(nextState)
     socket.emit("LEAVE_GAME", props.gameInfo.id)
   }
-  useEffect(() => {
-    socket.on("LEAVE_SUCCESS", () => setGameState(nextState))
-    return () => socket.off("LEAVE_SUCCESS", () => setGameState(nextState))
-  }, [nextState, setGameState, socket])
 
   return (
     <div className="container">

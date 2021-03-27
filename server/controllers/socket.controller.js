@@ -13,6 +13,7 @@ exports = module.exports = function (io, gameManager) {
     socket.on("ADD_ME_TO_GAME", (gameID) => handleJoinGame(gameID))
     socket.on("GET_GAME", () => broadCastGameInfo())
     socket.on("LEAVE_GAME", (gameID) => handleLeaveGame(gameID))
+    socket.on("QUIT_GAME", (gameID) => handleQuitGame(gameID))
     socket.on("GAME_CLICK", (guess) => handleGameClick(guess))
 
     socket.on("LOGIN", (token) => handleLogin(token))
@@ -38,6 +39,17 @@ exports = module.exports = function (io, gameManager) {
       .then(() => broadCastOpenGames())
       .catch(err => socket.emit('JOIN_ERROR', err.message))  
     }
+    const handleQuitGame = (gameID) => {
+      if (socket.handshake.session.userID) {
+        User.findById(socket.handshake.session.userID)
+        .then(user => gameManager.RemoveUser(user, gameID))
+        .then(data => {
+          if (!data.deleted) io.to(`game:${data.id}`).emit('GAME_INFO', data.game.ClientInfo())
+          handleLeaveGame(data.id)
+        })
+        .catch(err => socket.emit('GAME_ERROR', err.message))
+    }
+  }
     const handleAddGame = (newGameInfo) => {
       if (socket.handshake.session.userID) {
         User.findById(socket.handshake.session.userID)
@@ -113,6 +125,7 @@ exports = module.exports = function (io, gameManager) {
         console.log(`${userID} just connected`)
         socket.handshake.session.userID = userID
         socket.handshake.session.save();
+        handleCheckUserStatus
       }
     }
     const handleLogout = () => {

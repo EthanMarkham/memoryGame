@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const useAuth = () => {
   var token = localStorage.getItem('jwt')
-  const [auth, setAuth] = useState({isAuth: false, user: 'Guest', token: (token) ? token : ''});
+  const [auth, setAuth] = useState({isAuth: false, user: null, token: (token) ? token : ''});
 
   const updateAuth = (isAuth, userInfo) => {
     if (isAuth) 

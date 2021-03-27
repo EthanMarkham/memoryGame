@@ -7,17 +7,16 @@ module.exports.Game = class Game {
         console.log('Creating Game')
         let newGameValues = getGameValues(size)
         this.id = shortid.generate(),
-        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
-        this.playerCount = parseInt(playerCount),
-        this.inProgress = (this.playerCount !== 1) ? false : true,
-        this.completed = false, //will enter date time for completed at/auto delete
-        this.round = 0,
-        this.currentGuesses = [],
-        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
-        this.answers = newGameValues.answers
+            this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
+            this.playerCount = parseInt(playerCount),
+            this.inProgress = (this.playerCount !== 1) ? false : true,
+            this.completed = false, //will enter date time for completed at/auto delete
+            this.round = 0,
+            this.currentGuesses = [],
+            this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
+            this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
-        this.squareIDs = newGameValues.squareIDs
         this.resetting = false
     }
     //add user to game
@@ -35,6 +34,10 @@ module.exports.Game = class Game {
             this.message = `${user.username} just joined! Waiting for more players!`
         }
     }
+    RemoveUser(user) {
+        let userIndex = this.users.find(u => u.id === user.id)
+        this.users.splice(userIndex, 1)
+    }
     //reset cards to default on game
     ResetCards() {
         console.log('Reseting Cards')
@@ -43,12 +46,20 @@ module.exports.Game = class Game {
         this.message = "Guess a Square"
         this.resetting = false
     }
-
+    UpNext(){
+        return this.users.find(u => u.upNext)
+    }
+    NextTurn(){
+        const userIndex = this.users.findIndex(u => u.upNext)
+        let nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
+        if (userIndex !== -1) this.users[userIndex].upNext = false
+        this.users[nextUserIndex].upNext = true
+    }
     //handle a guess from user -- returns true or false to start a reset
     HandleClick(userID, guess) {
         const userIndex = this.users.findIndex(u => u.id == userID)
-        console.log(`Registering Click: User #${userIndex} is clicking ${guess} on game: ${this.id}`)
-        let guessIndex = this.squareIDs.findIndex(a => guess == a)
+        let guessIndex = this.answers.findIndex(a => guess == a.id)
+        console.log(`Registering Click: User #${userIndex} is clicking ${guess} #${guessIndex} on game: ${this.id}`)
         //verify they can make a guess
         if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
         if (userIndex === -1) throw Error("You're not in this game?")
@@ -86,16 +97,21 @@ module.exports.Game = class Game {
                 }
             } else {
                 this.message = "Oof! Try Again!"
-                let nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
-                this.users[userIndex].upNext = false
-                this.users[nextUserIndex].upNext = true
+                this.NextTurn()
             }
         }
     }
     //get client info for game
     ClientInfo() {
         let response = {
-            squares: this.currentSquares.map((sq, index) => ({id: this.squareIDs[index], ...sq })),
+            squares: this.currentSquares.map((sq, index) => {
+                return ({
+                    id: this.answers[index].id,
+                    flipped: sq.value != "*" && this.defaultSquares[index].value == '*',
+                    civ: sq.civ,
+                    image: sq.image
+                })
+            }),
             users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches, upNext: u.upNext })),
             playerCount: this.playerCount,
             inProgress: this.inProgress,
@@ -122,27 +138,34 @@ module.exports.Game = class Game {
 }
 //Helper functions
 function getGameValues(size) {
-    let file1Names = fs.readdirSync('./public/cards/paired/1') //,
-    file2Names = fs.readdirSync('./public/cards/paired/2')
-    _halfBoard = (size) ? size / 2 : file1Names.length
+    var fileNames = fs.readdirSync('./public/cards/paired/1') //,
+
+    let itemsToRemove = ((fileNames.length * 2) - size) / 2 //randomly removing difference because its easier than randomly selecting cards
+    for (let i = 0; i < itemsToRemove; i++) {
+        let removing = Math.floor(Math.random() * fileNames.length)
+        fileNames.splice(removing, 1)
+        // console.log(fileNames)
+    }
+    let _halfBoard = fileNames.length / 2
     //make new array based off size -> duplicate all values for pairs with different image paths-> randomize order 
     let answers = [...Array(_halfBoard).keys()].flatMap(i => [{
         value: i,
-        image: '/cards/paired/1/' + file1Names[i],
-        civ: ucFirst(file1Names[i].split('.')[0]) //Get civ name by looking at file name. 
+        image: '/cards/paired/1/' + fileNames[i],
+        civ: ucFirst(fileNames[i].split('.')[0]),//Get civ name by looking at file name. 
+        id: shortid.generate()
     }, {
         value: i,
-        image: '/cards/paired/2/' + file2Names[i],
-        civ: ucFirst(file1Names[i].split('.')[0])
+        image: '/cards/paired/2/' + fileNames[i],
+        civ: ucFirst(fileNames[i].split('.')[0]),
+        id: shortid.generate()
     }]).sort(() => Math.random() - 0.5)
 
     let defaults = Array(answers.length).fill({
         value: "*",
         image: "/cards/back.PNG"
     })
-
-    let squareIDs = answers.map(() => shortid.generate())
-    return { answers: answers, defaults: defaults, current: defaults.slice(), squareIDs: squareIDs }
+    console.log(answers)
+    return { answers: answers, defaults: defaults, current: defaults.slice()}
 }
 
 function randomColor() {

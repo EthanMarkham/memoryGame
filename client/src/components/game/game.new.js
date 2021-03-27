@@ -1,26 +1,13 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useContext } from "react";
 import { Col, Row, Form, Button } from "react-bootstrap"
 import { SocketContext } from '../../context/socket';
 
 function NewGameForm(props) {
   const socket = useContext(SocketContext);
+  const { setState } = props
 
-  const { setGameState } = props.gameStates
   const [gameName, setGameName] = useState("");
   const [playerCount, setPlayerCount] = useState(1);
-  const [error, setError] = useState("");
-
-  const handleError = useCallback((err) => {
-    console.log(err)
-    setError(err)
-  }, [setError])
-
-  useEffect(() => {
-    socket.on("ADD_ERROR", (err) => handleError(err))
-    return (() => {
-      socket.off("ADD_ERROR", (err) => handleError(err))
-    })
-  }, [])
 
   function addGame(event) {
     event.preventDefault();
@@ -59,7 +46,7 @@ function NewGameForm(props) {
         </Form.Group>
         <br />
         <Row>
-          <Col><Button onClick={() => { setGameState("GAME_JOIN") }} variant="secondary" type="submit" block>Join Game</Button></Col>
+          <Col><Button onClick={() => { setState("GAME_JOIN") }} variant="secondary" type="submit" block>Join Game</Button></Col>
           <Col><Button variant="primary" type="submit" disabled={gameName === ""} block>Create Game</Button></Col>
         </Row>
 

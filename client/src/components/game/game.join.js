@@ -1,30 +1,14 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, {useContext } from "react";
 import { Alert, Row, Col, Button } from "react-bootstrap"
 import { SocketContext } from '../../context/socket';
 import { Transition } from 'react-spring/renderprops'
 
 
 function GameJoiner(props) {
-  const { error, setGameState } = props.gameStates
-  const [games, setGames] = useState([]);
+  const {setState, games, error} = props
   const socket = useContext(SocketContext);
-
-  const handleGameList = useCallback(data => {
-    setGames(data)
-  }, [setGames])
-
-  useEffect(() => {
-    socket.emit("LIST_GAMES")
-    socket.on("GAME_LIST", data => handleGameList(data))
-
-    return () => {
-      socket.off("GAME_LIST", data => handleGameList(data))
-    }
-  }, [])
-
-  const joinGame = (gameId) => {
-    socket.emit("ADD_ME_TO_GAME", gameId)
-  }
+  const joinGame = gameId => socket.emit("ADD_ME_TO_GAME", gameId)
+  
   const GameInfo = (props) => {
     return (
     <button className="row gameList" onClick={() => {joinGame(props.game.id)}}>
@@ -52,7 +36,7 @@ function GameJoiner(props) {
         </Transition>
       </div>
       <Row>
-        <Col><Button onClick={() => { setGameState("GAME_NEW") }} variant="primary" type="submit" block>New Game</Button></Col>
+        <Col><Button onClick={() => { setState("GAME_NEW") }} variant="primary" type="submit" block>New Game</Button></Col>
       </Row>
         
     </div>

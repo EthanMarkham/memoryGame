@@ -5,8 +5,8 @@ function GameInfo(props) {
     <div className="gameInfo">
       <div className="userStats">
         <div className="gameStats">
-          <div className="stat">{props.info.message}</div>
-          <div className="stat" > Attempts: {props.info.round}</div>
+          <div className="stat">{props.message}</div>
+          <div className="stat" > Attempts: {props.round}</div>
         </div>
       </div>
 
@@ -18,7 +18,7 @@ function GameInfo(props) {
      
         <button
           className="gameButton btn"
-          onClick={() => {/*startNewGame()*/ }}>FF 11</button>
+          onClick={() => { if (window.confirm('Are you sure you wish to leave this game?')) props.handleQuit() } }>FF 11</button>
       </div>
     </div>
   )

@@ -2,11 +2,11 @@ import React, { useState, useContext } from 'react';
 import { SocketContext } from '../context/socket';
 
 function Login(props) {
-    const { setAuth } = props.authState
+    const { setAuth, setError, error } = props
     const socket = useContext(SocketContext);
+    
     const [user, setUser] = useState("")
     const [password, setPassword] = useState("")
-    const [error, setError] = useState("")
     const [action, setAction] = useState("Login")
 
     const validateForm = () => {
@@ -34,10 +34,8 @@ function Login(props) {
             .then(response => response.json())
             .then((data) => {
                 console.log(data)
-                if (data.error) {
-                    setError(data)
-                    return
-                } else {
+                if (data.error) setError(data.message)
+                else {
                     socket.emit("LOGIN", data.token)
                     setAuth(true, data)
                 }
@@ -52,7 +50,7 @@ function Login(props) {
     return (
         <div className="loginContainer">
             <form onSubmit={handleSubmit}>
-                {error && <div className="alert alert-danger"><b>Error!</b> <ul>{error.messages.map(e => <li>{e}</li>)}</ul></div>}
+                {error && <div className="alert alert-danger"><b>Error!</b> {error}</div>}
                 <div class="formGroup">
                     <label for="username">Username</label>
                     <input

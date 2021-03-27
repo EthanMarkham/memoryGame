@@ -59,8 +59,22 @@ class GameManager {
             try {
                 let gameIndex = this.FindIndexByGameID(gameID)
                 this.games[gameIndex].AddUser(user)
-                console.log('adding', this.games[gameIndex])
                 resolve(this.games[gameIndex])
+            }
+            catch (err) { reject(err) }
+        })
+    }
+    RemoveUser(user, gameID) {
+        return new Promise((resolve, reject) => {
+            try {
+                let gameIndex = this.FindIndexByGameID(gameID), id = this.games[gameIndex].id
+                this.games[gameIndex].RemoveUser(user)
+                if (this.games[gameIndex].users.length === 0) {
+                    this.games.splice(gameIndex, true) //deleting games if no users
+                    resolve({id: id, deleted: true})
+                }
+                if (this.games[gameIndex].inProgress && !this.games[gameIndex].UpNext()) this.games[gameIndex].NextTurn()
+                resolve({id: id, delted: false})
             }
             catch (err) { reject(err) }
         })
@@ -76,11 +90,13 @@ class GameManager {
     }
 
     ResetCards(userID){
-        let out = new Promise((resolve) => {
+        let out = new Promise((resolve, reject) => {
             let gameIndex = this.FindIndexByUserID(userID)
             setTimeout(() => {
-                this.games[gameIndex].ResetCards()
-                resolve(this.games[gameIndex])
+                if (this.games[gameIndex]) {
+                    this.games[gameIndex].ResetCards()
+                    resolve(this.games[gameIndex])
+                } 
             }, 3000)
         })
         return out 
