@@ -3,18 +3,19 @@ const shortid = require('shortid');
 //set storage for on-going this.games
 
 module.exports.Game = class Game {
-    constructor(user, playerCount, size) {
+    constructor(user, playerCount, size, name) {
         console.log('Creating Game')
         let newGameValues = getGameValues(size)
         this.id = shortid.generate(),
-            this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
-            this.playerCount = parseInt(playerCount),
-            this.inProgress = (this.playerCount !== 1) ? false : true,
-            this.completed = false, //will enter date time for completed at/auto delete
-            this.round = 0,
-            this.currentGuesses = [],
-            this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
-            this.answers = newGameValues.answers
+        this.name = name,
+        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
+        this.playerCount = parseInt(playerCount),
+        this.inProgress = (this.playerCount !== 1) ? false : true,
+        this.completed = false, //will enter date time for completed at/auto delete
+        this.round = 0,
+        this.currentGuesses = [],
+        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
+        this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
         this.resetting = false
@@ -113,6 +114,7 @@ module.exports.Game = class Game {
                 })
             }),
             users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches, upNext: u.upNext })),
+            name: this.name,
             playerCount: this.playerCount,
             inProgress: this.inProgress,
             round: this.round,
@@ -140,15 +142,13 @@ module.exports.Game = class Game {
 function getGameValues(size) {
     var fileNames = fs.readdirSync('./public/cards/paired/1') //,
 
-    let itemsToRemove = ((fileNames.length * 2) - size) / 2 //randomly removing difference because its easier than randomly selecting cards
-    for (let i = 0; i < itemsToRemove; i++) {
+    let itemsToRemove = ((fileNames.length * 2) - size)  //randomly removing difference because its easier than randomly selecting cards
+    for (let i = 0; i < itemsToRemove/2; i++) {
         let removing = Math.floor(Math.random() * fileNames.length)
         fileNames.splice(removing, 1)
-        // console.log(fileNames)
     }
-    let _halfBoard = fileNames.length / 2
     //make new array based off size -> duplicate all values for pairs with different image paths-> randomize order 
-    let answers = [...Array(_halfBoard).keys()].flatMap(i => [{
+    let answers = [...Array(fileNames.length ).keys()].flatMap(i => [{
         value: i,
         image: '/cards/paired/1/' + fileNames[i],
         civ: ucFirst(fileNames[i].split('.')[0]),//Get civ name by looking at file name. 
@@ -164,7 +164,6 @@ function getGameValues(size) {
         value: "*",
         image: "/cards/back.PNG"
     })
-    console.log(answers)
     return { answers: answers, defaults: defaults, current: defaults.slice() }
 }
 

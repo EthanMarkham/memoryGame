@@ -1,4 +1,4 @@
-const Game = require("../model/game.model").Game;
+const Game = require("../modules/game.module").Game;
 
 //set storage for on-going this.games
 module.exports.GameManager = () => { return new GameManager() }
@@ -12,11 +12,12 @@ class GameManager {
     }
     GetOpenGames() {
         if (!this.games) return null
-        let gameList = this.games.filter(g => !g.completed && g.users.length < g.playerCount)
+        let gameList = this.games.filter(g => !g.completed && !g.inProgress) //change here so people can join if someone quits?
         let output = gameList.map(g => ({
             players: g.users.length,
             maxPlayers: g.playerCount,
-            id: g.id
+            id: g.id,
+            name: g.name
         }))
         console.log(output)
         return(output)
@@ -45,10 +46,11 @@ class GameManager {
     }
 
     //create new game
-    NewGame(user, playerCount, size) {
+    NewGame(user, playerCount, size, name) {
+        //console.log(playerCount, size, name)
         let out = new Promise((resolve, reject) => {
             if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
-            let newGame = new Game(user, playerCount, size)
+            let newGame = new Game(user, playerCount, size, name)
             this.games.push(newGame)
             resolve(newGame.ClientInfo())
         })

@@ -1,12 +1,25 @@
 import React, { useState, useEffect, useCallback, useContext, useReducer } from 'react';
-import { propTypes } from 'react-bootstrap/esm/Image';
+import { useSpring, animated as a } from 'react-spring'
 import { SocketContext } from '../../context/socket';
 import { getGridLayout } from '../../helpers';
-import { Transition, animated as a } from 'react-spring/renderprops'
+import { Transition } from 'react-spring/renderprops'
 
 const GameInfo = require('./game.info').default
 const useWindowSize = require('../../hooks/useWindowSize').default
 
+const Square = (poops) => {
+  return (
+    <div className="squareHolder">
+      <button
+        className="square"
+        onClick={() => poops.handleClick(poops.id)}
+        style={{ ...poops.style, backgroundImage: `url(http://localhost:5000/${poops.image})`, }}//;fix show labels
+        disabled={!poops.clickable}>
+        {poops.showLabels && <label>{poops.civ}</label>}
+      </button>
+    </div>
+  );
+}
 function Game(props) {
   const socket = useContext(SocketContext);
   const size = useWindowSize()
@@ -29,7 +42,7 @@ function Game(props) {
   const cardsShowing = useCallback(() => squares.filter(s => s.flipped).length, [squares])
   const handleClick = id => socket.emit("GAME_CLICK", id)
   const handleQuit = () => { props.setGameState("GAME_JOIN"); socket.emit("QUIT_GAME", gameID) }
-  const cantClick = (id) => {let i = squares.findIndex(sq => sq.id === id); return (cardsShowing() >= 2 && getTurn() !== props.me && squares[i].value !== "*")}
+  const cantClick = (id) => { let i = squares.findIndex(sq => sq.id === id); return (cardsShowing() >= 2 && getTurn() !== props.me && squares[i].value !== "*") }
 
   const [gridSize, dispatchGridSize] = useReducer(() => {
     return getGridLayout(squares.length, size)
@@ -37,11 +50,11 @@ function Game(props) {
 
   useEffect(() => {
     socket.emit("GET_GAME")
-    socket.on("GAME_INFO", data => {handleSquareInfo(data.squares);handleGameMessage(data.message);handleUserInfo(data.users);handleRoundInfo(data.round);handleGameID(data.id)})
+    socket.on("GAME_INFO", data => { handleSquareInfo(data.squares); handleGameMessage(data.message); handleUserInfo(data.users); handleRoundInfo(data.round); handleGameID(data.id) })
     socket.on("GAME_ERROR", data => setError(data))
 
     return () => {
-      socket.off("GAME_INFO", data => {handleSquareInfo(data.squares);handleGameMessage(data.message);handleUserInfo(data.users);handleRoundInfo(data.round);handleGameID(data.id)})
+      socket.off("GAME_INFO", data => { handleSquareInfo(data.squares); handleGameMessage(data.message); handleUserInfo(data.users); handleRoundInfo(data.round); handleGameID(data.id) })
       socket.off("GAME_ERROR", data => setError(data))
     }
   }, []);
@@ -50,12 +63,19 @@ function Game(props) {
     dispatchGridSize()
   }, [size, squares.length])
 
+  const flipSpring = useSpring(() => ({
+    from: { transform: `perspective(600px) rotateX(180}deg)`, opacity: 0 },
+    to: { transform: `perspective(600px) rotateX(180}deg)` },
+    leave: { transform: `perspective(600px) rotateX(180}deg)` },
+    config: { mass: 5, tension: 500, friction: 800 }
+  }))
   return (
     <div className='gameContainer'>
       <div className="game-board" style={{ gridTemplateColumns: `repeat(${gridSize[0]}, minmax(20px, 1fr))`, gridTemplateRows: `repeat(${gridSize[1]}, minmax(20px, 1fr))` }}>
         <Transition
           items={squares} keys={item => item.id}
           initial={{ opacity: 0 }} //height: '0px'
+          //to={flipSpring}
           enter={{ opacity: 1 }} //height: '100%'
           leave={{ opacity: 0 }}
           update={{}}
@@ -64,7 +84,7 @@ function Game(props) {
           {item => animated => <Square
             {...item}
             handleClick={handleClick}
-            clickable={() => {cantClick(item.id)}}
+            clickable={() => { cantClick(item.id) }}
             style={animated}
             showLabels={labels}
           />}
@@ -83,20 +103,4 @@ function Game(props) {
   );
 }
 
-const Square = (poops) => {
-  return (
-    <button
-      className="square"
-      onClick={() => poops.handleClick(poops.id)}
-      style={{ ...poops.style }}//;
-      disabled={!poops.clickable}
-    >
-      <img
-        src={`http://localhost:5000/${poops.image}`}
-        alt={poops.civ}
-      />
-      {poops.showLabels && <label>{poops.civ}</label>}
-    </button>
-  );
-}
 export default Game;

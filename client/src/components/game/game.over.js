@@ -33,7 +33,7 @@ export default function GameOver(props) {
       <div className='leaderBoard'>
         <ol>
           {sortByMatches(users).map(u => {
-            return (<li key={u.usename}>{u.username} - {u.matches} matches</li>)
+            return (<li key={u.username}>{u.username} - {u.matches} matches</li>)
           })}
         </ol>
       </div>

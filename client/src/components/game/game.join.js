@@ -28,7 +28,7 @@ function GameJoiner(props) {
   const GameInfo = (props) => {
     return (
     <button className="row gameList" onClick={() => {joinGame(props.game.id)}}>
-      <div className="col-8"><h3>{props.game.id}</h3></div>
+      <div className="col-8"><h3>{props.game.name}</h3></div>
       <div className="col-4">
         <div className="gameStats">
           <div className="stat">Players: {props.game.players}</div>

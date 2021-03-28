@@ -53,7 +53,7 @@ exports = module.exports = function (io, gameManager) {
     const handleAddGame = (newGameInfo) => {
       if (socket.handshake.session.userID) {
         User.findById(socket.handshake.session.userID)
-          .then(user => gameManager.NewGame(user, newGameInfo.playerCount, 40)) //&&&&&&&&&&&&&&  Add size control
+          .then(user => gameManager.NewGame(user, newGameInfo.playerCount, newGameInfo.cardCount, newGameInfo.name)) //&&&&&&&&&&&&&&  Add size control
           .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
           .then(() => socket.emit('JOIN_SUCCESS'))
           .catch(err => socket.emit('ADD_ERROR', err.message))

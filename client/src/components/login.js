@@ -54,7 +54,7 @@ function Login(props) {
             <form onSubmit={handleSubmit}>
                 {error && <div className="alert alert-danger"><b>Error!</b> {error}</div>}
                 <div class="formGroup">
-                    <label for="username">Username</label>
+                    <label htmlFor="username">Username</label>
                     <input
                         type="text"
                         className="form-control"
@@ -67,7 +67,7 @@ function Login(props) {
                     <small className="text-muted form-text text-muted">Appropriate or <b>BANNED</b></small>
                 </div>
                 <div class="formGroup">
-                    <label for="password">Password</label>
+                    <label htmlFor="password">Password</label>
                     <input
                         type="password"
                         className="form-control"
@@ -84,7 +84,7 @@ function Login(props) {
                         <button
                             type="button"
                             className="btn btn-outline-secondary"
-                            onClick={() => { toggleMethod() }}>{action === 'login' ? "Have an Account?" : "Need an Account?"}
+                            onClick={() => { toggleMethod() }}>{action === 'login' ? "Need an Account?" : "Have an Account?"}
                         </button>
                     </div>
                     <div className="col-6">

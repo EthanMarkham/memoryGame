@@ -5,39 +5,39 @@
   .game-board {
     padding-top: 10px;
     padding-bottom: 10px;
-    height: 87%;
+    height: calc(87% - 20px);
     width: 100%;
     display: grid;
     overflow: hidden;
 
 
-    .square{
-      background-color: transparent;
-      padding: 1% 1% 1% 1%;
+    .squareHolder {
       height: 100%;
       width: 100%;
-      position: relative;
-    }
+    
+      .square{
+        margin: auto;
+        background-color: transparent;
+        height: 98%;
+        width: 98%;
+        border: none;
+        background: center no-repeat transparent;
+        background-size: contain;
+        display: flex;
+        justify-content: flex-start;
+        filter: drop-shadow(5px 5px 4px #00000070);
 
-    button {
-      border: none;
-      background: transparent;
-      img {
-        border: 3px solid $golden;
-        height: 100%;
-        width: auto;
-        max-height: 100%;
-      }
-
-      label{
-        position: absolute;
-        bottom: 2px;
-        left: 2px;
-        font-weight: bold;
-        background-color: black;
-        width: 100%;
-        color: white;
-        font-size: 0.8em;
+        label{
+          margin-left: 5%;
+          padding-left: 2%;
+          padding-right: 2%;
+          font-weight: bold;
+          background-color: black;
+          width: auto;
+          color: white;
+          font-size: 0.8em;
+          align-self: flex-end;
+        }
       }
     }
   }
