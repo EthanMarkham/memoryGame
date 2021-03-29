@@ -25,11 +25,12 @@
     font-weight: 600;
     width: 40%;
     padding: 2px;
-    padding-left: 5;
+    padding-left: 5px;
+    margin-left: 10px;
     color: $darkBrown;
     height: 100%;
     max-height: 100%;
-    border-radius: 0 20px 0 0;
+    border-radius: 20px 20px 0 0;
     border-bottom: hidden;
 
   }
@@ -37,8 +38,6 @@
   .userStats {
     overflow-y: auto;
     width: calc(40% - 10px);
-    margin-left: 10px;
-    border-radius: 20px 20px 0 0;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
@@ -88,9 +87,10 @@
           background: url("../assets/images/infocard_background.jpg");
           color: $niceBrown;
           @include coolBorder();
-          filter: drop-shadow(5px 5px 4px $niceBrown);
+          filter: drop-shadow(0 0 4px $niceBrown);
           label {
             font-size: 0.7em;
+            font-weight: bold;
           }
         }
  

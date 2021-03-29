@@ -35,7 +35,10 @@ exports = module.exports = function (io, gameManager) {
       User.findById(socket.handshake.session.userID)
       .then(user => gameManager.AddUser(user, gameID))
       .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
-      .then(() => socket.emit('JOIN_SUCCESS'))
+      .then(() => {
+        socket.emit('JOIN_SUCCESS')
+        socket.leave('games')
+      })
       .then(() => broadCastOpenGames())
       .catch(err => socket.emit('JOIN_ERROR', err.message))  
     }
@@ -125,7 +128,7 @@ exports = module.exports = function (io, gameManager) {
         console.log(`${userID} just connected`)
         socket.handshake.session.userID = userID
         socket.handshake.session.save();
-        handleCheckUserStatus
+        socket.emit('AUTH_SUCCESS')
       }
     }
     const handleLogout = () => {
@@ -133,6 +136,7 @@ exports = module.exports = function (io, gameManager) {
         delete socket.handshake.session.userID;
         socket.handshake.session.save();
       }
+      socket.emit("LOGOUT_SUCCESS")
     }
   })
 }

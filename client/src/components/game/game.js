@@ -1,26 +1,14 @@
 import React, { useState, useEffect, useCallback, useContext, useReducer } from 'react';
-import { useSpring, animated as a } from 'react-spring'
+import { useTransition, animated as a } from 'react-spring'
 import { SocketContext } from '../../context/socket';
 import { getGridLayout } from '../../helpers';
-import { Transition } from 'react-spring/renderprops'
 
+const GameOver = require('./game.over').default
 const GameInfo = require('./game.info').default
 const useWindowSize = require('../../hooks/useWindowSize').default
 
-const Square = (poops) => {
-  return (
-    <div className="squareHolder">
-      <button
-        className="square"
-        onClick={() => poops.handleClick(poops.id)}
-        style={{ ...poops.style, backgroundImage: `url(http://localhost:5000/${poops.image})`, }}//;fix show labels
-        disabled={!poops.clickable}>
-        {poops.showLabels && <label>{poops.civ}</label>}
-      </button>
-    </div>
-  );
-}
 function Game(props) {
+  const { me, setError, dispatch } = props
   const socket = useContext(SocketContext);
   const size = useWindowSize()
   const [squares, setSquares] = useState([])
@@ -29,7 +17,7 @@ function Game(props) {
   const [gameID, setGameID] = useState('0')
   const [gameMessage, setGameMessage] = useState("Loading")
   const [round, setRound] = useState(0);
-  const [error, setError] = useState("")
+  const [gameOver, setGameOver] = useState(false)
 
   const handleSquareInfo = useCallback(squares => setSquares(squares), [setSquares])
   const handleGameMessage = useCallback(msg => setGameMessage(msg), [setGameMessage])
@@ -38,24 +26,39 @@ function Game(props) {
   const handleGameID = useCallback(id => setGameID(id), [setGameID])
   const toggleLables = useCallback(() => setLabels(!labels), [labels])
 
-  const getTurn = useCallback(() => users.find(u => u.upNext).username, [users])
-  const cardsShowing = useCallback(() => squares.filter(s => s.flipped).length, [squares])
+  const handleGameData = (data, gameOver) => {
+    handleSquareInfo(data.squares)
+    handleGameMessage(data.message)
+    handleUserInfo(data.users)
+    handleRoundInfo(data.round)
+    handleGameID(data.id)
+    if (gameOver) setGameOver(true)
+  }
+  const getTurn = () => ((users.length > 0) ? users.find(u => u.upNext).username : "Waiting")
   const handleClick = id => socket.emit("GAME_CLICK", id)
-  const handleQuit = () => { props.setGameState("GAME_JOIN"); socket.emit("QUIT_GAME", gameID) }
-  const cantClick = (id) => { let i = squares.findIndex(sq => sq.id === id); return (cardsShowing() >= 2 && getTurn() !== props.me && squares[i].value !== "*") }
+  const handleQuit = () => { socket.emit("QUIT_GAME", gameID); dispatch({type: "GAME_JOIN"}); }
+  const cantClick = (id) => {
+    let i = squares.findIndex(sq => sq.id == id);
+    let turn = getTurn()
+    if (squares.filter(s => s.flipped).length >= 2 || squares[i].image !== "/cards/back.PNG") return true
+    else if (turn !== me) return true
+    else return false
+  }
 
   const [gridSize, dispatchGridSize] = useReducer(() => {
     return getGridLayout(squares.length, size)
-  }, size)
+  }, [size, squares.length])
 
   useEffect(() => {
     socket.emit("GET_GAME")
-    socket.on("GAME_INFO", data => { handleSquareInfo(data.squares); handleGameMessage(data.message); handleUserInfo(data.users); handleRoundInfo(data.round); handleGameID(data.id) })
-    socket.on("GAME_ERROR", data => setError(data))
 
+    socket.on("GAME_INFO", data => handleGameData(data))
+    socket.on("GAME_ERROR", data => setError(data))
+    socket.on("GAME_OVER", data => handleGameData(data, true))
     return () => {
-      socket.off("GAME_INFO", data => { handleSquareInfo(data.squares); handleGameMessage(data.message); handleUserInfo(data.users); handleRoundInfo(data.round); handleGameID(data.id) })
+      socket.off("GAME_INFO", data => handleGameData(data))
       socket.off("GAME_ERROR", data => setError(data))
+      socket.off("GAME_OVER", data => handleGameData(data, true))
     }
   }, []);
 
@@ -63,35 +66,37 @@ function Game(props) {
     dispatchGridSize()
   }, [size, squares.length])
 
-  const flipSpring = useSpring(() => ({
-    from: { transform: `perspective(600px) rotateX(180}deg)`, opacity: 0 },
-    to: { transform: `perspective(600px) rotateX(180}deg)` },
-    leave: { transform: `perspective(600px) rotateX(180}deg)` },
-    config: { mass: 5, tension: 500, friction: 800 }
-  }))
-  return (
+  const springs = useTransition(squares, item => item.id, {
+    //from: { opacity: 0},
+    to: { opacity: 1 },
+    from: { opacity: 0 },
+    enter: { transform: `perspective(600px) rotateX(0deg)`, opacity: 1 },
+    initial: { transform: `perspective(600px) rotateX(0deg)`, opacity: 0 },
+    update: { transform: `perspective(600px) rotateX(0px)`, opacity: 1 },
+    //unique: true,
+    trail: 50
+  })
+  if (!gameOver) return (
     <div className='gameContainer'>
       <div className="game-board" style={{ gridTemplateColumns: `repeat(${gridSize[0]}, minmax(20px, 1fr))`, gridTemplateRows: `repeat(${gridSize[1]}, minmax(20px, 1fr))` }}>
-        <Transition
-          items={squares} keys={item => item.id}
-          initial={{ opacity: 0 }} //height: '0px'
-          //to={flipSpring}
-          enter={{ opacity: 1 }} //height: '100%'
-          leave={{ opacity: 0 }}
-          update={{}}
-          trail={25}
-        >
-          {item => animated => <Square
-            {...item}
-            handleClick={handleClick}
-            clickable={() => { cantClick(item.id) }}
-            style={animated}
-            showLabels={labels}
-          />}
-        </Transition>
+        {springs.map(({ item, props, key }) => (
+          <a.div
+            style={{ ...props }}
+            key={key}
+            className="squareHolder">
+            <button
+              className="square"
+              onClick={() => handleClick(item.id)}
+              style={{ backgroundImage: `url(http://localhost:5000/${item.image})` }}//;fix show labels
+              disabled={cantClick(item.id)}>
+              {labels && <label>{item.civ}</label>}
+            </button>
+          </a.div>
+        )
+        )}
       </div>
       <GameInfo
-        me={props.me}
+        me={me}
         users={users}
         message={gameMessage}
         setLabels={toggleLables}
@@ -100,7 +105,9 @@ function Game(props) {
         handleQuit={handleQuit}
       />
     </div>
-  );
+  )
+  else return (<GameOver me={me} dispatch={dispatch} message={gameMessage} round={round} users={users} />)
 }
+
 
 export default Game;

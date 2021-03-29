@@ -1,14 +1,11 @@
-import { useState, useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Row, Col, Button } from "react-bootstrap"
 import {SocketContext} from '../../context/socket';
 
 export default function GameOver(props) {
   const socket = useContext(SocketContext);
-
-  const { setGameState } = props
-  const { message, round, users } = props.gameInfo
-  const [nextState, setNextState] = useState([])
-
+  const { message, round, users, dispatch } = props
+  const [nextState, setNextState] = useState("GAME_JOIN")
   const sortByMatches = (users) => {
     return users.sort((u1, u2) => (u1.matches < u2.matches) ? -1 : 1)
   }
@@ -17,9 +14,9 @@ export default function GameOver(props) {
     socket.emit("LEAVE_GAME", props.gameInfo.id)
   }
   useEffect(() => {
-    socket.on("LEAVE_SUCCESS", () => setGameState(nextState))
-    return () => socket.off("LEAVE_SUCCESS", () => setGameState(nextState))
-  }, [nextState, setGameState, socket])
+    socket.on("LEAVE_SUCCESS", () => dispatch({type: nextState}))
+    return () => socket.off("LEAVE_SUCCESS", () => dispatch({type: nextState}))
+  }, [nextState])
 
   return (
     <div className="container">
@@ -42,8 +39,6 @@ export default function GameOver(props) {
         <Col><Button onClick={() => { leaveGame("GAME_JOIN") }}>Join Game</Button></Col>
         <Col><Button onClick={() => { leaveGame("GAME_NEW") }}>New Game</Button></Col>
       </Row>
-
-
     </div>
   )
 }

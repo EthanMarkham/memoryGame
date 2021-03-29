@@ -5,10 +5,18 @@ const User = require("../model/user.model");
 const config = require('../config/config.json');
 
 module.exports.signUp = async (req, res) => {
+    var filter = require('leo-profanity');
+    filter.loadDictionary();
+
     const errors = validator.validationResult(req);
     const salt = await bcrypt.genSalt(10)
     const {username,password} = req.body;
-
+    
+    if (filter.check(username)) 
+    return res.status(400).json({
+        error: true,
+        message: "No Sir"
+    })
     if (!errors.isEmpty()) {
         return res.status(400).json({
             error: true,

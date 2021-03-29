@@ -42,7 +42,7 @@ module.exports.Game = class Game {
     //reset cards to default on game
     ResetCards() {
         console.log('Reseting Cards')
-        this.currentSquares = this.defaultSquares.slice();
+        this.currentSquares = this.defaultSquares.slice()
         this.currentGuesses = []
         this.message = "Guess a Square"
         this.resetting = false
@@ -70,14 +70,14 @@ module.exports.Game = class Game {
 
         //update new values
         this.currentSquares[guessIndex] = this.answers[guessIndex]
+        this.currentSquares[guessIndex].flipped = true
         this.currentGuesses.push({ index: guessIndex, value: this.answers[guessIndex].value })
-
 
         //if guess at 2 look for match
         if (this.currentGuesses.length === 2) {
             this.resetting = true
             this.round++
-
+            //get rid of old flipped for frontend
             if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
                 this.message = "Nice Match!"
                 //set match colors for two squares
@@ -108,7 +108,7 @@ module.exports.Game = class Game {
             squares: this.currentSquares.map((sq, index) => {
                 return ({
                     id: this.answers[index].id,
-                    flipped: sq.value != "*" && this.defaultSquares[index].value == '*',
+                    flipped: sq.flipped,
                     civ: sq.civ,
                     image: sq.image
                 })

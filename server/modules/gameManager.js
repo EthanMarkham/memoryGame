@@ -20,7 +20,7 @@ class GameManager {
             name: g.name
         }))
         console.log(output)
-        return(output)
+        return (output)
     }
 
     FindIndexByUserID(userID) {
@@ -34,7 +34,7 @@ class GameManager {
         else throw Error("Game not Found!")
     }
 
-    GetClientInfo(userID) {    
+    GetClientInfo(userID) {
         return new Promise((resolve, reject) => {
             let index = this.FindIndexByUserID(userID)
             resolve(this.games[index].ClientInfo())
@@ -47,10 +47,12 @@ class GameManager {
 
     //create new game
     NewGame(user, playerCount, size, name) {
+        var filter = require('leo-profanity');
+        filter.loadDictionary();
         //console.log(playerCount, size, name)
         let out = new Promise((resolve, reject) => {
             if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
-            let newGame = new Game(user, playerCount, size, name)
+            let newGame = new Game(user, playerCount, size, filter.clean(name))
             this.games.push(newGame)
             resolve(newGame.ClientInfo())
         })
@@ -73,10 +75,10 @@ class GameManager {
                 this.games[gameIndex].RemoveUser(user)
                 if (this.games[gameIndex].users.length === 0) {
                     this.games.splice(gameIndex, true) //deleting games if no users
-                    resolve({id: id, deleted: true})
+                    resolve({ id: id, deleted: true })
                 }
                 if (this.games[gameIndex].inProgress && !this.games[gameIndex].UpNext()) this.games[gameIndex].NextTurn()
-                resolve({id: id, delted: false})
+                resolve({ id: id, delted: false })
             }
             catch (err) { reject(err) }
         })
@@ -91,16 +93,16 @@ class GameManager {
         })
     }
 
-    ResetCards(userID){
+    ResetCards(userID) {
         let out = new Promise((resolve, reject) => {
             let gameIndex = this.FindIndexByUserID(userID)
             setTimeout(() => {
                 if (this.games[gameIndex]) {
                     this.games[gameIndex].ResetCards()
                     resolve(this.games[gameIndex])
-                } 
+                }
             }, 3000)
         })
-        return out 
+        return out
     }
 }

@@ -5,7 +5,6 @@ const cors = require('cors')
 
 // Initiate Mongo Server
 require('./config/database.config')
-
 const gameManager = require('./modules/gameManager').GameManager()
 const usersRouter = require('./routes/user');
 

@@ -5,7 +5,7 @@ import { Transition } from 'react-spring/renderprops'
 
 
 function GameJoiner(props) {
-  const { error, setGameState } = props
+  const { error, dispatch } = props
   const [games, setGames] = useState([]);
   const socket = useContext(SocketContext);
 
@@ -52,7 +52,7 @@ function GameJoiner(props) {
         </Transition>
       </div>
       <Row>
-        <Col><Button onClick={() => { setGameState("GAME_NEW") }} variant="primary" type="submit" block>New Game</Button></Col>
+        <Col><Button onClick={() => { dispatch({type: "GAME_NEW"}) }} variant="primary" type="submit" block>New Game</Button></Col>
       </Row>
         
     </div>
