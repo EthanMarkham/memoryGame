@@ -1,21 +1,19 @@
 import { useState} from "react";
 
 function NewGameForm(props) {
-  const { dispatch, setError } = props
+  const { dispatch, addGame } = props
 
   const [gameName, setGameName] = useState("");
   const [playerCount, setPlayerCount] = useState(1);
   const [cardCount, setCardCount] = useState(48);
 
-  function addGame(event) {
-    event.preventDefault();
-    console.log("adding game")
-    dispatch({type: "ADD_GAME", payload: { name: gameName, playerCount: playerCount, cardCount: cardCount }})
+  const handleSubmit = e => {
+    e.preventDefault()
+    addGame({playerCount: playerCount, cardCount: cardCount, name: gameName})
   }
-
   return (
     <div className="container">
-      <form onSubmit={addGame}>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name:</label>
           <input type="text" id="name" className="form-control" placeholder="Enter Lobby Name" onChange={(event) => { setGameName(event.target.value) }} value={gameName} />

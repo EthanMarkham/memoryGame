@@ -4,31 +4,29 @@ const shortid = require('shortid');
 
 module.exports.Game = class Game {
     constructor(user, playerCount, size, name) {
-        console.log('Creating Game')
         let newGameValues = getGameValues(size)
-        this.id = shortid.generate(),
-        this.name = name,
-        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true }],
-        this.playerCount = parseInt(playerCount),
-        this.inProgress = (this.playerCount !== 1) ? false : true,
-        this.completed = false, //will enter date time for completed at/auto delete
-        this.round = 0,
-        this.currentGuesses = [],
-        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!",
+        this.id = shortid.generate()
+        this.name = name
+        this.round = 0
+        this.playerCount = parseInt(playerCount)
+        this.currentGuesses = []
+        this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true, active: true }]
+        this.status = (this.playerCount !== 1) ? "WAITING" : "ONGOING"
+        this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!"
+
         this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
-        this.resetting = false
     }
     //add user to game
     AddUser(user) {
         if (this.users.length >= this.playerCount) throw Error("Game full")
         if (!user) throw Error("Invalid User")
 
-        this.users.push({ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: false })
+        this.users.push({ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: false, active: true })
         console.log(this.users)
         if (this.users.length === this.playerCount) {
-            this.inProgress = true
+            this.status = "ONGOING"
             this.message = `${user.username} just joined! Good luck!`
         }
         else {
@@ -37,7 +35,7 @@ module.exports.Game = class Game {
     }
     RemoveUser(user) {
         let userIndex = this.users.find(u => u.id === user.id)
-        this.users.splice(userIndex, 1)
+        this.users[userIndex].active = false
     }
     //reset cards to default on game
     ResetCards() {
@@ -45,15 +43,14 @@ module.exports.Game = class Game {
         this.currentSquares = this.defaultSquares.slice()
         this.currentGuesses = []
         this.message = "Guess a Square"
-        this.resetting = false
-    }
-    UpNext() {
-        return this.users.find(u => u.upNext)
     }
     NextTurn() {
         const userIndex = this.users.findIndex(u => u.upNext)
-        let nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
-        if (userIndex !== -1) this.users[userIndex].upNext = false
+        var nextUserIndex
+        do {
+            nextUserIndex = (userIndex + 1 < this.users.length) ? userIndex + 1 : 0
+            if (userIndex !== -1) this.users[userIndex].upNext = false
+        } while (!this.users[nextUserIndex].active) //loop til we find active user
         this.users[nextUserIndex].upNext = true
     }
     //handle a guess from user -- returns true or false to start a reset
@@ -105,6 +102,7 @@ module.exports.Game = class Game {
     //get client info for game
     ClientInfo() {
         let response = {
+            name: this.name,
             squares: this.currentSquares.map((sq, index) => {
                 return ({
                     id: this.answers[index].id,
@@ -113,23 +111,10 @@ module.exports.Game = class Game {
                     image: sq.image
                 })
             }),
+            status: this.status,
             users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches, upNext: u.upNext })),
             name: this.name,
-            playerCount: this.playerCount,
-            inProgress: this.inProgress,
-            round: this.round,
-            cardsShowing: this.currentGuesses.length,
-            message: this.message,
-            id: this.id
-        }
-        return response
-    }
-    GameOverInfo() {
-        let response = {
-            squares: this.currentSquares,
-            users: this.users.map(u => ({ username: u.username, color: u.color, matches: u.matches })),
-            playerCount: this.playerCount,
-            inProgress: this.inProgress,
+            status: this.inProgress,
             round: this.round,
             cardsShowing: this.currentGuesses.length,
             message: this.message,
@@ -143,12 +128,12 @@ function getGameValues(size) {
     var fileNames = fs.readdirSync('./public/cards/paired/1') //,
 
     let itemsToRemove = ((fileNames.length * 2) - size)  //randomly removing difference because its easier than randomly selecting cards
-    for (let i = 0; i < itemsToRemove/2; i++) {
+    for (let i = 0; i < itemsToRemove / 2; i++) {
         let removing = Math.floor(Math.random() * fileNames.length)
         fileNames.splice(removing, 1)
     }
     //make new array based off size -> duplicate all values for pairs with different image paths-> randomize order 
-    let answers = [...Array(fileNames.length ).keys()].flatMap(i => [{
+    let answers = [...Array(fileNames.length).keys()].flatMap(i => [{
         value: i,
         image: '/cards/paired/1/' + fileNames[i],
         civ: ucFirst(fileNames[i].split('.')[0]),//Get civ name by looking at file name. 

@@ -12,7 +12,7 @@ class GameManager {
     }
     GetOpenGames() {
         if (!this.games) return null
-        let gameList = this.games.filter(g => !g.completed && !g.inProgress) //change here so people can join if someone quits?
+        let gameList = this.games.filter(g => !g.status === "WAITING") //change here so people can join if someone quits?
         let output = gameList.map(g => ({
             players: g.users.length,
             maxPlayers: g.playerCount,
@@ -24,9 +24,9 @@ class GameManager {
     }
 
     FindIndexByUserID(userID) {
-        let output = this.games.findIndex(g => g.users.findIndex(u => u.id === userID) !== -1 && g.completed === false)
+        let output = this.games.findIndex(g => g.users.findIndex(u => u.id === userID) !== -1 && g.status === "ONGOING")
         if (output !== -1) return output
-        else throw Error("Game not Found!")
+        else {console.log(1); throw Error("Game not Found!")}
     }
     FindIndexByGameID(gameID) {
         let output = this.games.findIndex(g => g.id == gameID)
