@@ -72,7 +72,7 @@ function Game(props) {
   return (
     <div className='gameContainer'>
       <div className="game-board" style={{ gridTemplateColumns: `repeat(${gridSize[0]}, minmax(20px, 1fr))`, gridTemplateRows: `repeat(${gridSize[1]}, minmax(20px, 1fr))` }}>
-        <Transition
+        {/*<Transition
           items={squares} keys={item => item.id}
           initial={{ opacity: 0 }} //height: '0px'
           //to={flipSpring}
@@ -88,17 +88,28 @@ function Game(props) {
             style={animated}
             showLabels={labels}
           />}
-        </Transition>
-      </div>
-      <GameInfo
-        me={props.me}
-        users={users}
-        message={gameMessage}
-        setLabels={toggleLables}
-        turn={() => (getTurn())}
-        round={round}
-        handleQuit={handleQuit}
-      />
+          </Transition>*/}
+        {flipSpring.map((item, key) => (
+          <animated.div className="squareHolder" key={key}>
+              <button
+                className="square"
+                onClick={() => handleClick(item.id)}
+                style={{ ...item.style, backgroundImage: `url(http://localhost:5000/${item.image})`, }}//;fix show labels
+                disabled={!item.clickable}>
+                {item.showLabels && <label>{item.civ}</label>}
+              </button>
+          </animated.div>
+        ))}
+        <GameInfo
+          me={props.me}
+          users={users}
+          message={gameMessage}
+          setLabels={toggleLables}
+          turn={() => (getTurn())}
+          round={round}
+          handleQuit={handleQuit}
+        />
+      </div >
     </div>
   );
 }
