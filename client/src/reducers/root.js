@@ -35,7 +35,7 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             return copy
         case "GAME_INFO":
             copy.gameList.listening = false //stop listening to games
-            copy = { ...copy, game: { ...data } }
+            copy = { ...copy, game: { ...data, listening: true } }
             console.log(copy)
             if (data.status === "GAME_OVER") copy.pageIndex = 5
             else copy.pageIndex = 3
@@ -61,7 +61,7 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             copy.gameList.listening = true
             return copy
         case "ERROR":
-            copy.error = data.message
+            copy.error = data
             return copy
         default:
             copy.pageIndex = 0

@@ -1,108 +1,75 @@
-const Game = require("../modules/game.module").Game;
-
-//set storage for on-going this.games
-module.exports.GameManager = () => { return new GameManager() }
-
-class GameManager {
-    constructor() {
-        this.games = []
-    }
-    GameCount() {
-        return this.games.length
-    }
-    GetOpenGames() {
-        if (!this.games) return null
-        let gameList = this.games.filter(g => !g.status === "WAITING") //change here so people can join if someone quits?
-        let output = gameList.map(g => ({
+const Game = require("../model/game.model").Game;
+var GameManager = module.exports = {
+    games: [],
+    GameCount: _ => (GameManager.games.count),
+    GetOpenGameInfo: _ => {
+        let gameList = GameManager.games.filter(g => !g.users.length < g.playerCount)
+        return gameList.map(g => ({
             players: g.users.length,
             maxPlayers: g.playerCount,
             id: g.id,
             name: g.name
         }))
-        console.log(output)
-        return (output)
-    }
-
-    FindIndexByUserID(userID) {
-        let output = this.games.findIndex(g => g.users.findIndex(u => u.id === userID) !== -1 && g.status === "ONGOING")
-        if (output !== -1) return output
-        else {console.log(1); throw Error("Game not Found!")}
-    }
-    FindIndexByGameID(gameID) {
-        let output = this.games.findIndex(g => g.id == gameID)
-        if (output !== -1) return output
-        else throw Error("Game not Found!")
-    }
-
-    GetClientInfo(userID) {
-        return new Promise((resolve, reject) => {
-            let index = this.FindIndexByUserID(userID)
-            resolve(this.games[index].ClientInfo())
+    },
+    FindIndexByUserID: userID => (GameManager.games.filter(g => g.status === "ONGOING").findIndex(g => g.users.filter(u => u.active).map(u => u.id).includes(userID))),
+    FindIndexByGameID: gameID => (GameManager.games.findIndex(g => g.id == gameID)),
+    GetClientInfo: userID => {
+        return new Promise((res, rej) => {
+            let gameIndex = GameManager.FindIndexByUserID(userID)
+            if (gameIndex == -1) rej("User not in game")
+            res(GameManager.games[gameIndex].ClientInfo())
         })
-    }
-    GetGameOverInfo(gameID) {
-        let index = this.FindIndexByGameID(gameID)
-        return this.games[index].GameOverInfo()
-    }
+    },
+    NewGame: (user, playerCount, size, gameName) => {
+        let filter = require('leo-profanity')
+        filter.loadDictionary()
+        gameName = filter.clean(gameName)
 
-    //create new game
-    NewGame(user, playerCount, size, name) {
-        var filter = require('leo-profanity');
-        filter.loadDictionary();
-        //console.log(playerCount, size, name)
-        let out = new Promise((resolve, reject) => {
-            if (this.games.filter(g => g.completed === false).map(g => g.users).findIndex(u => u.id === user.id) !== -1) reject("User already in a game!")
-            let newGame = new Game(user, playerCount, size, filter.clean(name))
-            this.games.push(newGame)
-            resolve(newGame.ClientInfo())
+        return new Promise((res, rej) => {
+            if (GameManager.FindIndexByUserID(user.id) != -1) rej("User already in a game!")
+            let newGame = new Game(user, playerCount, size, gameName)
+            GameManager.games.push(newGame)
+            res(newGame)
         })
-        return out
-    }
-    AddUser(user, gameID) {
-        return new Promise((resolve, reject) => {
-            try {
-                let gameIndex = this.FindIndexByGameID(gameID)
-                this.games[gameIndex].AddUser(user)
-                resolve(this.games[gameIndex])
+    },
+    AddUser: (user, gameID) => {
+        return new Promise((res, rej) => {
+            let gameIndex = GameManager.FindIndexByGameID(gameID)
+            if (gameIndex == -1) rej("Game not found")
+            GameManager.games[gameIndex].AddUser(user)
+            res(GameManager.games[gameIndex].ClientInfo()) //send game info after added
+        })
+    },
+    RemoveUser: userID => {
+        return new Promise((res, rej) => {
+            let gameIndex = GameManager.FindIndexByUserID(userID)
+            if (!gameIndex) rej("Game not found")
+            GameManager.games[gameIndex].RemoveUser(user)
+            if (GameManager.games[gameIndex].users.filter(u => u.active) === 0) {//deleting games if no users
+                GameManager.games.splice(gameIndex, 1)
+                res({ id: id, deleted: true }) //why do i pass if it was deleted?
             }
-            catch (err) { reject(err) }
+            else if (GameManager.games[gameIndex].inProgress && !GameManager.games[gameIndex].UpNext()) GameManager.games[gameIndex].NextTurn() //if no one is up next and game ongoing skip next turn
+            res({ id: id, delted: false })
         })
-    }
-    RemoveUser(user, gameID) {
-        return new Promise((resolve, reject) => {
-            try {
-                let gameIndex = this.FindIndexByGameID(gameID), id = this.games[gameIndex].id
-                this.games[gameIndex].RemoveUser(user)
-                if (this.games[gameIndex].users.length === 0) {
-                    this.games.splice(gameIndex, true) //deleting games if no users
-                    resolve({ id: id, deleted: true })
-                }
-                if (this.games[gameIndex].inProgress && !this.games[gameIndex].UpNext()) this.games[gameIndex].NextTurn()
-                resolve({ id: id, delted: false })
-            }
-            catch (err) { reject(err) }
+    },
+    HandleClick: (userID, guess) => {
+        return new Promise((res, rej) => {
+            let gameIndex = GameManager.FindIndexByUserID(userID)
+            if (gameIndex == -1) rej("User not in game")
+            GameManager.games[gameIndex].HandleClick(userID, guess) //handle click will validate they can click and throw errors if not
+            res(GameManager.games[gameIndex]) //we send entire game info to check game conditions and broadcast different for gameover/reset
         })
-    }
-    //handle a guess from user
-    HandleClick(userID, guess) {
-        return new Promise((resolve) => {
-            console.log(guess)
-            let gameIndex = this.FindIndexByUserID(userID)
-            this.games[gameIndex].HandleClick(userID, guess)
-            resolve(this.games[gameIndex])
-        })
-    }
-
-    ResetCards(userID) {
-        let out = new Promise((resolve, reject) => {
-            let gameIndex = this.FindIndexByUserID(userID)
+    },
+    ResetCards: gameID => {
+        return new Promise((res, rej) => {
+            let gameIndex = GameManager.FindIndexByGameID(gameID)
+            if (gameIndex == -1) rej("Game not found?")
             setTimeout(() => {
-                if (this.games[gameIndex]) {
-                    this.games[gameIndex].ResetCards()
-                    resolve(this.games[gameIndex])
-                }
+                GameManager.games[gameIndex].ResetCards()
+                res(GameManager.games[gameIndex].ClientInfo())
             }, 3000)
         })
-        return out
-    }
+    },
 }
+

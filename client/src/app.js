@@ -5,11 +5,13 @@ import { checkAuth, getGridLayout } from './helpers'
 
 const socket = require("./context/socket").socket;
 const reducer = require('./reducers/root').default
+const useWindowSize = require('./hooks/useWindowSize').default
 
+const GameInfo = require('./components/game/game.info').default
 const Nav = require('./components/nav').default
 const Login = require('./components/login').default
 const GameJoiner = require('./components/game/game.join').default
-const Game = require('./components/game/game').default
+const Game = require('./components/game/game.board').default
 const GameCreator = require('./components/game/game.new').default
 const GameOver = require('./components/game/game.over').default
 
@@ -31,6 +33,9 @@ const initialState = {
 }
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const size = useWindowSize()
+  const [gridSize, dispatchGridSize] = useReducer(_ => (getGridLayout(state.game.squares.length, size)), [size, state.game.squares.length])
+
   useEffect(() => {
     checkAuth().then(data => dispatch({ type: "LOGIN", payload: data })).catch() //init check auth, dispatch response which is handled in reducer
     socket.on("ERROR", data => dispatch({ type: "ERROR", payload: data }))
@@ -60,7 +65,9 @@ export default function App() {
     else socket.off("GAME_LIST")
   }, [state.gameList.listening])
 
-
+  useEffect(() => {
+    dispatchGridSize()
+  }, [size, state.game.squares.length])
 
   const springs = useTransition(state.game.squares, item => item.id, {
     //from: { opacity: 0},
@@ -72,6 +79,7 @@ export default function App() {
     //unique: true,
     trail: 50
   })
+  const getTurn = () => ((state.game.users.length) ? state.game.users.find(u => u.upNext).username : 'Waiting') 
   const handleClick = id => socket.emit("GAME_CLICK", id)
   const handleQuit = () => { socket.emit("QUIT_GAME", this.game.gameID); dispatch({ type: "QUIT_GAME" }); }
   const addGame = (data) => { socket.emit("ADD_GAME", data) }
@@ -81,7 +89,10 @@ export default function App() {
     <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />,
     <GameJoiner dispatch={dispatch} games={state.gameList.games} joinGame={joinGame} />,
     <GameCreator dispatch={dispatch} addGame={addGame} />,
-    <Game game={state.game} springs={springs} me={state.auth.username} handleClick={handleClick} handleQuit={handleQuit} dispatch={dispatch} />,
+    <div className='gameContainer'>
+      <Game game={state.game} springs={springs} me={state.auth.username} handleClick={handleClick} turn={getTurn()} gridSize={gridSize}/>
+      <GameInfo me={state.auth.username} users={state.game.users} round={state.game.round} message={state.game.message} handleQuit={handleQuit} dispatch={dispatch}/>
+    </div>,
     <Login dispatch={dispatch} />,
     <GameOver game={state.game} me={state.auth.username} dispatch={dispatch} />
   ]

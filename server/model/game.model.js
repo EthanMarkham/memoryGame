@@ -2,7 +2,7 @@ const fs = require('fs')
 const shortid = require('shortid');
 //set storage for on-going this.games
 
-module.exports.Game = class Game {
+class Game {
     constructor(user, playerCount, size, name) {
         let newGameValues = getGameValues(size)
         this.id = shortid.generate()
@@ -13,7 +13,6 @@ module.exports.Game = class Game {
         this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true, active: true }]
         this.status = (this.playerCount !== 1) ? "WAITING" : "ONGOING"
         this.message = (playerCount !== 1) ? "Waiting for players!" : "Guess a square!"
-
         this.answers = newGameValues.answers
         this.currentSquares = newGameValues.current
         this.defaultSquares = newGameValues.defaults
@@ -42,6 +41,7 @@ module.exports.Game = class Game {
         console.log('Reseting Cards')
         this.currentSquares = this.defaultSquares.slice()
         this.currentGuesses = []
+        this.resetting= false
         this.message = "Guess a Square"
     }
     NextTurn() {
@@ -61,7 +61,7 @@ module.exports.Game = class Game {
         //verify they can make a guess
         if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
         if (userIndex === -1) throw Error("You're not in this game?")
-        if (!this.inProgress) throw Error("Game not in progress!")
+        if (this.status !== "ONGOING") throw Error("Game not in progress!")
         if (!this.users[userIndex].upNext) throw Error("Wait your turn plz")
         if (this.currentSquares[guessIndex].value !== "*") throw Error("You already guessed that brrr")
 
@@ -87,8 +87,7 @@ module.exports.Game = class Game {
 
                 //if default squares does not contain '*'' values were done
                 if (this.defaultSquares.findIndex(s => s.value === "*") === -1) {
-                    this.completed = true
-                    this.inProgress = false
+                    this.status = "GAME_OVER"
                     this.resetting = false
                     let winner = this.users.sort((a, b) => { return a.matches - b.matches })
                     this.message = `Game over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
@@ -158,4 +157,7 @@ function randomColor() {
 
 function ucFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+module.exports = {
+    Game: Game
 }

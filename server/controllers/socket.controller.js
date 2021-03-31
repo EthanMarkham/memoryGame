@@ -5,21 +5,16 @@ const User = require("../model/user.model");
 exports = module.exports = function (io, gameManager) {
   io.on('connection', (socket) => {
     socket.emit('connected')
-
     socket.on("GET_STATUS", () => handleCheckUserStatus())
     socket.on("LIST_GAMES", () => handleListGames())
-
     socket.on("ADD_GAME", gameInfo => handleAddGame(gameInfo))
     socket.on("ADD_ME_TO_GAME", gameID => handleJoinGame(gameID))
     socket.on("LEAVE_GAME", gameID => handleLeaveGame(gameID)) //after game is over
     socket.on("QUIT_GAME", gameID => handleQuitGame(gameID)) //quitting early
-
     socket.on("GET_GAME", () => broadCastGameInfo())
     socket.on("GAME_CLICK", guess => handleGameClick(guess))
-
     socket.on("LOGIN", (token) => handleLogin(token))
     socket.on("LOGOUT", () => handleLogout())
-
     socket.on('disconnecting', () => { console.log(socket.rooms) })
 
     //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
@@ -29,7 +24,7 @@ exports = module.exports = function (io, gameManager) {
       .then(user => gameManager.AddUser(user, gameID))
       .then(_ => handleCheckUserStatus())
       .then(_ => broadCastOpenGames())
-      .catch(err => socket.emit('ERROR', err.message))  
+      .catch(err => socket.emit('ERROR', err))  
     }
     const handleQuitGame = (gameID) => {
       if (socket.handshake.session.userID) {
@@ -46,9 +41,13 @@ exports = module.exports = function (io, gameManager) {
       if (socket.handshake.session.userID) {
         User.findById(socket.handshake.session.userID)
           .then(user => gameManager.NewGame(user, newGameInfo.playerCount, newGameInfo.cardCount, newGameInfo.name)) //
-          .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
-          .then(() => handleCheckUserStatus()) //client will catch status and apply new game info
-          .catch(err => socket.emit('ERROR', err.message))
+          .then(gameInfo => {
+            socket.join(`game:${gameInfo.id}`) 
+            socket.emit('USER_STATUS', { game: true }) //client catches status and asks for games
+          })
+          .catch(err => {
+            socket.emit('ERROR', err)
+          })
       }
     }
     const handleListGames = () => {
@@ -77,8 +76,8 @@ exports = module.exports = function (io, gameManager) {
       console.log('Clicking......')
       gameManager.HandleClick(socket.handshake.session.userID, guess)
         .then((data) => {
-          if (data.completed) broadCastGameOver(data)
-          else if (data.resetting) broadcastReset()
+          if (data.status === "GAME_OVER") broadCastGameOver(data)
+          else if (data.resetting) broadcastReset(data.id)
           else broadCastGameInfo()
         })
         .catch(err => socket.emit('ERROR', err.message))
@@ -86,22 +85,21 @@ exports = module.exports = function (io, gameManager) {
 
     //game broadCasts
     const broadCastOpenGames = _ => io.to('games').emit('GAME_LIST', gameManager.GetOpenGames())
-    
-    const broadcastReset = () => {
+    const broadcastReset = (gameID) => {
       broadCastGameInfo()
-      return gameManager.ResetCards(socket.handshake.session.userID).then(() => broadCastGameInfo())
+      gameManager.ResetCards(gameID).then(_ => broadCastGameInfo()).catch(err => socket.emit('ERROR', err.message))
+      return
     }
     const broadCastGameInfo = _ => {
-      console.log('Request for Game Info')
       gameManager.GetClientInfo(socket.handshake.session.userID)
-        .then(gameInfo => io.to(`game:${gameInfo.id}`).emit('GAME_INFO', gameInfo))
-        .catch(err => socket.emit('ERROR', err.message))
+        .then(gameInfo => {
+          io.to(`game:${gameInfo.id}`).emit('GAME_INFO', gameInfo)})
+        .catch(err => socket.emit('ERROR', err))
     }
     const broadCastGameOver = (game) => {
       console.log('Broadcasting Game Over Info')
       io.to(`game:${game.id}`).emit('GAME_INFO', gameManager.GetGameOverInfo(game.id))
     }
-
     const handleLogin = (token) => {
       let userID
       if (token) {

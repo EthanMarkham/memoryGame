@@ -2,16 +2,18 @@ const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const cors = require('cors')
+const config = require('./config/config.json');
 
 // Initiate Mongo Server
 require('./config/database.config')
-const gameManager = require('./modules/gameManager').GameManager()
+
+const gameManager = require('./modules/gameManager')
 const usersRouter = require('./routes/user');
 
 var app = express(),
     server = require('http').createServer(app),
     session = require("express-session")({
-      secret: "my-secret",
+      secret: config.sessionSecret,
       resave: true,
       saveUninitialized: true
     }),
@@ -29,9 +31,7 @@ const io = require("socket.io")(server, {
     }
 })
 io.use(sharedsession(session));
-
 require('./controllers/socket.controller')(io, gameManager);
-
 //Sends json so that it looks good
 app.set('json spaces', 2)
 
