@@ -32,7 +32,7 @@ const initialState = {
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState)
   useEffect(() => {
-    checkAuth().then(data => dispatch({ type: "LOGIN", payload: data })) //init check auth, dispatch response which is handled in reducer
+    checkAuth().then(data => dispatch({ type: "LOGIN", payload: data })).catch() //init check auth, dispatch response which is handled in reducer
     socket.on("ERROR", data => dispatch({ type: "ERROR", payload: data }))
   }, [])
 

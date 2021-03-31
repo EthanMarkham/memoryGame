@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { login } from '../helpers'
 
 function Login(props) {
     const { setAuth, setError, dispatch} = props
@@ -11,11 +12,10 @@ function Login(props) {
         else return user.length > 0 && password.length > 0;
     }
 
-    function handleSubmit(event,) {
+    function handleSubmit(event) {
         event.preventDefault();
         //instead of strings we just use bool for action. if true we want to login, if false we want to register
-        
-        
+        login({username: user, password: password}, action).then(data => dispatch({ type: "LOGIN", payload: data }))
     }
 
     function toggleMethod() {

@@ -15,6 +15,11 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
                 copy.pageIndex = 4
             }
             return copy
+        case "LOGOUT":
+            localStorage.clear()
+            copy.auth = {username: 'Guest', token: '', isAuth: false }
+            copy.pageIndex = 4
+            return copy
         case "STATUS":
             if (data.game) {
                 copy.game.listening = true
@@ -30,7 +35,7 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             return copy
         case "GAME_INFO":
             copy.gameList.listening = false //stop listening to games
-            copy = { ...copy, game: {...data } }
+            copy = { ...copy, game: { ...data } }
             console.log(copy)
             if (data.status === "GAME_OVER") copy.pageIndex = 5
             else copy.pageIndex = 3
@@ -38,13 +43,13 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
 
         case "QUIT_GAME":
             let game = copy.game
-            copy = { ...copy, game: {...game, status: "QUIT", listening: false } }
+            copy = { ...copy, game: { ...game, status: "QUIT", listening: false } }
             copy.pageIndex = 1
             copy.gameList.listening = true
             return copy
 
         case "GAME_LIST":
-            copy.gameList.games = {...data }
+            copy.gameList.games = { ...data }
             return copy
 
         case "GAME_NEW":

@@ -32,7 +32,7 @@ export const checkAuth = () => {
         .then(data => resolve(data))
         .catch(err => reject(err))
     }
-    else reject(false)
+    else resolve({error: true})
   })
 }
 export const login = (data, action="login") => {
