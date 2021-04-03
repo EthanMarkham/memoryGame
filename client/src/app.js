@@ -1,105 +1,88 @@
 import React, { useEffect, useReducer } from "react";
-import { useTransition } from 'react-spring'
-import Loader from "react-loader-spinner";
-import { checkAuth, getGridLayout } from './helpers'
+import { useSpring, useTransition, animated as a } from 'react-spring'
+import { checkAuth } from './helpers/helpers';
+import { initialState } from './helpers/initialState';
+import { squareTransition, errorTransition, pageTransition } from './helpers/transitions';
 
 const socket = require("./context/socket").socket;
 const reducer = require('./reducers/root').default
 const useWindowSize = require('./hooks/useWindowSize').default
+const pages = require('./components/pages').default
+const { Nav } = require('./components/imports')
 
-const GameInfo = require('./components/game/game.info').default
-const Nav = require('./components/nav').default
-const Login = require('./components/login').default
-const GameJoiner = require('./components/game/game.join').default
-const Game = require('./components/game/game.board').default
-const GameCreator = require('./components/game/game.new').default
-const GameOver = require('./components/game/game.over').default
-
-const initialState = {
-  auth: { username: 'Guest', token: localStorage.getItem('jwt'), isAuth: false },
-  pageIndex: 0, //index 0: Loader, 1: Join, 2: New, 3: Game, 4: Login
-  game: {
-    id: null,
-    status: "WAITING",
-    squares: [],
-    round: 0,
-    message: '',
-    users: [],
-    showLabels: true,
-    listening: false
-  },
-  gameList: { games: [], listening: false },
-  error: ''
-}
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const size = useWindowSize()
-  const [gridSize, dispatchGridSize] = useReducer(_ => (getGridLayout(state.game.squares.length, size)), [size, state.game.squares.length])
+  // const [hoverStyle, setHoverStyle] = useSpring(() => ({ xys: [0, 0, 1], config: { mass: 5, tension: 350, friction: 40 } }))
+  const windowSize = useWindowSize()
 
   useEffect(() => {
-    checkAuth().then(data => dispatch({ type: "LOGIN", payload: data })).catch() //init check auth, dispatch response which is handled in reducer
+    checkAuth().then(data => dispatch({ type: "LOGIN", payload: data })) //init check auth, dispatch response which is handled in reducer
     socket.on("ERROR", data => dispatch({ type: "ERROR", payload: data }))
+    return (() => socket.off("ERROR"))
   }, [])
 
   useEffect(() => {
     if (state.auth.isAuth) {
+      console.log('asking loggin socket')
       socket.emit("LOGIN", localStorage.getItem('jwt')) //init socket session
+      socket.on("LOGIN_SUCCESS", () => socket.emit("GET_STATUS"))
       socket.on("USER_STATUS", status => dispatch({ type: "STATUS", payload: status })) //backend can control where user is by emmitting user status
     }
     else {
       socket.emit("LOGOUT") //tell socket to clear session, mb clean this up with logging out state?
+    }
+    return () => {
       socket.off("USER_STATUS")
+      socket.off("LOGIN_SUCCESS")
     }
   }, [state.auth])
 
   useEffect(() => {
     if (state.game.listening) {
+      console.log('listening')
       socket.emit("GET_GAME") //initial ask for game from server
-      socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data })) 
+      socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
     }
-    else socket.off("GAME_INFO")
+    else {
+      console.log('not listening')
+    }
+    return (() => socket.off("GAME_INFO"))
   }, [state.game.listening])
 
   useEffect(() => {
-    if (state.gameList.listening) socket.on("GAME_LIST", data => dispatch({ type: "GAME_LIST", payload: data }))
-    else socket.off("GAME_LIST")
+    if (state.gameList.listening) {
+      socket.on("GAME_LIST", data => dispatch({ type: "GAME_LIST", payload: data }))
+      socket.emit("LIST_GAMES")
+    }
+    return (() => socket.off("GAME_LIST"))
   }, [state.gameList.listening])
 
-  useEffect(() => {
-    dispatchGridSize()
-  }, [size, state.game.squares.length])
+  useEffect(() => dispatch({ type: "SET_GRID", payload: windowSize }), [windowSize, state.game.squares.length])
 
-  const springs = useTransition(state.game.squares, item => item.id, {
-    //from: { opacity: 0},
-    to: { opacity: 1 },
-    from: { opacity: 0 },
-    enter: { transform: `perspective(600px) rotateX(0deg)`, opacity: 1 },
-    initial: { transform: `perspective(600px) rotateX(0deg)`, opacity: 0 },
-    update: { transform: `perspective(600px) rotateX(0px)`, opacity: 1 },
-    //unique: true,
-    trail: 50
-  })
-  const getTurn = () => ((state.game.users.length) ? state.game.users.find(u => u.upNext).username : 'Waiting') 
-  const handleClick = id => socket.emit("GAME_CLICK", id)
-  const handleQuit = () => { socket.emit("QUIT_GAME", this.game.gameID); dispatch({ type: "QUIT_GAME" }); }
-  const addGame = (data) => { socket.emit("ADD_GAME", data) }
-  const joinGame = id => socket.emit("ADD_ME_TO_GAME", id)
-
-  const pages = [
-    <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />,
-    <GameJoiner dispatch={dispatch} games={state.gameList.games} joinGame={joinGame} />,
-    <GameCreator dispatch={dispatch} addGame={addGame} />,
-    <div className='gameContainer'>
-      <Game game={state.game} springs={springs} me={state.auth.username} handleClick={handleClick} turn={getTurn()} gridSize={gridSize}/>
-      <GameInfo me={state.auth.username} users={state.game.users} round={state.game.round} message={state.game.message} handleQuit={handleQuit} dispatch={dispatch}/>
-    </div>,
-    <Login dispatch={dispatch} />,
-    <GameOver game={state.game} me={state.auth.username} dispatch={dispatch} />
-  ]
+  const squareSprings = useTransition(state.game.squares, item => item.id, squareTransition)
+  const pageSprings = useTransition(state.pageIndex, p => p, pageTransition)
+  //const errorSpring = useSpring(errorTransition)
+  const actions = {
+    handleClick: id => socket.emit("GAME_CLICK", id),
+    handleQuit: id => socket.emit("QUIT_GAME", id),
+    addGame: data => socket.emit("ADD_GAME", data),
+    joinGame: id => socket.emit("ADD_ME_TO_GAME", id)
+  }
   return (<>
     <Nav auth={state.auth} dispatch={dispatch} />
-    {state.error && <div className="alert alert-danger"><b>Error!</b> {state.error}</div>}
-    {pages[state.pageIndex]}
+    <div className="page-container">
+      {pageSprings.map(({ item, props, key }) => {
+        const Page = pages[item]
+        return <Page 
+          key={key} 
+          style={props} 
+          dispatch={dispatch} 
+          state={state} 
+          actions={actions} 
+          squareSprings={squareSprings} 
+        />
+      })}
+    </div>
   </>)
 }
 

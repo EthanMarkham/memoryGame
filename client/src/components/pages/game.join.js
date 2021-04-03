@@ -1,10 +1,8 @@
-import React from "react";
 import { Transition } from 'react-spring/renderprops'
 
 
 function GameJoiner(props) {
   const { dispatch, games, joinGame } = props
-
   const GameInfo = (props) => {
     return (
     <button className="row gameList" onClick={() => {joinGame(props.game.id)}}>
@@ -21,16 +19,16 @@ function GameJoiner(props) {
     <div className="container">
       <div className="gameList">
         <h2>{games.length} games found!</h2>
-        <Transition
+        {games.length > 0 && <Transition
           items={games} keys={item => item.id}
           from={{ transform: 'translate3d(0,-40px,0)' }}
           enter={{ transform: 'translate3d(0,0px,0)' }}
           leave={{ transform: 'translate3d(0,-40px,0)' }}>
           {item => props => <div style={props}>{<GameInfo game={item}/>}</div>}
-        </Transition>
+        </Transition>}
       </div>
       <div className="row">
-        <div className="col"><button className="btn btn-primary" onClick={() => { dispatch({type: "GAME_NEW"}) }} block>New Game</button></div>
+        <div className="col"><button className="btn btn-primary btn-large btn-block" onClick={() => { dispatch({type: "GAME_NEW"}) }} >New Game</button></div>
       </div>
         
     </div>

@@ -1,130 +1,101 @@
 const jwt = require("jsonwebtoken");
 const config = require('../config/config.json');
-const User = require("../model/user.model");
+const GameController = require("./game.controller")
 
-exports = module.exports = function (io, gameManager) {
-  io.on('connection', (socket) => {
-    socket.emit('connected')
-    socket.on("GET_STATUS", () => handleCheckUserStatus())
-    socket.on("LIST_GAMES", () => handleListGames())
-    socket.on("ADD_GAME", gameInfo => handleAddGame(gameInfo))
-    socket.on("ADD_ME_TO_GAME", gameID => handleJoinGame(gameID))
-    socket.on("LEAVE_GAME", gameID => handleLeaveGame(gameID)) //after game is over
-    socket.on("QUIT_GAME", gameID => handleQuitGame(gameID)) //quitting early
-    socket.on("GET_GAME", () => broadCastGameInfo())
-    socket.on("GAME_CLICK", guess => handleGameClick(guess))
-    socket.on("LOGIN", (token) => handleLogin(token))
-    socket.on("LOGOUT", () => handleLogout())
-    socket.on('disconnecting', () => { console.log(socket.rooms) })
-
-    //HELPER FUNCTIONS TO MAKE ^^^ CLEANER
-    const handleJoinGame = (gameID) => {
-      console.log('Joining Game')
-      User.findById(socket.handshake.session.userID)
-      .then(user => gameManager.AddUser(user, gameID))
-      .then(_ => handleCheckUserStatus())
-      .then(_ => broadCastOpenGames())
-      .catch(err => socket.emit('ERROR', err))  
-    }
-    const handleQuitGame = (gameID) => {
-      if (socket.handshake.session.userID) {
-        User.findById(socket.handshake.session.userID)
-        .then(user => gameManager.RemoveUser(user, gameID))
-        .then(data => {
-          if (!data.deleted) io.to(`game:${data.id}`).emit('GAME_INFO', data.game.ClientInfo())
-          handleLeaveGame(data.id)
-        })
-        .catch(err => socket.emit('ERROR', err.message))
-    }
-  }
-    const handleAddGame = (newGameInfo) => {
-      if (socket.handshake.session.userID) {
-        User.findById(socket.handshake.session.userID)
-          .then(user => gameManager.NewGame(user, newGameInfo.playerCount, newGameInfo.cardCount, newGameInfo.name)) //
-          .then(gameInfo => {
-            socket.join(`game:${gameInfo.id}`) 
-            socket.emit('USER_STATUS', { game: true }) //client catches status and asks for games
-          })
-          .catch(err => {
-            socket.emit('ERROR', err)
-          })
-      }
-    }
-    const handleListGames = () => {
-      if (socket.handshake.session.userID) {
-        socket.join('games')
-        broadCastOpenGames()
-      }
-    }
-    const handleLeaveGame = (gameID) => {
-      if (socket.handshake.session.userID) {
-        socket.leave(`game:${gameID}`)
-        handleCheckUserStatus()
-      }
-    }
-    const handleCheckUserStatus = () => {
-      gameManager.GetClientInfo(socket.handshake.session.userID)
-        .then(gameInfo => { socket.join(`game:${gameInfo.id}`) })
-        .then(() => {
-          socket.leave('games') //in game so no longer in this room
-          socket.emit('USER_STATUS', { game: true })
-        })
-        .then(() => broadCastOpenGames())
-        .catch(() => socket.emit('USER_STATUS', { game: false }))
-    }
-    const handleGameClick = (guess) => {
-      console.log('Clicking......')
-      gameManager.HandleClick(socket.handshake.session.userID, guess)
-        .then((data) => {
-          if (data.status === "GAME_OVER") broadCastGameOver(data)
-          else if (data.resetting) broadcastReset(data.id)
-          else broadCastGameInfo()
-        })
-        .catch(err => socket.emit('ERROR', err.message))
-    }
-
-    //game broadCasts
-    const broadCastOpenGames = _ => io.to('games').emit('GAME_LIST', gameManager.GetOpenGames())
-    const broadcastReset = (gameID) => {
-      broadCastGameInfo()
-      gameManager.ResetCards(gameID).then(_ => broadCastGameInfo()).catch(err => socket.emit('ERROR', err.message))
-      return
-    }
-    const broadCastGameInfo = _ => {
-      gameManager.GetClientInfo(socket.handshake.session.userID)
-        .then(gameInfo => {
-          io.to(`game:${gameInfo.id}`).emit('GAME_INFO', gameInfo)})
-        .catch(err => socket.emit('ERROR', err))
-    }
-    const broadCastGameOver = (game) => {
-      console.log('Broadcasting Game Over Info')
-      io.to(`game:${game.id}`).emit('GAME_INFO', gameManager.GetGameOverInfo(game.id))
-    }
-    const handleLogin = (token) => {
-      let userID
-      if (token) {
-        jwt.verify(token, config.secret, async (err, decoded) => {
-          if (!err) userID = decoded.user.id
-          else console.log(err)
-        })
-      }
-      if (!token || !userID) {
-        console.log('Authentication Error')
-        socket.emit('AUTH_ERROR', "Token Expired")
-      }
-      else {
-        console.log(`${userID} just connected`)
-        socket.handshake.session.userID = userID
-        socket.handshake.session.save();
-        handleCheckUserStatus()
-      }
-    }
-    const handleLogout = _ => {
-      if (socket.handshake.session.userID) {
-        delete socket.handshake.session.userID;
-        socket.handshake.session.save();
-      }
-      socket.emit("LOGOUT_SUCCESS")
-    }
-  })
+module.exports.handleAddGame = (socket, io, newGameInfo) => {
+  console.log(socket.handshake.session.userID, newGameInfo)
+  GameController.NewGame(socket.handshake.session.userID, newGameInfo)
+    .then(newGame => {
+      socket.join(`game:${newGame.id}`)
+      if (newGame.users.length < newGame.playerCount) io.to(`games`).emit('GAME_LIST', GameController.GetOpenGameInfo())
+      socket.emit('USER_STATUS', { game: true }) //client catches status and asks for games
+    }).catch(err => { console.log(err); socket.emit('ERROR', err.message) })
 }
+module.exports.handleCheckUserStatus = (socket) => {
+  GameController.GetClientInfo(socket.handshake.session.userID)
+    .then(gameInfo => {
+      socket.join(`game:${gameInfo.id}`)
+      socket.leave('games') //in game so no longer in this room
+      socket.emit('USER_STATUS', { game: true })
+    })
+    .catch(_ => {
+      socket.join('games')
+      socket.emit('USER_STATUS', { game: false })
+    })
+}
+module.exports.handleGameClick = (socket, io, guess) => {
+  console.log('Clicking......')
+  GameController.HandleClick(socket.handshake.session.userID, guess)
+    .then(game => {
+      if (game.resetting) {
+        broadcastGameInfo(io, game) //broadcast new cards
+        GameController.ResetCards(game.id) //resolves after 3000 ms
+          .then(game => broadcastGameInfo(io, game)) //broadcast reset
+          .catch(err => { console.log(err); socket.emit('ERROR', err.message) })
+      }
+      else broadcastGameInfo(io, game)
+    })
+    .catch(err => { console.log(err); socket.emit('ERROR', err.message) })
+}
+module.exports.handleJoinGame = (socket, io, gameID) => {
+  console.log('Joining Game')
+  GameController.AddUser(socket.handshake.session.userID, gameID)
+    .then(gameInfo => {
+      socket.join(`game:${gameInfo.id}`)
+      socket.leave('games') //in game so no longer in this room
+      socket.emit('USER_STATUS', { game: true })
+      if (gameInfo.users.length < gameInfo.playerCount) io.to(`games`).emit('GAME_LIST', GameController.GetOpenGameInfo())
+    })
+    .catch(err => { console.log(err); socket.emit('ERROR', err.message) })
+}
+module.exports.handleQuitGame = (socket, io, gameID) => {
+  GameController.RemoveUser(socket.handshake.session.userID)
+    .then(gameData => {
+      socket.leave(`game:${gameID}`)
+      socket.emit('USER_STATUS', { game: false })
+      if (!gameData.deleted) {
+        io.to(`game:${gameData.clientInfo.id}`).emit('GAME_INFO', gameData.clientInfo)
+      }
+    })
+    .catch(err => { console.log(err); socket.emit('ERROR', err.message) })
+}
+module.exports.joinGameList = socket => {
+  socket.join('games')
+  socket.emit('GAME_LIST', GameController.GetOpenGameInfo())
+}
+module.exports.handleLogin = (socket, token) => {
+  let userID
+  if (token) {
+    jwt.verify(token, config.secret, async (err, decoded) => {
+      if (!err) userID = decoded.user.id
+      else console.log(err)
+    })
+  }
+  if (!token || !userID) {
+    console.log('Authentication Error')
+    socket.emit('ERROR', "Token Expired")
+  }
+  else {
+    console.log(`${userID} just connected`)
+    socket.handshake.session.userID = userID
+    socket.handshake.session.save();
+    socket.emit('LOGIN_SUCCESS')
+  }
+}
+module.exports.handleLogout = socket => {
+  if (socket.handshake.session.userID) {
+    delete socket.handshake.session.userID;
+    socket.handshake.session.save();
+  }
+  socket.emit("LOGOUT_SUCCESS")
+}
+module.exports.getGame = (socket, io) => {
+  console.log(socket.handshake.session.userID)
+  GameController.GetClientInfo(socket.handshake.session.userID)
+  .then(game => {
+    io.to(`game:${game.id}`).emit('GAME_INFO', game)
+  })
+  .catch(err => { console.log(err); socket.emit('ERROR', err.message) })
+}
+
+const broadcastGameInfo = (io, game) => io.to(`game:${game.id}`).emit('GAME_INFO', game.ClientInfo())

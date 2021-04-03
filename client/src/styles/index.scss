@@ -12,7 +12,18 @@ body {
   height: 100vh;
 }
 /*TODO ------------------ Place in separate files*/
-
+.alertBox{
+  position: fixed;
+  width: 100%;
+  height: 10%;
+  align-self: center;
+  background-color: lightcoral;
+  
+  b{
+    size: 4em;
+    color: darkred;
+  }
+}
 /* Loader */
 .loader {
   width: 100%;
@@ -23,7 +34,19 @@ body {
 }
 
 /*---------------------------------------*/
-
+.page-container {
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
+  height: 90%;
+  display: flex;
+  will-change: transform, opacity;
+  
+  div {
+    width: 100%;
+    height: 100%;
+  }
+}
 /*Imports*/
 @import "nav";
 @import "login";

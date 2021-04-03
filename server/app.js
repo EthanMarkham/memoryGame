@@ -6,8 +6,6 @@ const config = require('./config/config.json');
 
 // Initiate Mongo Server
 require('./config/database.config')
-
-const gameManager = require('./modules/gameManager')
 const usersRouter = require('./routes/user');
 
 var app = express(),
@@ -23,6 +21,7 @@ app.use(cors())
 app.use(session);
 
 //socket stuff
+const SocketController = require('./controllers/socket.controller')
 const io = require("socket.io")(server, {
   cors: {
     origin: "http://localhost:3000",
@@ -31,7 +30,19 @@ const io = require("socket.io")(server, {
     }
 })
 io.use(sharedsession(session));
-require('./controllers/socket.controller')(io, gameManager);
+io.on('connection', (socket) => {
+  socket.emit('connected')
+  socket.on("ADD_GAME", gameInfo => SocketController.handleAddGame(socket, io, gameInfo))
+  socket.on("ADD_ME_TO_GAME", gameID => SocketController.handleJoinGame(socket, io, gameID))
+  socket.on("GAME_CLICK", guess => SocketController.handleGameClick(socket, io, guess))
+  socket.on("GET_GAME", _ => SocketController.getGame(socket, io))
+  socket.on("GET_STATUS", _ => SocketController.handleCheckUserStatus(socket))
+  socket.on("LIST_GAMES", _ => SocketController.joinGameList(socket))
+  socket.on("LOGIN", token => SocketController.handleLogin(socket, token))
+  socket.on("LOGOUT", _ => SocketController.handleLogout(socket))
+  socket.on("QUIT_GAME", gameID => SocketController.handleQuitGame(socket, io, gameID))
+  socket.on('disconnecting', () => { console.log(socket.rooms) })
+})
 //Sends json so that it looks good
 app.set('json spaces', 2)
 
@@ -71,4 +82,4 @@ app.use(function (err, req, res, next) {
   })
 })
 
-module.exports = { app: app, server: server, gameManager: gameManager }; 
+module.exports = { app: app, server: server }; 

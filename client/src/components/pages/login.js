@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { login } from '../helpers'
+import { login } from '../../helpers/helpers'
 
 function Login(props) {
-    const { setAuth, setError, dispatch} = props
+    const {dispatch} = props
     const [user, setUser] = useState("")
     const [password, setPassword] = useState("")
     const [action, setAction] = useState("Login")
@@ -16,6 +16,7 @@ function Login(props) {
         event.preventDefault();
         //instead of strings we just use bool for action. if true we want to login, if false we want to register
         login({username: user, password: password}, action).then(data => dispatch({ type: "LOGIN", payload: data }))
+        .catch(e => dispatch({type: "ERROR", payload: e}))
     }
 
     function toggleMethod() {
