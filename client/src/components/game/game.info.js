@@ -69,6 +69,8 @@ export default function GameInfo(props) {
             </button>
           </div>
         </div>
+      
+        <div className="borderBottom" />
       </div>
     </>
   )

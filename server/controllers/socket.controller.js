@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require('../config/config.json');
-const GameController = require("./game.controller")
+const GameController = require("../modules/game.manager")
 
 module.exports.handleAddGame = (socket, io, newGameInfo) => {
   console.log(socket.handshake.session.userID, newGameInfo)

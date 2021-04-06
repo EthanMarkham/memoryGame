@@ -25,6 +25,7 @@ export default function reducer(state, action) { //index 0: Login, 1: Games, 2: 
             return copy
         case "GAMES_DATA":
             copy.games = data.games
+            if (data.games.length == 0) copy.indexes.page = 1
             return copy;
         case "VIEW_GAME":
             try {

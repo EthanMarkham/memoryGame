@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
 const config = require('../config/config.json');
-const GameController = require("./game.controller")
+const GameController = require("../modules/game.manager")
 
 module.exports.removeUser = (req, res) => {
     let { userID } = req.params

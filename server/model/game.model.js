@@ -2,6 +2,8 @@ const fs = require('fs')
 const shortid = require('shortid');
 class Game {
     constructor(user, playerCountString, size, gameName) {
+        if (![1,2,3,4].includes(parseInt(playerCountString))) throw new Error("Stop trying to break me!")
+        if (![16,48,72,4].includes(parseInt(size))) throw new Error("Stop trying to break me!")
         this.id = shortid.generate()
         this.squares = getthisValues(size)
         this.playerCount = parseInt(playerCountString)

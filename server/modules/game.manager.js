@@ -1,8 +1,10 @@
 const Game = require("../model/game.model").Game;
 const User = require("../model/user.model");
+var events = require('events');
 
 var GameManager = module.exports = {
     games: [],
+    events: new events.EventEmitter(),
     GameCount: _ => (GameManager.games.count),
     GetAllGames: _ => GameManager.games,
     GetOpenGameInfo: _ => {

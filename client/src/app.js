@@ -74,6 +74,8 @@ export default function App() {
 
   const pageAnimations = useTransition(state.pageIndex, p => p, pageTransition)
   const errorTrans = useTransition(state.error.show, null, errorTransition)
+  //const squareSprings = useSprings(state.game.squares.length, items.map(item => ({ opacity: item.opacity })))
+
   const actions = {
     handleClick: id => socket.emit("GAME_CLICK", id),
     handleQuit: id => socket.emit("QUIT_GAME", id),
