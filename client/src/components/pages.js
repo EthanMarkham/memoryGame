@@ -9,26 +9,26 @@ const Loader = require("react-loader-spinner").default;
 
 const pages = [
     ({style}) => (
-        <a.div style={{ ...style }}>
+        <a.div className='animatedDiv' style={{ ...style }}>
             <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />
         </a.div>
     ),
     ({style, dispatch, state, actions }) => (
-        <a.div style={{ ...style }}>
+        <a.div className='animatedDiv' style={{ ...style }}>
             <GameJoiner dispatch={dispatch} games={state.gameList.games} joinGame={actions.joinGame} />
         </a.div>
     ),
     ({style, dispatch, state, actions }) => (
-        <a.div  style={{ ...style }}>
+        <a.div  className='animatedDiv' style={{ ...style }}>
             <GameCreator dispatch={dispatch} addGame={actions.addGame} />
         </a.div>
     ),
-    ({style, dispatch, state, actions, squareSprings }) => (
-        <a.div style={{ ...style }} className='gameContainer'>
+    ({style, dispatch, state, actions }) => (
+        <a.div className='animatedDiv' style={{ ...style }}>
             <GameBoard
                 state={state}
-                squareSprings={squareSprings}
-                handleClick={actions.handleClick}
+                dispatch={dispatch}
+                actions={actions}
             />
             <GameInfo
                 state={state}
@@ -38,12 +38,12 @@ const pages = [
         </a.div>
     ),
     ({style, dispatch}) => (
-        <a.div  style={{ ...style }}>
+        <a.div  className='animatedDiv' style={{ ...style }}>
           <Login dispatch={dispatch} />
         </a.div>
     ),
     ({style, dispatch, state}) => (
-        <a.div style={{ ...style }}>
+        <a.div className='animatedDiv' style={{ ...style }}>
           <GameOver state={state} dispatch={dispatch} />
         </a.div>
     ),

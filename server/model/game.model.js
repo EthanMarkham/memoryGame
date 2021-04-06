@@ -8,6 +8,7 @@ class Game {
         this.users = [{ username: user.username, id: user.id, matches: 0, color: randomColor(), upNext: true, active: true }]
         this.status = (this.playerCount !== 1) ? "WAITING" : "ONGOING"
         this.message = (this.playerCount !== 1) ? "Waiting for players!" : "Guess a square!"
+        this.round = 0
         this.gameName = gameName
         this.currentGuesses = []
     }
@@ -84,6 +85,7 @@ class Game {
                 if (this.squares.defaults.findIndex(s => s.value === "*") === -1) {
                     this.status = "GAME_OVER"
                     this.resetting = false
+                    this.users = this.users.map(u => ({...u, active: false}))
                     let winner = this.users.sort((a, b) => { return a.matches - b.matches })
                     this.message = `this over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
                 }

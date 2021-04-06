@@ -1,30 +1,38 @@
-export const squareTransition = {
-    from: { transform: `perspective(600px) rotateX(360deg)`, opacity: 0 },
-    to: { opacity: 1 },
-    leave: { opacity: 0 },
-    enter: { transform: `perspective(600px) rotateX(360deg)`, opacity: 1 },
-    initial: { transform: `perspective(600px) rotateX(360deg)`, opacity: 0 },
-    //update: { transform: `perspective(600px) rotateX(360px)`, opacity: 1 },
-    unique: true,
-    // trail: 50,
-    config: { delay: 500 },
+import { config } from 'react-spring'
+
+export const squareSprings = (item) => {
+    console.log(item)
+    if (item.flipping) return {
+        from: { transform: `perspective(600px) rotateY(-90deg)`, opacity: 1 },
+        to: { opacity: 1, transform: `perspective(600px) sharotateY(0deg)`},//transform: 'rotateY(0)' },
+        leave: { opacity: 1, transform: `perspective(600px) rotateY(90deg)`},//transform: 'rotateY(0)' },
+        config: {duration: 0}
+    }
+    else if (item.newSquare) {
+        let randomDelay = Math.random()*1000+1000
+        return {
+            from: { transform: `perspective(600px)`, opacity: 0 },
+            to: { opacity: 1,}, //transform: `` },
+            config: {...config.gentle, duration: randomDelay},
+            delay: 100
+        }
+    }
+    else return {to: {opacity: 1}}
 }
+
 const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 20, 1.1]
 const trans = (x, y, s) => `perspective(600px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`
 
 
 export const errorTransition = {
-    from: { top: '0', left: '0' },
-    to: async next => {
-        await next({ left: '50%', top: '20%', opacity: 1 })
-        await next({ opacity: 0, display: 'hidden' })
-    },
-    reset: true,
-    config: { duration: 5000 }
+    from: { opacity: 0 },
+    enter: { opacity: 1 },
+    leave: {opacity: 0}
 }
 
 export const pageTransition = {
-    from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
-    enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
-    leave: { opacity: 0, transform: 'translate3d(-50%,0,0)' },
+    from: { opacity: 1, transform: 'rotateY(90deg)' },
+    enter: { opacity: 1, transform: 'rotateY(0deg)'},
+    leave: { opacity: 0, transform: 'rotateY(90deg)'},
+    config: config.gentle
 }

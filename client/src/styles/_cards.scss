@@ -1,8 +1,4 @@
-.gameContainer{
-  width: 100%;
-  height: 100%;
-
-  .game-board {
+.game-board {
     padding-top: 10px;
     padding-bottom: 10px;
     height: 87%;
@@ -26,6 +22,8 @@
         display: flex;
         justify-content: flex-start;
         filter: drop-shadow(5px 5px 4px #00000070);
+        //position: fixed;
+        will-change: transform, opacity;
 
         label{
           margin-left: 5%;
@@ -41,4 +39,3 @@
       }
     }
   }
-}

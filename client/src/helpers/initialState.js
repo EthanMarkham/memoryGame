@@ -20,7 +20,10 @@ export const initialState = {
         games: [], 
         listening: false 
     },
-    error: '',
+    error: {
+        show: false,
+        message: '',
+    },
     labels: {
         card: true,
         leaveInfo: false,

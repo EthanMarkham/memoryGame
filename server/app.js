@@ -7,6 +7,7 @@ const config = require('./config/config.json');
 // Initiate Mongo Server
 require('./config/database.config')
 const usersRouter = require('./routes/user');
+const adminRouter = require('./routes/admin');
 
 var app = express(),
     server = require('http').createServer(app),
@@ -57,7 +58,8 @@ app.use(express.static('public'))
 
 //routes
 app.use('/api/users', usersRouter);
-app.use(express.static(path.join(__dirname, 'client/build')))
+app.use('/api/admin', adminRouter) 
+//app.use(express.static(path.join(__dirname, 'client/build')))
 
 //Errors
 app.use(function(req, res, next) {

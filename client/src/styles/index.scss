@@ -12,18 +12,6 @@ body {
   height: 100vh;
 }
 /*TODO ------------------ Place in separate files*/
-.alertBox{
-  position: fixed;
-  width: 100%;
-  height: 10%;
-  align-self: center;
-  background-color: lightcoral;
-  
-  b{
-    size: 4em;
-    color: darkred;
-  }
-}
 /* Loader */
 .loader {
   width: 100%;
@@ -33,18 +21,33 @@ body {
   align-items: center;
 }
 
+.errorHolder{
+  position: fixed;
+  z-index: 2;
+  will-change: display, opacity;
+  background-color: lightcoral;
+  width: 100%;
+  height: 10%;
+  align-self: center;
+  .b {
+    size: 4em;
+    color: darkred;
+  }
+  .span {
+    
+  }
+}
 /*---------------------------------------*/
 .page-container {
-  cursor: pointer;
-  position: absolute;
   width: 100%;
   height: 90%;
-  display: flex;
-  will-change: transform, opacity;
-  
-  div {
+  position: fixed;
+  z-index: 1;
+  .animatedDiv {
     width: 100%;
-    height: 100%;
+    height: 90%;
+    position: fixed;
+    will-change: transform, opacity;
   }
 }
 /*Imports*/

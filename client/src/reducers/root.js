@@ -12,7 +12,8 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             }
             else {
                 localStorage.setItem('jwt', '')
-                copy.error = data.message
+                copy.error.message = data.message
+                copy.error.show = true;
                 copy.pageIndex = 4
             }
             return copy
@@ -36,10 +37,13 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             return copy
         case "GAME_INFO":
             copy.gameList.listening = false //stop listening to games
-            copy = { ...copy, game: { ...data, showLabels: copy.game.showLabels, listening: copy.game.listening }, users: data.users }
-            copy.game.squares = copy.game.squares.map(s => {
+            copy = { ...copy, game: { ...data, listening: copy.game.listening } }
+            copy.game.squares = copy.game.squares.map((s, index) => {
                 const clickable = (s.image === "/cards/back.PNG" && copy.game.status === "ONGOING" && copy.game.users.find(u => u.upNext).username === copy.auth.username)
-                return { ...s, clickable: clickable }
+                if (state.game.squares.length === 0 && copy.game.squares.length > 0) return { ...s, clickable: clickable, newSquare: true }
+                let flipping = (state.game.squares.length > 0 && state.game.squares[index].image !== s.image) ? true : false; //adding these values for animations
+                if (flipping) return { ...s, clickable: clickable, flipping: flipping }
+                else return { ...s, clickable: clickable }
             })
             if (data.status === "GAME_OVER") copy.pageIndex = 5
             else copy.pageIndex = 3
@@ -61,12 +65,27 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             copy.gameList.listening = true
             return copy
         case "ERROR":
-            copy.error = data
+            copy.error.message = data
+            copy.error.show = true
+            if (data === "User not in game") { //this is to force them out of game if admin kicks them. probably a better way
+                let game = copy.game
+                copy.error.message = "You were removed from game"
+                copy.error.show = true
+                copy = { ...copy, game: { ...game, status: "QUIT", listening: false } }
+                copy.pageIndex = 1
+                copy.gameList.listening = true
+                return copy
+            }
             return copy
         case "TOGGLE_LABELS":
-            if (data.type === "GAME") copy.labels.card = (data.value !== undefined) ? data.value : !copy.labels.card;
-            else if (data.type === "LEAVE_INFO") copy.labels.leaveInfo = (data.value !== undefined) ? data.value : !copy.labels.leaveInfo
-            else if (data.type === "LABEL_INFO") copy.labels.labelInfo = (data.value !== undefined) ? data.value : !copy.labels.labelInfo
+            if (data.type === "GAME_INFO") {
+                copy.labels.card = !copy.labels.card;
+                console.log(copy.labels)
+                return copy
+            }
+            //ON HOVER BLOWING OUT DISPATCHER AND MOVED BACK TO SUB COMPONENT
+            else if (data.type === "LEAVE_INFO") copy.labels.leaveInfo = (data.value !== undefined) ? data.value : !copy.labels.leaveInfo;
+            else if (data.type === "LABEL_INFO") copy.labels.labelInfo = (data.value !== undefined) ? data.value : !copy.labels.labelInfo;
             return copy
         case "SET_GRID":
             //checking if we need to return n
@@ -75,6 +94,12 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             if (!newGridCalc) return copy;
             if (newGridCalc[0] === copy.gridSize[0] && newGridCalc[1] === copy.gridSize[1]) return copy; //no change
             copy.gridSize = newGridCalc;
+            return copy;
+        case "HIDE_ERROR":
+            copy.error.show = false;
+            return copy;
+        case "SWITCH_PAGE":
+            copy.pageIndex = data.pageIndex
             return copy;
         default:
             return copy;
