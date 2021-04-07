@@ -42,7 +42,7 @@ function NewGameForm(props) {
         </div>
         <br />
         <div className="row">
-          <div className="col"><button className="btn-lg btn-block btn-secondary" onClick={() => { dispatch({type: "GAME_JOIN"}) }} type="button">Join Game</button></div>
+          <div className="col"><button className="btn-lg btn-block btn-secondary" onClick={() => { dispatch({type: "SWITCH_PAGE", payload: {pageIndex: 1}}) }} type="button">Join Game</button></div>
           <div className="col"><button className="btn-lg btn-block btn-primary" type="submit" disabled={gameName === ""}>Create Game</button></div>
         </div>
       </form>

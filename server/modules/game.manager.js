@@ -1,24 +1,27 @@
 const Game = require("../model/game.model").Game;
 const User = require("../model/user.model");
-var events = require('events');
-
+const events = require('events');
+const { arrEquals } = require('../helpers/arrayEquals')
 var GameManager = module.exports = {
     games: [],
     events: new events.EventEmitter(),
+    openGames: [],
+
     GameCount: _ => (GameManager.games.count),
     GetAllGames: _ => GameManager.games,
-    GetOpenGameInfo: _ => {
-        let gameList = GameManager.games.filter(g => g.users.length < g.playerCount)
-        return gameList.map(g => ({
-            players: g.users.length,
-            maxPlayers: g.playerCount,
-            id: g.id,
-            name: g.name
-        }))
+    GetOpenGames: _ => {
+        return GameManager.games
+            .filter(g => g.users.length < g.playerCount)
+            .map(g => ({
+                players: g.users.length,
+                maxPlayers: g.playerCount,
+                id: g.id,
+                name: g.name
+            }))
     },
     FindIndexByUserID: userID => {
         try {
-            let gameSearch = GameManager.games.filter(g => g.status != "GAME_OVER").map(g => ({ id: g.id, users: g.users.filter(u => u.active).map(u=>u.id) }));
+            let gameSearch = GameManager.games.filter(g => g.status != "GAME_OVER").map(g => ({ id: g.id, users: g.users.filter(u => u.active).map(u => u.id) }));
             let tempIndex = gameSearch.findIndex(g => g.users.includes(userID));
             console.log(tempIndex, gameSearch)
             return (GameManager.FindIndexByGameID(gameSearch[tempIndex].id))
@@ -26,106 +29,157 @@ var GameManager = module.exports = {
         catch { return -1 }
     },
     FindIndexByGameID: gameID => GameManager.games.findIndex(g => g.id == gameID),
-    GetClientInfo: userID => {
-        return new Promise((res, rej) => {
+    CheckUserStatus: userID => {
+        return new Promise((resolve, reject) => {
             if (!userID) reject("No credentials")
             let gameIndex = GameManager.FindIndexByUserID(userID)
             if (gameIndex == -1) rej("User not in game")
-            res(GameManager.games[gameIndex].ClientInfo())
+            resolve(GameManager.games[gameIndex].ClientInfo())
         })
     },
     NewGame: (userID, info) => {
-        return new Promise(async (res, rej) => {
+        return new Promise(async (resolve, reject) => {
             try {
-                let user = await User.findById(userID)
-                if (!user) rej({ error: true, message: "No credentials" })
-                if (GameManager.FindIndexByUserID(userID) != -1) rej({ error: true, message: "User already in a game!" })
-                let filter = require('leo-profanity')
-                filter.loadDictionary()
-                gameName = filter.clean(info.name)
-                let newGame = Game(user, info.playerCount, info.cardCount, gameName)
-                GameManager.games.push(newGame)
-                res(newGame) //send info back so client can join 
-            } catch (err) { rej(err) }
+                let user = await User.findById(userID);
+                if (!user) {
+                    reject({ error: true, message: "No credentials" });
+                }
+                if (GameManager.FindIndexByUserID(userID) != -1) {
+                    reject({ error: true, message: "User already in a game!" });
+                }
+                //cleaning name
+                let filter = require('leo-profanity');
+                filter.loadDictionary();
+                gameName = filter.clean(info.name);
+
+                let newGame = Game(user, info.playerCount, info.cardCount, gameName);
+                GameManager.games.push(newGame);//
+                GameManager.EmitGames();
+                resolve(newGame) //send info back so client can join 
+            } catch (err) { reject(err); };
         })
     },
     DeleteGame: (gameID) => {
         try {
-            let gameIndex = GameManager.FindIndexByGameID(gameID)
-            GameManager.games.splice(gameIndex, 1)
-            return { deleted: true }
+            let gameIndex = GameManager.FindIndexByGameID(gameID);
+            clearInterval(GameManager.games[gameIndex].moveTimer)
+            GameManager.games.splice(gameIndex, 1);
+            return { deleted: true };
         }
         catch {
-            return { deleted: false, games: this.games } //return games to reload if error?
+            return { deleted: false, games: this.games }; //return games to reload if error?
         }
     },
     AddUser: (userID, gameID) => {
-        return new Promise((res, rej) => {
-            let gameIndex = GameManager.FindIndexByGameID(gameID) //if we search by user itll ignore because user no longer in game
+        return new Promise((resolve, reject) => {
+            let gameIndex = GameManager.FindIndexByGameID(gameID); //if we search by user itll ignore because user no longer in game
             if (gameIndex == -1) rej({ error: true, message: "Game not found" })
             try {
                 User.findById(userID)
                     .then(user => {
-                        GameManager.games[gameIndex].AddUser(user)
-                        res(GameManager.games[gameIndex])  //send game info after added)
-                    }).catch(err => rej(err))
-            } catch (err) { rej(err) }
+                        GameManager.games[gameIndex].AddUser(user);
+                        GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
+                        resolve(true)  //send game info after added)
+                    }).catch(err => reject(err))
+            } catch (err) { reject(err) }
         })
     },
     RemoveUser: userID => {
-        return new Promise((res, rej) => {
+        return new Promise((resolve, reject) => {
             try {
                 let gameIndex = GameManager.FindIndexByUserID(userID)
-                if (gameIndex == -1) rej({ error: true, message: "Game not found" })
+                if (gameIndex == -1) reject({ error: true, message: "Game not found" })
                 GameManager.games[gameIndex].RemoveUser(userID)
-                if (response.deleted) {
-                    let id = GameManager.games[gameIndex].id
-                    GameManager.games.splice(gameIndex, 1)
-                    res({ id: id, deleted: true }) //if socket catches deleted we stop broadcasting data
-                }
-                else res({ deleted: false, clientInfo: GameManager.games[gameIndex].ClientInfo() })
-            } catch (err) { rej(err) }
+                    .then(g => {
+                        if (g.status == "DELETE") {
+                            clearInterval(GameManager.games[gameIndex].moveTimer)
+                            GameManager.games.splice(gameIndex, 1)
+                            resolve() //resolve id to leave room
+                        }
+                        else {
+                            GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
+                            resolve();
+                        }
+                    })
+            } catch (err) { reject(err) }
         })
     },
     HandleClick: (userID, guess) => {
         return new Promise((resolve, reject) => {
             try {
                 let gameIndex = GameManager.FindIndexByUserID(userID)
-                if (gameIndex == -1) rej({ error: true, message: "User not in game" })
-                GameManager.games[gameIndex].HandleClick(userID, guess) //handle click will validate they can click and throw errors if not
-                resolve(() => EmitInfo(index))
-            } catch (err) { reject(err) }
-        })
-    },
-    ResetCards: gameID => {
-        return new Promise((resolve, reject) => {
-            try {
-                let gameIndex = GameManager.FindIndexByGameID(gameID)
-                if (gameIndex == -1) reject({ error: true, message: "Game not found?" })
-                setTimeout(() => {
-                    try {
-                        GameManager.games[gameIndex].ResetCards()
-                        resolve(() => EmitInfo(index))
-                    } catch {
-                        reject({ error: true, message: "Game was Deleted" })
-                    }
-
-                }, 3000)
+                if (gameIndex == -1) reject({ error: true, message: "User not in game" })
+                if (GameManager.games[gameIndex].moveTimer) clearInterval(GameManager.games[gameIndex].moveTimer);
+                //Handle Click
+                GameManager.games[gameIndex].HandleClick(userID, guess)
+                    .then(game => {
+                        //Set move timer
+                        GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
+                        //If resetting broadcast 2x
+                        if (game.status == "RESETTING") {
+                            GameManager.games[gameIndex].ResetCards()
+                            setTimeout(() => {
+                                GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo())
+                                if (GameManager.games[gameIndex].users.filter(u => u.active).length >= 2){ //if more than 2 people start move timer
+                                    GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
+                                }
+                                resolve()
+                            }, 3000)
+                        }
+                        //If Gameober set timeout to delete game
+                        else if (game.status == "GAME_OVER") {
+                            setTimeout(() => {
+                                DeleteGame(GameManager.games[gameIndex].id)
+                            }, 10000)
+                            resolve()
+                        }
+                        else {
+                            GameManager.EmitInfo(gameIndex)
+                            GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
+                            resolve();
+                        }
+                    })
             } catch (err) { reject(err) }
         })
     },
     SkipUser: userID => {
         return new Promise((resolve, reject) => {
             try {
-                let index = FindIndexByUserID(userID)
-                GameManager.games[index].NextTurn()
-                resolve(() => EmitInfo(index))
+                let gameIndex = FindIndexByUserID(userID)
+                GameManager.games[gameIndex].NextTurn()
+                resolve(() => GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo()))
             }
             catch (err) {
                 reject(err)
             }
         })
     },
-    EmitInfo: gameIndex => events.emit("CLIENT_INFO", GameManager.games[gameIndex].ClientInfo())
+    EmitInfo: info => GameManager.events.emit("CLIENT_INFO", info),
+    EmitGames: _ => {
+        let games = GameManager.GetOpenGames();
+        if (games.length == 0 && GameManager.openGames.length != 0) {
+            GameManager.events.emit("GAME_LIST", [])
+            return
+        }
+        else if (!arrEquals( //only emit games if gamelist has changed
+            GameManager.openGames.map(g => g.id),
+            games.map(g => g.id)
+        )) {
+            GameManager.openGames = games
+            GameManager.events.emit("GAME_LIST", openGames)
+            return
+        }
+    },
+    EmitMessage: (id, message) => GameManager.events.emit("GAME_MESSAGE", { id: id, message: message }),
+
+    SetMoveTimer: id => setInterval(() => {
+        let gameIndex = GameManager.FindIndexByGameID(id); //find index again here for closure
+        if (gameIndex != -1) {
+            GameManager.games[gameIndex].NextTurn();
+            GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
+            GameManager.EmitMessage(id, "Times Up!");
+        }
+    }, 45000),
 }
+
 

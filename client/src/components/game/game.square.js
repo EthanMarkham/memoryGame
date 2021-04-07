@@ -1,5 +1,4 @@
 const GameSquare = ({ id, clickable, showLabels, civ, image, handleClick }) => {
-    console.log('render')
     return (
         <button
             className="square"

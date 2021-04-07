@@ -27,26 +27,17 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             if (data.game) {
                 copy.game.listening = true
                 copy.gameList.listening = false
+                copy = setGameInfo(copy, state, data)
             }
             else {
                 copy.game = { id: null, status: "WAITING", squares: [], round: 0, message: '', users: [], showLabels: true, listening: false }
                 copy.pageIndex = 1
                 copy.game.listening = false
-                copy.gameList.listening = true
+                copy.gameList = {games: data.openGames, listening: true}
             }
             return copy
         case "GAME_INFO":
-            copy.gameList.listening = false //stop listening to games
-            copy = { ...copy, game: { ...data, listening: copy.game.listening } }
-            copy.game.squares = copy.game.squares.map((s, index) => {
-                const clickable = (s.image === "/cards/back.PNG" && copy.game.status === "ONGOING" && copy.game.users.find(u => u.upNext).username === copy.auth.username)
-                if (state.game.squares.length === 0 && copy.game.squares.length > 0) return { ...s, clickable: clickable, newSquare: true }
-                let flipping = (state.game.squares.length > 0 && state.game.squares[index].image !== s.image) ? true : false; //adding these values for animations
-                if (flipping) return { ...s, clickable: clickable, flipping: flipping }
-                else return { ...s, clickable: clickable }
-            })
-            if (data.status === "GAME_OVER") copy.pageIndex = 5
-            else copy.pageIndex = 3
+            copy = setGameInfo(copy, state, data)
             return copy
         case "QUIT_GAME":
             let game = copy.game
@@ -57,13 +48,7 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
         case "GAME_LIST":
             copy.gameList.games = data
             return copy
-        case "GAME_NEW":
-            copy.pageIndex = 2
-            return copy
-        case "GAME_JOIN":
-            copy.pageIndex = 1
-            copy.gameList.listening = true
-            return copy
+
         case "ERROR":
             copy.error.message = data
             copy.error.show = true
@@ -104,4 +89,17 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
         default:
             return copy;
     }
+}
+function setGameInfo(copy, state, {game}) {
+    copy = { ...copy, game: { ...game, listening: copy.game.listening } }
+    copy.game.squares = copy.game.squares.map((s, index) => {
+        const clickable = (s.image === "/cards/back.PNG" && copy.game.status === "ONGOING" && copy.game.users.find(u => u.upNext).username === copy.auth.username)
+        if (state.game.squares.length === 0 && copy.game.squares.length > 0) return { ...s, clickable: clickable, newSquare: true }
+        let flipping = (state.game.squares.length > 0 && state.game.squares[index].image !== s.image) ? true : false; //adding these values for animations
+        if (flipping) return { ...s, clickable: clickable, flipping: flipping }
+        else return { ...s, clickable: clickable }
+    })
+    if (game.status === "GAME_OVER") copy.pageIndex = 5
+    else copy.pageIndex = 3
+    return copy
 }

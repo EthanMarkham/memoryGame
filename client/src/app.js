@@ -52,8 +52,7 @@ export default function App() {
   }, [state.error.show])
   useEffect(() => {
     if (state.game.listening) {
-      console.log('listening')
-      socket.emit("GET_GAME") //initial ask for game from server
+      console.log('listening');
       socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
     }
     else {
@@ -65,9 +64,11 @@ export default function App() {
   useEffect(() => {
     if (state.gameList.listening) {
       socket.on("GAME_LIST", data => dispatch({ type: "GAME_LIST", payload: data }))
-      socket.emit("LIST_GAMES")
     }
-    return (() => socket.off("GAME_LIST"))
+    return (() => {
+      socket.emit("LEAVE_GAME_LIST");
+      socket.off("GAME_LIST");
+    })
   }, [state.gameList.listening])
 
   useEffect(() => dispatch({ type: "SET_GRID", payload: windowSize }), [windowSize, state.game.squares.length])
@@ -80,7 +81,7 @@ export default function App() {
     handleClick: id => socket.emit("GAME_CLICK", id),
     handleQuit: id => socket.emit("QUIT_GAME", id),
     addGame: data => socket.emit("ADD_GAME", data),
-    joinGame: id => socket.emit("ADD_ME_TO_GAME", id)
+    joinGame: id => socket.emit("JOIN_GAME", id)
   }
   return (<>
     <Nav auth={state.auth} dispatch={dispatch} />

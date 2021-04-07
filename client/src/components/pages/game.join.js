@@ -28,7 +28,7 @@ function GameJoiner(props) {
         </Transition>}
       </div>
       <div className="row">
-        <div className="col"><button className="btn btn-primary btn-large btn-block" onClick={() => { dispatch({type: "GAME_NEW"}) }} >New Game</button></div>
+        <div className="col"><button className="btn btn-primary btn-large btn-block" onClick={() => { dispatch({type: "SWITCH_PAGE", payload: {pageIndex: 2}}) }} >New Game</button></div>
       </div>
         
     </div>

@@ -26,12 +26,17 @@ class Game {
         }
     }
     RemoveUser = id => {
-        this.users.find(u => u.id === id).active = false
-        if (this.users.filter(u => u.active).length === 0) return {deleted: true}
-        else {
-            this.NextTurn()
-            return {deleted: false}
-        }
+        return new Promise((resolve, reject) => {
+            this.users.find(u => u.id === id).active = false
+            if (this.users.filter(u => u.active).length === 0) {
+                this.status = "DELETE"
+                resolve(this) 
+            }
+            else {
+                if (this.users.find(u => u.id === id).upNext) this.NextTurn()
+                resolve(this)
+            }
+        })
     }
     ResetCards = _ => {
         this.squares.current = this.squares.defaults.slice()
@@ -53,50 +58,57 @@ class Game {
         }
     }
     HandleClick = (userID, guess) => {
-        const userIndex = this.users.findIndex(u => u.id == userID)
-        let guessIndex = this.squares.answers.findIndex(a => guess == a.id)
-        console.log(`Registering Click: User #${userIndex} is clicking ${guess} #${guessIndex} on this: ${this.id}`)
-        //verify they can make a guess
-        if (this.currentGuesses.length >= 2) throw Error("No guesses allowed rn!")
-        if (userIndex === -1) throw Error("You're not in this this?")
-        if (this.status !== "ONGOING") throw Error("this not in progress!")
-        if (!this.users[userIndex].upNext) throw Error("Wait your turn plz")
-        if (this.squares.current[guessIndex].value !== "*") throw Error("You already guessed that brrr")
+        return new Promise((resolve, reject) => {
+            const userIndex = this.users.findIndex(u => u.id == userID)
+            let guessIndex = this.squares.answers.findIndex(a => guess == a.id)
+            console.log(`Registering Click: User #${userIndex} is clicking ${guess} #${guessIndex} on this: ${this.id}`)
+            //verify they can make a guess
+            if (this.currentGuesses.length >= 2) reject("No guesses allowed rn!")
+            if (userIndex === -1) reject("You're not in this this?")
+            if (this.status !== "ONGOING") reject("this not in progress!")
+            if (!this.users[userIndex].upNext) reject("Wait your turn plz")
+            if (this.squares.current[guessIndex].value !== "*") reject("You already guessed that brrr")
+    
+            //update new values
+            this.squares.current[guessIndex] = this.squares.answers[guessIndex]
+            this.squares.current[guessIndex].flipped = true
+            this.currentGuesses.push({ index: guessIndex, value: this.squares.answers[guessIndex].value })
+    
+            //if guess at 2 look for match
+            if (this.currentGuesses.length === 2) {
+                this.resetting = true
+                this.round++
+                //get rid of old flipped for frontend
+                if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
+                    this.message = "Nice Match!"
+                    //set match colors for two squares
+                    this.squares.current[this.currentGuesses[0].index].matchColor = this.users[userIndex].color
+                    this.squares.current[guessIndex].matchColor = this.users[userIndex].color
+    
+                    //update new default squares and inc user match count
+                    this.squares.defaults = this.squares.current.slice()
+                    this.users[userIndex].matches++
+    
+                    //if default squares does not contain '*'' values were done
+                    if (this.squares.defaults.findIndex(s => s.value === "*") === -1) {
+                        this.status = "GAME_OVER"
+                        this.resetting = false
+                        this.users = this.users.map(u => ({...u, active: false}))
+                        let winner = this.users.sort((a, b) => { return a.matches - b.matches })
+                        this.message = `this over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
+                        resolve(this)
 
-        //update new values
-        this.squares.current[guessIndex] = this.squares.answers[guessIndex]
-        this.squares.current[guessIndex].flipped = true
-        this.currentGuesses.push({ index: guessIndex, value: this.squares.answers[guessIndex].value })
-
-        //if guess at 2 look for match
-        if (this.currentGuesses.length === 2) {
-            this.resetting = true
-            this.round++
-            //get rid of old flipped for frontend
-            if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
-                this.message = "Nice Match!"
-                //set match colors for two squares
-                this.squares.current[this.currentGuesses[0].index].matchColor = this.users[userIndex].color
-                this.squares.current[guessIndex].matchColor = this.users[userIndex].color
-
-                //update new default squares and inc user match count
-                this.squares.defaults = this.squares.current.slice()
-                this.users[userIndex].matches++
-
-                //if default squares does not contain '*'' values were done
-                if (this.squares.defaults.findIndex(s => s.value === "*") === -1) {
-                    this.status = "GAME_OVER"
-                    this.resetting = false
-                    this.users = this.users.map(u => ({...u, active: false}))
-                    let winner = this.users.sort((a, b) => { return a.matches - b.matches })
-                    this.message = `this over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
+                    }
+                } else {
+                    this.message = "Oof! Try Again!"
+                    this.status = "RESETTING"
+                    this.NextTurn()
+                    resolve(this)
                 }
-            } else {
-                this.message = "Oof! Try Again!"
-                this.status = "RESETTING"
-                this.NextTurn()
             }
-        }
+            else resolve(this)
+        })
+        
     }
     ClientInfo = _ => {
         let squares = this.squares.current.map((sq, index) => {
