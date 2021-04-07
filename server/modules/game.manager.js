@@ -45,7 +45,7 @@ var GameManager = module.exports = {
                 gameName = filter.clean(info.name)
                 let newGame = Game(user, info.playerCount, info.cardCount, gameName)
                 GameManager.games.push(newGame)
-                res(newGame)
+                res(newGame) //send info back so client can join 
             } catch (err) { rej(err) }
         })
     },
@@ -77,7 +77,7 @@ var GameManager = module.exports = {
             try {
                 let gameIndex = GameManager.FindIndexByUserID(userID)
                 if (gameIndex == -1) rej({ error: true, message: "Game not found" })
-                response = GameManager.games[gameIndex].RemoveUser(userID)
+                GameManager.games[gameIndex].RemoveUser(userID)
                 if (response.deleted) {
                     let id = GameManager.games[gameIndex].id
                     GameManager.games.splice(gameIndex, 1)
@@ -88,30 +88,30 @@ var GameManager = module.exports = {
         })
     },
     HandleClick: (userID, guess) => {
-        return new Promise((res, rej) => {
+        return new Promise((resolve, reject) => {
             try {
                 let gameIndex = GameManager.FindIndexByUserID(userID)
                 if (gameIndex == -1) rej({ error: true, message: "User not in game" })
                 GameManager.games[gameIndex].HandleClick(userID, guess) //handle click will validate they can click and throw errors if not
-                res(GameManager.games[gameIndex]) //we send entire game info to check game conditions and broadcast different for gameover/reset
-            } catch (err) { rej(err) }
+                resolve(() => EmitInfo(index))
+            } catch (err) { reject(err) }
         })
     },
     ResetCards: gameID => {
-        return new Promise((res, rej) => {
+        return new Promise((resolve, reject) => {
             try {
                 let gameIndex = GameManager.FindIndexByGameID(gameID)
-                if (gameIndex == -1) rej({ error: true, message: "Game not found?" })
+                if (gameIndex == -1) reject({ error: true, message: "Game not found?" })
                 setTimeout(() => {
                     try {
                         GameManager.games[gameIndex].ResetCards()
-                        res(GameManager.games[gameIndex])
+                        resolve(() => EmitInfo(index))
                     } catch {
-                        rej({ error: true, message: "Game was Deleted" })
+                        reject({ error: true, message: "Game was Deleted" })
                     }
 
                 }, 3000)
-            } catch (err) { rej(err) }
+            } catch (err) { reject(err) }
         })
     },
     SkipUser: userID => {
@@ -119,12 +119,13 @@ var GameManager = module.exports = {
             try {
                 let index = FindIndexByUserID(userID)
                 GameManager.games[index].NextTurn()
-                resolve({ skipped: true, users: GameManager.games[index].users })
+                resolve(() => EmitInfo(index))
             }
             catch (err) {
                 reject(err)
             }
         })
-    }
+    },
+    EmitInfo: gameIndex => events.emit("CLIENT_INFO", GameManager.games[gameIndex].ClientInfo())
 }
 
