@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import {SocketContext} from '../context/socket';
+import React, { useState, useEffect } from 'react';
 
 function Nav(props) {
-  const { auth, setAuth } = props.authState
-  const socket = useContext(SocketContext);
+  const { auth, dispatch } = props
   const [logoutBtn, showLogout] = useState(false)
   
   const Logout = () => {
-    socket.emit("LOGOUT")
-    setAuth(false)
+    dispatch({type: "LOGOUT"})
   }
   useEffect(() => {
     if (auth.isAuth) showLogout(true)

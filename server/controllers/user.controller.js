@@ -5,18 +5,26 @@ const User = require("../model/user.model");
 const config = require('../config/config.json');
 
 module.exports.signUp = async (req, res) => {
+    var filter = require('leo-profanity');
+    filter.loadDictionary();
+
     const errors = validator.validationResult(req);
     const salt = await bcrypt.genSalt(10)
-    const {username,password} = req.body;
+    const { username, password } = req.body;
 
+    if (filter.check(username))
+        return res.status(400).json({
+            error: true,
+            message: "No Sir"
+        })
     if (!errors.isEmpty()) {
         return res.status(400).json({
             error: true,
-            messages: errors.errors.map(e=>e.msg)
+            messages: errors.errors.map(e => e.msg)
         });
     }
     try {
-        let user = await User.findOne({username})
+        let user = await User.findOne({ username })
         if (user) {
             return res.status(400).json({
                 error: true,
@@ -24,11 +32,11 @@ module.exports.signUp = async (req, res) => {
             });
         }
 
-        user = new User({username,password})
+        user = new User({ username, password })
         user.password = await bcrypt.hash(password, salt)
         await user.save()
 
-        const payload = {user: {id: user.id}}
+        const payload = { user: { id: user.id } }
 
         jwt.sign(payload, config.secret, { expiresIn: '2 days' },
             (err, token) => {
@@ -48,13 +56,13 @@ module.exports.login = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({
             error: true,
-            messages: errors.errors.map(e=>e.msg)
+            messages: errors.errors.map(e => e.msg)
         })
     }
 
-    const {username,password} = req.body;
+    const { username, password } = req.body;
     try {
-        let user = await User.findOne({username})
+        let user = await User.findOne({ username })
         if (!user)
             return res.status(400).json({
                 error: true,
@@ -68,10 +76,10 @@ module.exports.login = async (req, res) => {
                 message: "Incorrect Password!"
             })
 
-        const payload = {user: {id: user.id}}
+        const payload = { user: { id: user.id } }
 
         var token = jwt.sign(payload, config.secret, { expiresIn: '2 days' })
-        
+
         res.redirect(`/api/users/me/${token}`)
     } catch (e) {
         console.error(e);
@@ -84,7 +92,7 @@ module.exports.me = async (req, res) => {
     try {
         // request.user is getting fetched from Middleware after token authentication
         const user = await User.findById(req.userId);
-        res.json({username: user.username, token: req.params.jwtToken});
+        res.json({ username: user.username, token: req.params.jwtToken });
     } catch (e) {
         res.status(200).send({ error: true, message: "Error in Fetching user" });
     }
