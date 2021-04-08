@@ -11,17 +11,17 @@ var GameManager = module.exports = {
     GetAllGames: _ => GameManager.games,
     GetOpenGames: _ => {
         return GameManager.games
-            .filter(g => g.users.length < g.playerCount)
+            .filter(g => g.ActiveUsers().length < g.playerCount)
             .map(g => ({
-                players: g.users.length,
+                players: g.ActiveUsers().length,
                 maxPlayers: g.playerCount,
                 id: g.id,
-                name: g.name
+                name: g.gameName
             }))
     },
     FindIndexByUserID: userID => {
         try {
-            let gameSearch = GameManager.games.filter(g => g.status != "GAME_OVER").map(g => ({ id: g.id, users: g.users.filter(u => u.active).map(u => u.id) }));
+            let gameSearch = GameManager.games.filter(g => g.status != "GAME_OVER").map(g => ({ id: g.id, users: g.ActiveUsers().map(u => u.id) }));
             let tempIndex = gameSearch.findIndex(g => g.users.includes(userID));
             console.log(tempIndex, gameSearch)
             return (GameManager.FindIndexByGameID(gameSearch[tempIndex].id))
@@ -62,7 +62,7 @@ var GameManager = module.exports = {
     DeleteGame: (gameID) => {
         try {
             let gameIndex = GameManager.FindIndexByGameID(gameID);
-            clearInterval(GameManager.games[gameIndex].moveTimer)
+            clearTimeout(GameManager.games[gameIndex].moveTimer)
             GameManager.games.splice(gameIndex, 1);
             return { deleted: true };
         }
@@ -79,7 +79,7 @@ var GameManager = module.exports = {
                     .then(user => {
                         GameManager.games[gameIndex].AddUser(user);
                         GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
-                        resolve(true)  //send game info after added)
+                        resolve(GameManager.games[gameIndex].ClientInfo())  //send game info after added)
                     }).catch(err => reject(err))
             } catch (err) { reject(err) }
         })
@@ -92,11 +92,16 @@ var GameManager = module.exports = {
                 GameManager.games[gameIndex].RemoveUser(userID)
                     .then(g => {
                         if (g.status == "DELETE") {
-                            clearInterval(GameManager.games[gameIndex].moveTimer)
+                            console.log('deleting game')
+                            clearTimeout(GameManager.games[gameIndex].moveTimer)
                             GameManager.games.splice(gameIndex, 1)
                             resolve() //resolve id to leave room
                         }
                         else {
+                            clearTimeout(GameManager.games[gameIndex].moveTimer)
+                            if (GameManager.games[gameIndex].ActiveUsers().length > 1) { //if more than 1 people start move timer
+                                GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
+                            }
                             GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
                             resolve();
                         }
@@ -106,40 +111,37 @@ var GameManager = module.exports = {
     },
     HandleClick: (userID, guess) => {
         return new Promise((resolve, reject) => {
-            try {
-                let gameIndex = GameManager.FindIndexByUserID(userID)
-                if (gameIndex == -1) reject({ error: true, message: "User not in game" })
-                if (GameManager.games[gameIndex].moveTimer) clearInterval(GameManager.games[gameIndex].moveTimer);
-                //Handle Click
-                GameManager.games[gameIndex].HandleClick(userID, guess)
-                    .then(game => {
-                        //Set move timer
-                        GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
-                        //If resetting broadcast 2x
-                        if (game.status == "RESETTING") {
-                            GameManager.games[gameIndex].ResetCards()
-                            setTimeout(() => {
-                                GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo())
-                                if (GameManager.games[gameIndex].users.filter(u => u.active).length >= 2){ //if more than 2 people start move timer
-                                    GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
-                                }
-                                resolve()
-                            }, 3000)
-                        }
-                        //If Gameober set timeout to delete game
-                        else if (game.status == "GAME_OVER") {
-                            setTimeout(() => {
-                                DeleteGame(GameManager.games[gameIndex].id)
-                            }, 10000)
-                            resolve()
-                        }
-                        else {
-                            GameManager.EmitInfo(gameIndex)
+            let gameIndex = GameManager.FindIndexByUserID(userID)
+            if (gameIndex == -1) reject({ error: true, message: "User not in game" })
+            if (GameManager.games[gameIndex].moveTimer) clearTimeout(GameManager.games[gameIndex].moveTimer);
+            //Handle Click
+            GameManager.games[gameIndex].HandleClick(userID, guess)
+                .then(game => {
+                    //Set move timer
+                    GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
+                    //If resetting broadcast 2x
+                    if (game.status == "RESETTING") {
+                        setTimeout(() => {
+                            GameManager.games[gameIndex].ResetCards();
+                            GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
                             GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
-                            resolve();
-                        }
-                    })
-            } catch (err) { reject(err) }
+                            resolve()
+                        }, 3000)
+                    }
+                    //If Gameober set timeout to delete game
+                    else if (game.status == "GAME_OVER") {
+                        setTimeout(() => {
+                            DeleteGame(GameManager.games[gameIndex].id)
+                        }, 10000)
+                        resolve()
+                    }
+                    else {
+                        GameManager.EmitInfo(gameIndex)
+                        GameManager.games[gameIndex].moveTimer = GameManager.SetMoveTimer(game.id);
+                        resolve();
+                    }
+                })
+                .catch(e => reject(e))
         })
     },
     SkipUser: userID => {
@@ -155,6 +157,7 @@ var GameManager = module.exports = {
         })
     },
     EmitInfo: info => GameManager.events.emit("CLIENT_INFO", info),
+
     EmitGames: _ => {
         let games = GameManager.GetOpenGames();
         if (games.length == 0 && GameManager.openGames.length != 0) {
@@ -165,16 +168,18 @@ var GameManager = module.exports = {
             GameManager.openGames.map(g => g.id),
             games.map(g => g.id)
         )) {
+            console.log(games)
             GameManager.openGames = games
-            GameManager.events.emit("GAME_LIST", openGames)
+            GameManager.events.emit("GAME_LIST", GameManager.openGames)
             return
         }
     },
     EmitMessage: (id, message) => GameManager.events.emit("GAME_MESSAGE", { id: id, message: message }),
 
-    SetMoveTimer: id => setInterval(() => {
+    SetMoveTimer: id => setTimeout(() => {
         let gameIndex = GameManager.FindIndexByGameID(id); //find index again here for closure
-        if (gameIndex != -1) {
+
+        if (gameIndex != -1 ) {
             GameManager.games[gameIndex].NextTurn();
             GameManager.EmitInfo(GameManager.games[gameIndex].ClientInfo());
             GameManager.EmitMessage(id, "Times Up!");

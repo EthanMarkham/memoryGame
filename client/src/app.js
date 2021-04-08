@@ -37,8 +37,8 @@ export default function App() {
       socket.emit("LOGOUT") //tell socket to clear session, mb clean this up with logging out state?
     }
     return () => {
-      socket.off("USER_STATUS")
-      socket.off("LOGIN_SUCCESS")
+      socket.off("USER_STATUS", status => dispatch({ type: "STATUS", payload: status }))
+      socket.off("LOGIN_SUCCESS", () => socket.emit("GET_STATUS"))
     }
   }, [state.auth])
 
@@ -53,21 +53,25 @@ export default function App() {
   useEffect(() => {
     if (state.game.listening) {
       console.log('listening');
+      socket.emit("JOIN_GAME_LIST");
       socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
     }
     else {
       console.log('not listening')
     }
-    return (() => socket.off("GAME_INFO"))
+    return (() => socket.off("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
+    )
   }, [state.game.listening])
 
   useEffect(() => {
     if (state.gameList.listening) {
       socket.on("GAME_LIST", data => dispatch({ type: "GAME_LIST", payload: data }))
     }
-    return (() => {
+    else {
       socket.emit("LEAVE_GAME_LIST");
-      socket.off("GAME_LIST");
+    }
+    return (() => {
+      socket.off("GAME_LIST", data => dispatch({ type: "GAME_LIST", payload: data }))
     })
   }, [state.gameList.listening])
 

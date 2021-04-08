@@ -31,8 +31,8 @@ export const errorTransition = {
 }
 
 export const pageTransition = {
-    from: { opacity: 1, transform: 'rotateY(90deg)' },
-    enter: { opacity: 1, transform: 'rotateY(0deg)'},
-    leave: { opacity: 0, transform: 'rotateY(90deg)'},
-    config: config.gentle
+    from: { opacity: 1, transform: 'translate(-100%)' }, //rotateY(90deg)
+    enter: { opacity: 1, transform: 'translate(0);'}, //rotateY(0deg) 
+    leave: { opacity: 1, transform: 'translate(100%)'}, //rotateY(90deg)
+    config: config.default
 }

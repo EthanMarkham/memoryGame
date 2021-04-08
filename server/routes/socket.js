@@ -3,16 +3,19 @@ const config = require('../config/config.json');
 const GameManager = require('../modules/game.manager')
 
 exports = module.exports = function (io) {
+
   GameManager.events.on("CLIENT_INFO", gameInfo => {
+    console.log('sending info', gameInfo.id)
     io.to(`game:${gameInfo.id}`).emit('GAME_INFO', { game: gameInfo })
   });
   GameManager.events.on("GAME_LIST", games => {
-    console.log(games)
     io.to(`games`).emit('GAME_LIST', games)
+    console.log(games)
   });
   GameManager.events.on("GAME_MESSAGE", data => {
     io.to(`game:${data.id}`).emit('ERROR', data.message) //switch this so its not error just temp
   });
+
   io.on('connection', (socket) => {
     socket.emit('connected')
 
@@ -20,7 +23,7 @@ exports = module.exports = function (io) {
     socket.on("JOIN_GAME", gameID => handleJoinGame(gameID))
     socket.on("GET_STATUS", _ => handleCheckUserStatus())
 
-    socket.on("LIST_GAMES", _ => joinGameList())
+    socket.on("JOIN_GAME_LIST", _ => joinGameList())
 
     socket.on("GAME_CLICK", guess => handleGameClick(guess))
     socket.on("QUIT_GAME", gameID => handleQuitGame(gameID))
