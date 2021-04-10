@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from "react";
+const GameTimer = require('./game.timer').default
 
 export default function GameInfo(props) {
   const { state, handleQuit, dispatch } = props
   const { message, round, users, status, id } = state.game
 
   const nextTurn = (state.game.users.find(u => u.upNext)) ? state.game.users.find(u => u.upNext).username : "";
-
+  const timerEnables = (state.game.users.length > 1)
   const [labelHelper, setLabelHelper] = useState(false)
   const [leaveHelper, setLeaveHelper] = useState(false)
   
@@ -25,8 +26,9 @@ export default function GameInfo(props) {
       <div className="gameInfo">
         <div className="gameStats">
           <div className="stat">{message}</div>
-          <div className="stat" > Attempts: {round}</div>
           <div className="stat">{turnMessage}</div>
+          <div className="stat" > Attempts: {round}</div>
+          <GameTimer time={state.moveTimer} enabled={timerEnables}/>
         </div>
 
         <div className="userStats col-5">

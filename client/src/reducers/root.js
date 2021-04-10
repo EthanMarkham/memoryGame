@@ -33,12 +33,15 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
                 copy.game = { id: null, status: "WAITING", squares: [], round: 0, message: '', users: [], showLabels: true, listening: false }
                 copy.pageIndex = 1
                 copy.game.listening = false
-                copy.gameList = {games: data.openGames, listening: true}
+                copy.gameList = { games: data.openGames, listening: true }
             }
             return copy
         case "GAME_INFO":
             copy = setGameInfo(copy, state, data)
             return copy
+        case "GAME_TIMER":
+            copy.moveTimer = parseInt(data);
+            return copy;
         case "QUIT_GAME":
             let game = copy.game
             copy = { ...copy, game: { ...game, status: "QUIT", listening: false } }
@@ -90,7 +93,7 @@ export default function reducer(state, action) { //PAGGES:  0 Loader || 1 GameJo
             return copy;
     }
 }
-function setGameInfo(copy, state, {game}) {
+function setGameInfo(copy, state, { game }) {
     copy = { ...copy, game: { ...game, listening: copy.game.listening } }
     copy.game.squares = copy.game.squares.map((s, index) => {
         const clickable = (s.image === "/cards/back.PNG" && copy.game.status === "ONGOING" && copy.game.users.find(u => u.upNext).username === copy.auth.username)

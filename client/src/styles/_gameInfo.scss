@@ -39,7 +39,19 @@
     color: $darkBrown;
     height: 99%;
     border-radius: 20px 20px 10px 10px;
+    display: flex;
+    flex-flow: wrap row;
 
+    .stat{
+      padding-left: 3%;
+      width: 50%;
+      flex-grow: 1; /* default 0 */
+      flex-shrink: 3; /* default 1 */
+      display: flex;
+      max-height: 50%;
+      padding-bottom: 3px;
+      border-radius: 3px;
+    }
   }
 
   .userStats {

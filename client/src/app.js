@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from "react";
 import { useSpring, useTransition, animated as a } from 'react-spring'
 import { checkAuth } from './helpers/helpers';
 import { initialState } from './helpers/initialState';
-import { squareSprings, errorTransition, pageTransition } from './helpers/transitions';
+import { squareSprings, errorTransition, pageTransition, timerTransition } from './helpers/transitions';
 const reducer = require('./reducers/root').default
 const useWindowSize = require('./hooks/useWindowSize').default
 
@@ -54,13 +54,16 @@ export default function App() {
     if (state.game.listening) {
       console.log('listening');
       socket.emit("JOIN_GAME_LIST");
-      socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
+      socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }));
+      socket.on("GAME_TIMER", time => dispatch({type: "GAME_TIMER", payload: time}));
     }
     else {
       console.log('not listening')
     }
-    return (() => socket.off("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }))
-    )
+    return (() => {
+      socket.off("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }));
+      socket.off("GAME_TIMER", time => dispatch({type: "GAME_TIMER", payload: time}));
+    })
   }, [state.game.listening])
 
   useEffect(() => {
@@ -77,10 +80,14 @@ export default function App() {
 
   useEffect(() => dispatch({ type: "SET_GRID", payload: windowSize }), [windowSize, state.game.squares.length])
 
-  const pageAnimations = useTransition(state.pageIndex, p => p, pageTransition)
-  const errorTrans = useTransition(state.error.show, null, errorTransition)
+  const pageAnimations = useTransition(state.pageIndex, p => p, pageTransition);
+  const errorTrans = useTransition(state.error.show, null, errorTransition);
+  const timerTrans = useTransition(state.moveTimer, null, timerTransition);
   //const squareSprings = useSprings(state.game.squares.length, items.map(item => ({ opacity: item.opacity })))
 
+  const transitions = {
+    timerTrans: timerTrans,
+  }
   const actions = {
     handleClick: id => socket.emit("GAME_CLICK", id),
     handleQuit: id => socket.emit("QUIT_GAME", id),
@@ -105,6 +112,7 @@ export default function App() {
           dispatch={dispatch}
           state={state}
           actions={actions}
+          transitions={transitions}
         />
       })}
     </div>

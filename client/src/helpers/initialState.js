@@ -20,6 +20,7 @@ export const initialState = {
         games: [], 
         listening: false 
     },
+    moveTimer: 45,
     error: {
         show: false,
         message: '',
