@@ -10,12 +10,13 @@ exports = module.exports = function (io) {
   });
   GameManager.events.on("GAME_LIST", games => {
     io.to(`games`).emit('GAME_LIST', games)
-    console.log(games)
   });
   GameManager.events.on("GAME_MESSAGE", data => {
     io.to(`game:${data.id}`).emit('ERROR', data.message) //switch this so its not error just temp
+  }); 
+  GameManager.events.on("GAME_TIMER", data => {
+    io.to(`game:${data.id}`).emit('GAME_TIMER', data.timeLeft) 
   });
-
   io.on('connection', (socket) => {
     socket.emit('connected')
 
@@ -45,7 +46,6 @@ exports = module.exports = function (io) {
     const handleCheckUserStatus = _ => {
       GameManager.CheckUserStatus(socket.handshake.session.userID)
         .then(gameInfo => {
-          console.log(gameInfo)
           socket.join(`game:${gameInfo.id}`)
           socket.emit('USER_STATUS', { game: gameInfo })
         })

@@ -1,3 +1,4 @@
+import React from 'react';
 import { animated as a } from 'react-spring'
 const GameInfo = require('./game/game.info').default
 const GameBoard = require('./game/game.board').default

@@ -11,7 +11,7 @@ class Game {
         this.status = (this.playerCount !== 1) ? "WAITING" : "ONGOING"
         this.message = (this.playerCount !== 1) ? "Waiting for players!" : "Guess a square!"
         this.round = 0
-        this.inProgress = this.playerCount !== 1
+        this.inProgress = true
         this.gameName = gameName
         this.currentGuesses = []
     }
@@ -77,15 +77,15 @@ class Game {
             let guessIndex = this.squares.answers.findIndex(a => guess == a.id)
             console.log(`Registering Click: User #${userIndex} is clicking ${guess} #${guessIndex} on this: ${this.id}`, this.currentGuesses)
             //verify they can make a guess
-            if (this.currentGuesses.length >= 2) reject("No guesses allowed rn!")
-            if (userIndex === -1) reject("You're not in this this?")
-            if (this.status !== "ONGOING") reject("this not in progress!")
-            if (!this.users[userIndex].upNext) reject("Wait your turn plz")
-            if (this.squares.current[guessIndex].value !== "*") reject("You already guessed that brrr")
+            if (this.currentGuesses.length >= 2) reject("No guesses allowed rn!");
+            if (userIndex === -1) reject("You're not in this this?");
+            if (this.status !== "ONGOING") reject("this not in progress!");
+            if (!this.users[userIndex].upNext) reject("Wait your turn plz");
+            if (this.squares.current[guessIndex].value !== "*") reject("You already guessed that brrr");
 
             //update new values
-            this.squares.current[guessIndex] = this.squares.answers[guessIndex]
-            this.squares.current[guessIndex].flipped = true
+            this.squares.current[guessIndex] = this.squares.answers[guessIndex];
+            this.squares.current[guessIndex].flipped = true;
             this.currentGuesses.push({ index: guessIndex, value: this.squares.answers[guessIndex].value })
 
             //if guess at 2 look for match
@@ -185,4 +185,4 @@ function ucFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-module.exports.Game = (user, playerCountString, size, gameName) => { return new Game(user, playerCountString, size, gameName) }
+module.exports = {Game: Game}
