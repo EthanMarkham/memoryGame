@@ -1,6 +1,4 @@
-import React from 'react';
 import { Transition } from 'react-spring/renderprops'
-
 
 function GameJoiner(props) {
   const { dispatch, games, joinGame } = props

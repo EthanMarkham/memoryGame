@@ -1,12 +1,12 @@
-import React, { useEffect, useReducer } from "react";
+import React, { Suspense, useEffect, useReducer } from "react";
 import { useSpring, useTransition, animated as a } from 'react-spring'
 import { checkAuth } from './helpers/helpers';
 import { initialState } from './helpers/initialState';
 import { squareSprings, errorTransition, pageTransition, timerTransition } from './helpers/transitions';
+import { SocketContext, socket } from './context/socket';
+
 const reducer = require('./reducers/root').default
 const useWindowSize = require('./hooks/useWindowSize').default
-
-const socket = require("./context/socket").socket;
 
 const pages = require('./components/pages').default
 const Nav = require('./components/nav').default
@@ -55,14 +55,14 @@ export default function App() {
       console.log('listening');
       socket.emit("JOIN_GAME_LIST");
       socket.on("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }));
-      socket.on("GAME_TIMER", time => dispatch({type: "GAME_TIMER", payload: time}));
+      socket.on("GAME_TIMER", time => dispatch({ type: "GAME_TIMER", payload: time }));
     }
     else {
       console.log('not listening')
     }
     return (() => {
       socket.off("GAME_INFO", data => dispatch({ type: "GAME_INFO", payload: data }));
-      socket.off("GAME_TIMER", time => dispatch({type: "GAME_TIMER", payload: time}));
+      socket.off("GAME_TIMER", time => dispatch({ type: "GAME_TIMER", payload: time }));
     })
   }, [state.game.listening])
 
@@ -95,27 +95,33 @@ export default function App() {
     joinGame: id => socket.emit("JOIN_GAME", id)
   }
   return (<>
-    <Nav auth={state.auth} dispatch={dispatch} />
-    {errorTrans.map(({ item, key, props }) =>
-      item
-        ? <a.div style={props} key={key} className="errorHolder">
-          <b>Error!</b>  <span>{state.error.message}</span>
-        </a.div>
-        : null)
-    }
-    <div className="page-container">
-      {pageAnimations.map(({ item, props, key }) => {
-        const Page = pages[item]
-        return <Page
-          key={key}
-          style={props}
-          dispatch={dispatch}
-          state={state}
-          actions={actions}
-          transitions={transitions}
-        />
-      })}
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+      <SocketContext.Provider value={socket}>
+        <Nav auth={state.auth} dispatch={dispatch} />
+        {errorTrans.map(({ item, key, props }) =>
+          item
+            ? <a.div style={props} key={key} className="errorHolder">
+              <b>Error!</b>  <span>{state.error.message}</span>
+            </a.div>
+            : null)
+        }
+        <div className="page-container">
+          {pageAnimations.map(({ item, props, key }) => {
+            const Page = pages[item]
+            return (
+              <a.div className='animatedDiv' style={{ ...props }}>
+                <Page
+                  key={key}
+                  dispatch={dispatch}
+                  state={state}
+                  actions={actions}
+                  transitions={transitions}
+                />
+              </a.div>)
+          })}
+        </div>
+      </SocketContext.Provider>
+    </Suspense>
   </>)
 }
 

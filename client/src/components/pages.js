@@ -1,31 +1,18 @@
 import React from 'react';
-import { animated as a } from 'react-spring'
-const GameInfo = require('./game/game.info').default
+const GameInfo = React.lazy(() => import('./game/game.info'));
 const GameBoard = require('./game/game.board').default
-const Login = require('./pages/login').default
+const Login =  React.lazy(() => import('./pages/login'));
 const GameJoiner = require('./pages/game.join').default
 const GameCreator = require('./pages/game.new').default
 const GameOver = require('./pages/game.over').default
 const Loader = require("react-loader-spinner").default;
 
 const pages = [
-    ({style}) => (
-        <a.div className='animatedDiv' style={{ ...style }}>
-            <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />
-        </a.div>
-    ),
-    ({style, dispatch, state, actions }) => (
-        <a.div className='animatedDiv' style={{ ...style }}>
-            <GameJoiner dispatch={dispatch} games={state.gameList.games} joinGame={actions.joinGame} />
-        </a.div>
-    ),
-    ({style, dispatch, state, actions }) => (
-        <a.div  className='animatedDiv' style={{ ...style }}>
-            <GameCreator dispatch={dispatch} addGame={actions.addGame} />
-        </a.div>
-    ),
-    ({style, dispatch, state, actions }) => (
-        <a.div className='animatedDiv' style={{ ...style }}>
+    () => <Loader className="loader" type="Rings" color="#00BFFF" height={80} width={80} />,
+    ({dispatch, state, actions }) => <GameJoiner dispatch={dispatch} games={state.gameList.games} joinGame={actions.joinGame} />,
+    ({dispatch, actions }) => <GameCreator dispatch={dispatch} addGame={actions.addGame} />,
+    ({dispatch, state, actions }) => (
+        <>
             <GameBoard
                 state={state}
                 dispatch={dispatch}
@@ -36,17 +23,9 @@ const pages = [
                 handleQuit={actions.handleQuit}
                 dispatch={dispatch} 
                 />
-        </a.div>
+        </>
     ),
-    ({style, dispatch}) => (
-        <a.div  className='animatedDiv' style={{ ...style }}>
-          <Login dispatch={dispatch} />
-        </a.div>
-    ),
-    ({style, dispatch, state}) => (
-        <a.div className='animatedDiv' style={{ ...style }}>
-          <GameOver state={state} dispatch={dispatch} />
-        </a.div>
-    ),
+    ({dispatch}) => <Login dispatch={dispatch} />,
+    ({dispatch, state}) => <GameOver state={state} dispatch={dispatch} />,
 ]
 export default pages

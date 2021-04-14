@@ -48,6 +48,8 @@ app.use(express.static('public'))
 //routes
 app.use('/api/users', usersRouter);
 app.use('/api/admin', adminRouter)
+app.get('*', (req, res) => res.sendFile('index.html', {root: __dirname+'/public'}));
+
 //app.use(express.static(path.join(__dirname, 'client/build')))
 
 //Errors
