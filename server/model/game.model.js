@@ -1,3 +1,4 @@
+const { Resolver } = require('dns');
 const fs = require('fs')
 const shortid = require('shortid');
 class Game {
@@ -36,39 +37,60 @@ class Game {
     }
     RemoveUser = id => {
         return new Promise((resolve, reject) => {
-            this.users.find(u => u.id === id).active = false
-            if (this.ActiveUsers().length === 0) {
+            this.users.find(u => u.id == id).active = false
+            if (this.ActiveUsers().length == 0) {
                 this.status = "DELETE";
                 this.inProgress = false;
                 resolve(this);
             }
             else {
-                if (this.users.find(u => u.id === id).upNext) this.NextTurn().then(resolve(this))
+                if (this.users.find(u => u.id == id).upNext) {
+                    this.NextTurn()
+                        .then(_ => resolve(this));
+                }
+                else resolve(this);
             }
-        })
+        });
     }
-    ResetCards = _ => {
-        this.squares.current = this.squares.defaults.slice();
-        this.currentGuesses = [];
-        this.resetting = false;
-        this.status = "ONGOING"
-        this.message = "Guess a Square"
+    ResetCards = (nextTurn, message) => {
+        return new Promise(resolve => {
+            this.squares.current = this.squares.defaults.slice();
+            this.currentGuesses = [];
+            this.resetting = false;
+            this.status = "ONGOING";
+            this.message = (message) ? message : "Guess a Square!";
+            if (nextTurn) this.NextTurn()
+                .then(_ => resolve(this));
+            else (resolve(this));
+        });
     }
     NextTurn = _ => {
-        return new Promise((resolve, reject) => {
-            if (this.ActiveUsers().length >= 1) {
-                console.log('next turn')
-                var next, loops = 0;
+        return new Promise((resolve) => {
+            if (this.ActiveUsers().length >= 1
+                || this.ActiveUsers().findIndex(u => u.upNext) != -1) {
+                console.log('next turn', this.ActiveUsers().findIndex(u => u.upNext) != -1)
+                var next;
                 var cur = this.users.findIndex(u => u.upNext);
+                const defaultUser = this.users.findIndex(u => u.upNext); //store the default so if loop breaks and it cant find active user do nothing
+                var loops = 0;
                 do {
                     next = (cur + 1 < this.users.length) ? cur + 1 : 0;
                     this.users[cur].upNext = false;
                     this.users[next].upNext = true;
                     cur = (cur + 1 < this.users.length) ? cur++ : 0;
                     loops++;
-                } while (!this.users.find(u => u.upNext).active && loops < 100) //loop til we find active user
-                resolve()
+                } while (!this.users.find(u => u.upNext).active && loops < 50) //loop til we find active user or 50 loops
+                //if hit max loops go back to default users
+                if (loops == 50) {
+                    this.users[next].upNext = false;
+                    this.users[defaultUser].upNext = true;
+                }
             }
+            else {
+                if (this.ActiveUsers().length > 0) this.ActiveUsers()[0].upNext = true;
+            }
+            resolve();
+
         })
     }
     HandleClick = (userID, guess) => {
@@ -78,50 +100,55 @@ class Game {
             console.log(`Registering Click: User #${userIndex} is clicking ${guess} #${guessIndex} on this: ${this.id}`, this.currentGuesses)
             //verify they can make a guess
             if (this.currentGuesses.length >= 2) reject("No guesses allowed rn!");
-            if (userIndex === -1) reject("You're not in this this?");
-            if (this.status !== "ONGOING") reject("this not in progress!");
-            if (!this.users[userIndex].upNext) reject("Wait your turn plz");
-            if (this.squares.current[guessIndex].value !== "*") reject("You already guessed that brrr");
+            else if (userIndex === -1) reject("You're not in this this?");
+            else if (this.status !== "ONGOING") reject("this not in progress!");
+            else if (!this.users[userIndex].upNext) reject("Wait your turn plz");
+            else if (this.squares.current[guessIndex].value !== "*") reject("You already guessed that brrr");
+            else {
+                //update new values
+                this.squares.current[guessIndex] = this.squares.answers[guessIndex];
+                this.squares.current[guessIndex].flipped = true;
+                this.currentGuesses.push({ index: guessIndex, value: this.squares.answers[guessIndex].value })
+                this.message = "Guess Another!"
 
-            //update new values
-            this.squares.current[guessIndex] = this.squares.answers[guessIndex];
-            this.squares.current[guessIndex].flipped = true;
-            this.currentGuesses.push({ index: guessIndex, value: this.squares.answers[guessIndex].value })
+                //if guess at 2 look for match
+                if (this.currentGuesses.length === 2) {
+                    this.resetting = true
+                    this.round++
+                    //get rid of old flipped for frontend
+                    if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
+                        this.message = "Nice Match!"
+                        //set match colors for two squares
+                        this.squares.current[this.currentGuesses[0].index].matchColor = this.users[userIndex].color
+                        this.squares.current[guessIndex].matchColor = this.users[userIndex].color
 
-            //if guess at 2 look for match
-            if (this.currentGuesses.length === 2) {
-                this.resetting = true
-                this.round++
-                //get rid of old flipped for frontend
-                if (this.currentGuesses[0].value === this.currentGuesses[1].value) {
-                    this.message = "Nice Match!"
-                    //set match colors for two squares
-                    this.squares.current[this.currentGuesses[0].index].matchColor = this.users[userIndex].color
-                    this.squares.current[guessIndex].matchColor = this.users[userIndex].color
+                        //update new default squares and inc user match count
+                        this.squares.defaults = this.squares.current.slice()
+                        this.users[userIndex].matches++
 
-                    //update new default squares and inc user match count
-                    this.squares.defaults = this.squares.current.slice()
-                    this.users[userIndex].matches++
-
-                    //if default squares does not contain '*'' values were done
-                    if (this.squares.defaults.findIndex(s => s.value === "*") === -1) {
-                        this.status = "GAME_OVER"
-                        this.resetting = false
-                        this.users = this.users.map(u => ({ ...u, active: false }))
-                        let winner = this.users.sort((a, b) => { return a.matches - b.matches })
-                        this.message = `this over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
-                        resolve(this)
-
+                        //if default squares does not contain '*'' values were done
+                        if (this.squares.defaults.findIndex(s => s.value === "*") === -1) {
+                            this.status = "GAME_OVER"
+                            this.resetting = false;
+                            this.inProgress = false;
+                            let winner = this.users.sort((a, b) => { return a.matches - b.matches });
+                            this.message = (this.ActiveUsers().length > 1)
+                                ? `Game Over!!!! ${winner[0].username} won with ${winner[0].matches} matches!`
+                                : `Game Over!!!! ${winner[0].username} had ${winner[0].matches} matches!`;
+                            resolve(this);
+                        }
+                        else { //if match reset here. if not game manager will call after delay
+                            this.ResetCards(false, "Nice Match! Guess Again!");
+                            resolve(this);
+                        }
+                    } else {
+                        this.message = "Oof! No Match!";
+                        this.status = "RESETTING";
+                        resolve(this);
                     }
-                } else {
-                    this.message = "Oof! Try Again!"
-                    this.status = "RESETTING"
-                    if (this.ActiveUsers().length > 1) this.NextTurn()
-                        .then(_ => resolve(this))
-                    else {resolve(this)}
                 }
+                else resolve(this);
             }
-            else resolve(this)
         })
 
     }
@@ -145,8 +172,8 @@ class Game {
             id: this.id
         })
     }
-    UpNext = _ => this.users.find(u => u.upNext)
-    ActiveUsers = _ => this.users.filter(u => u.active)
+    UpNext = _ => this.users.find(u => u.upNext);
+    ActiveUsers = _ => this.users.filter(u => u.active);
 }
 //Helper functions
 function getthisValues(size) {
@@ -185,4 +212,4 @@ function ucFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-module.exports = {Game: Game}
+module.exports = { Game: Game }

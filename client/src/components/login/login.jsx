@@ -27,7 +27,7 @@ function Login(props) {
     return (
         <div className="loginContainer">
             <form onSubmit={handleSubmit}>
-                <div class="formGroup">
+                <div className="formGroup">
                     <label htmlFor="username">Username</label>
                     <input
                         type="text"

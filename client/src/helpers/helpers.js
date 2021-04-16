@@ -27,7 +27,7 @@ export const checkAuth = () => {
   return new Promise((resolve, reject) => {
     let token = localStorage.getItem('jwt')
     if (token !== "undefined" && token) {
-      fetch(`http://localhost:5000/api/users/me/${token}`)
+      fetch(`/api/users/me/${token}`)
         .then(response => response.json())
         .then(data => resolve(data))
         .catch(err => reject(err))
@@ -36,7 +36,7 @@ export const checkAuth = () => {
   })
 }
 export const login = (data, action="login") => {
-  let url = (action === 'login') ? "http://localhost:5000/api/users/login" : "http://localhost:5000/api/users/register"
+  let url = (action === 'login') ? "/api/users/login" : "/api/users/register"
   return new Promise((resolve, reject) => {
     fetch(url, {
       method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -53,7 +53,6 @@ export const login = (data, action="login") => {
     })
       .then(response => response.json())
       .then((data) => {
-        console.log(data)
         if (data.error) {
           reject(data.message)
           return

@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { SocketContext } from 'context/socket';
+import React, { useState, useEffect, useContext } from "react";
+import { SocketContext } from '../../context/socket';
 
 function PreGame(props) {
     const [games, setGames] = useState([]);
     const [gameName, setGameName] = useState("");
-    const [playerCount, setPlayerCount] = userState(1);
+    const [playerCount, setPlayerCount] = useState(1);
     const [cardCount, setCardCount] = useState(48);
-    const [action, setAction] = 0; //0 for Joining OR 1 for Creating
+    const [action, setAction] = useState(1); //1 for Joining OR 0 for Creating
     const socket = useContext(SocketContext);
 
     useEffect(() => {
-        socket.emit("LEAVE_GAME_LIST");
-        socket.on("GAME_LIST", data => setGames(data));
+        let mounted = true;
+        if (mounted) socket.emit("JOIN_GAME_LIST"); //join socket room
+        if (mounted) socket.emit("GET_GAME_LIST");   //ask for open games
+        socket.on("GAME_LIST", data => {if (mounted) setGames(data); });
 
         return (() => {
-            socket.off("GAME_LIST", data => setGames(data));
+            socket.emit("LEAVE_GAME_LIST");
+            socket.off("GAME_LIST", data => {if (mounted) setGames(data); });
+            mounted = false;
         })
     }, []);
 
@@ -24,9 +28,10 @@ function PreGame(props) {
         socket.emit("ADD_GAME", { playerCount: playerCount, cardCount: cardCount, name: gameName })
     }
 
-    return (
-        <div className="container">
-            {(action === 0) ?
+return (
+    <>
+        {(action === 0) ?
+            <div className="container">
                 <form onSubmit={handleNewGameSubmit}>
                     <div className="form-group">
                         <label htmlFor="name">Name:</label>
@@ -56,27 +61,24 @@ function PreGame(props) {
                     </div>
                     <br />
                     <div className="row">
-                        <div className="col"><button className="btn-lg btn-block btn-secondary" onClick={() => { dispatch({ type: "SWITCH_PAGE", payload: { pageIndex: 1 } }) }} type="button">Join Game</button></div>
+                        <div className="col"><button className="btn-lg btn-block btn-secondary" onClick={() => setAction(1)} type="button">Join Game</button></div>
                         <div className="col"><button className="btn-lg btn-block btn-primary" type="submit" disabled={gameName === ""}>Create Game</button></div>
                     </div>
                 </form>
-                :
+            </div>
+            :
+            <div className="container">
                 <div className="gameList">
                     <h2>{games.length} games found!</h2>
-                    {games.length > 0 && <Transition
-                        items={games} keys={item => item.id}
-                        from={{ transform: 'translate3d(0,-40px,0)' }}
-                        enter={{ transform: 'translate3d(0,0px,0)' }}
-                        leave={{ transform: 'translate3d(0,-40px,0)' }}>
-                        {item => props => <div style={props}>{<GameInfo game={item} joinGame={joinGame} />}</div>}
-                    </Transition>}
+                    {games.map(g => <GameInfo game={g} key={g.id} joinGame={joinGame} />)}
                 </div>
-            }
-            <div className="row">
-                <div className="col"><button className="btn btn-primary btn-large btn-block" onClick={() => setAction(action === 0 ? 1 : 0)} >{action === 0 ? "New Game" : "Join Game"}</button></div>
+                <div className="row">
+                    <div className="col"><button className="btn btn-primary btn-large btn-block" onClick={() => setAction(0)} >New Game</button></div>
+                </div>
             </div>
-        </div>
-    )
+        }
+    </>
+)
 }
 
 const GameInfo = (props) => {
