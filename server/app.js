@@ -25,7 +25,7 @@ const sharedsession = require("express-socket.io-session");
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -48,6 +48,8 @@ app.use(express.static('public'))
 //routes
 app.use('/api/users', usersRouter);
 app.use('/api/admin', adminRouter)
+app.get('*', (req, res) => res.sendFile('index.html', {root: __dirname+'/public'}));
+
 //app.use(express.static(path.join(__dirname, 'client/build')))
 
 //Errors

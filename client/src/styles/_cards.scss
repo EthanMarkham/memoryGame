@@ -12,20 +12,30 @@
       width: 100%;
     
       .square{
+        will-change: transform, opacity;
         margin: auto;
         background-color: transparent;
         height: 95%;
         width: 98%;
         border: none;
-        background: center no-repeat transparent;
-        background-size: contain;
         display: flex;
         justify-content: flex-start;
         filter: drop-shadow(5px 5px 4px #00000070);
-        //position: fixed;
-        will-change: transform, opacity;
-
+        .c {
+          background: center no-repeat transparent;
+          background-size: contain;
+          height: 100%;
+          width: 100%;
+          position: absolute;
+          will-change: transform, opacity;
+          z-index: 1;
+        }
+        .back{
+          background-image: url("http://localhost:5000//cards/back.PNG");
+          z-index: 2;
+        }
         label{
+          z-index: 3;
           margin-left: 5%;
           padding-left: 2%;
           padding-right: 2%;
