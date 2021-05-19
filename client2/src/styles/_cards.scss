@@ -1,0 +1,63 @@
+.game-board {
+    height: 87%;
+    width: 100%;
+    display: grid;
+    overflow: hidden;
+    //background: url("../assets/images/main_background.jpg");
+
+    .squareHolder {
+      display: flex;
+      height: 100%;
+      width: 100%;
+      justify-content: center;
+      padding: 1vh 1vw 1vh 1vw;
+    
+      .square{
+        display: flex;
+        will-change: transform, opacity;
+        background-color: transparent;
+        padding: 0;
+        border: none;
+        cursor: grab;
+
+        height: 100%;
+        aspect-ratio: 1 / 1;
+        margin: auto;
+
+        .c {          
+          background-repeat: no-repeat;
+          background-size: contain;
+          background-position: center;
+
+          height: 100%;
+          aspect-ratio: 1 / 1;
+
+          position: absolute;
+
+          will-change: transform, opacity;
+          z-index: 1;
+
+          border: 1px solid $prim3;
+          filter: drop-shadow(2px 2px 3px $prim3);
+        }
+        .back{
+          z-index: 2;
+        }
+        label{
+          z-index: 3;
+          margin-left: 5%;
+          padding-left: 2%;
+          padding-right: 2%;
+          font-weight: bold;
+          background-color: black;
+          width: auto;
+          color: white;
+          font-size: 0.8em;
+          align-self: flex-end;
+        }
+      }
+      .square:disabled{
+        cursor: none;
+      }
+    }
+  }

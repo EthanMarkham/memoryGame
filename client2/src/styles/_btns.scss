@@ -1,0 +1,38 @@
+.btn{
+    display: block;
+    cursor: pointer;
+    overflow: hidden;
+
+    padding: 0.5vh 0.5vh 0.5vh 1vh;
+    text-align: center;
+  
+    font-weight: 550;
+    letter-spacing: 0.1em;
+  
+    color: $prim4;
+    background: linear-gradient(45deg, $prim6, $prim8, $prim6);
+
+    border: 1px solid $prim6;
+    border-radius: 7px;
+    filter: drop-shadow(2px 2px 1px $prim5);
+  }
+  
+  .btn-outline{
+    //color: $prim7;
+    //border: 1px solid $prim9;
+   // background-color: $prim10;
+    //filter: drop-shadow(0 0 2px $prim5);
+  }
+  
+  .btn-block{
+    width: 100%;
+  }
+  
+  .btn:disabled{
+    cursor: not-allowed !important;
+    text-decoration: none !important; 
+  }
+  .btn:hover{
+    color: $prim9;
+    //flex-basis: 200%;
+  }

@@ -1,0 +1,142 @@
+@import "colors";
+
+html,
+body {
+  
+  margin: 0;
+  width: 100%;
+  background: url("../assets/images/main_background.jpg");
+  background-repeat: round;
+  //background-color: #191c21;
+  //background-color: $prim1;
+  overflow: hidden;
+  font-family: "trajan-pro-3", serif;
+  color: $prim5;
+}
+
+/*main background*/
+#root {
+  height: 100vh;
+}
+/*TODO ------------------ Place in separate files*/
+/* Loader */
+.loader {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.errorHolder{
+  position: fixed;
+  z-index: 2;
+  will-change: display, opacity;
+  display: flex;
+  background-color: $analred8;
+  width: 100%;
+  height: fit-content;
+  justify-content: center;
+  padding: 10px;
+  
+  b {
+    size: 4em;
+    color: $analred2;
+  }
+  span {
+    padding-left: 0.5em;
+  }
+}
+/*---------------------------------------*/
+.page-container {
+  width: 100%;
+  height: 92%;
+  position: fixed;
+  z-index: 1;
+
+  .animatedDiv {
+    width: 100%;
+    height: 92%;
+    position: fixed;
+    will-change: transform, opacity;
+    //DO I NEED>?>>
+    .game{
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+/*Imports*/
+@import "form";
+@import "btns";
+
+@import "nav";
+@import "login";
+@import "gameList";
+@import "cards";
+@import "gameInfo";
+@import "preGame";
+@import "gameOver";
+
+
+/*Media Queries*/
+@mixin responsive($maxWidth, $logoSize, $columns, $rows, $imageWidth, $imageHeight, $labelFontSize, $labelHeight, $columnSize, $rowSize) {
+  @media screen and (max-width: $maxWidth) {
+    nav {
+      h1 {
+        font-size: $logoSize;
+      }
+    }    
+  }
+  @media (min-width: 0) and (max-width: 767px) {
+    .gameInfo{
+        grid-template-columns: 1% 1fr 1fr 53% 15% 1%;
+    }
+  }
+  @media (min-width: 1350) {
+    .game>.gameInfo{
+        grid-template-columns: 1% 7% 7% auto 7% 1%;
+    }
+  }
+}
+
+
+
+/* SCROLL BARS */
+/* width */
+::-webkit-scrollbar {
+  width: 0.5em;
+  position: fixed;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: $prim8;
+  border-radius: 100%;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: $prim4;
+}
+
+.justify-right{
+  justify-content: flex-end !important;
+}
+
+
+
+
+//ACCENTS FOR DANGER // SUCCESS
+.danger-accent{
+  filter: drop-shadow(2px 2px 3px $analred4);
+}
+.success-accent{
+  filter: drop-shadow(2px 2px 3px $analgreen4);
+}

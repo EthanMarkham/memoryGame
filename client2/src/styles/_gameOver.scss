@@ -1,0 +1,102 @@
+@import "colors";
+.gameOverInfo{
+  will-change: transform, opacity;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+
+  .gameover{
+    width: 100%;
+    height: 100%;
+    padding-top: 2%;
+  
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-rows: 3em 20% 40% 25%;
+
+    .header{
+      display: block;
+      text-align: center;
+      grid-column-start: 1;
+      grid-column-end: 5;
+    }
+    .gameStats{
+      grid-column-start: 1;
+      grid-column-end: 5;
+
+      display: flex;
+      flex-flow: column;
+      >*{
+        flex: 1 33%;
+        text-align: center;
+      }
+    }
+    .leaderBoard{
+      h2{
+        background-color: $prim7;
+        color: $prim5;
+        margin: 0;
+        font-size: 1.5em;
+        width: 100%;
+        height: 10%;
+        text-align: center;
+        border-bottom: 2px solid $prim6;
+      }
+
+      .scores{
+        width: 100%;
+        height: 90%;
+        display: flex;
+        flex-flow: column;
+        height: 85%;
+        //overflow-y: scroll;
+        overflow-y: overlay;
+        border: 2px solid $prim7;
+        border-radius: 0 0 20px 20px;
+  
+        .leaderBoardEntry{
+          width: 100%;
+          padding: 10px;
+          border-top: 1px solid $prim6;
+          border-bottom: 1px solid $prim8;
+          text-align: center;
+          background-color: $prim10;
+        }
+
+        .myScore{
+          background-color: $triadteal8;
+          color: $triadteal1;
+          font: bolder;
+        }
+      }
+    }
+
+    #monthly{
+      grid-row-start: 3;
+      grid-column-start: 1;
+      grid-column-end: 3;
+    }
+    #allTime{
+      grid-row-start: 3;
+      grid-column-start: 3;
+      grid-column-end: 5;
+    }
+    
+    .buttonHolder{
+      width: 50%;
+      margin: auto;
+
+      grid-row-start: 4;
+      grid-column-start: 2;
+      grid-column-end: 4;
+      button{
+        width: 100%;
+        border-radius: 5px;
+        background: url("../assets/images/infocard_background.jpg");
+        color: $darkBrown;
+        font-weight: bold;
+        filter: drop-shadow(0 0 4px $niceBrown);
+      }
+    }
+  }
+}

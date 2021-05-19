@@ -1,0 +1,74 @@
+@import "colors";
+
+@mixin coolBorder{
+    border: 4px groove $niceBrown;
+    border-bottom: 4px ridge $niceBrown;
+    filter: drop-shadow(5px 5px 4px $niceBrown);
+}
+.pregameContainer{
+  width: 100%;
+  //padding-top: 2vh;
+  margin: auto;
+  height: 100%;
+  
+  //background: url("../assets/images/main_background.jpg");
+  //background-repeat: round;
+  >*{
+    margin-top: 5vh;
+  }
+  .inputForm{
+    padding: 5vh 1vh 1vw 1vw;
+    //background-color: $prim10;
+    margin: auto;
+    width: 75%;
+
+    .buttonHolder{
+      margin-top: 8vh;
+      margin-bottom: 2.5vh;
+      padding: 0;
+      display: flex;
+      justify-content: space-around;
+      .btn{
+        width: 40%
+      }
+    }
+
+    .row{
+      margin-bottom: 4vh;
+      }
+    }
+  .gameList{
+    //background-color: $comp10;
+    height: 80%;
+    width: 100%;
+    margin: auto;
+  }
+
+  h2{
+    text-align: center;
+    letter-spacing: 0.2em;
+    font-size: 1.6em;
+    font-weight: bolder;
+    padding: 1vh;
+    padding-left: 1.2vw;
+    padding-right: 1vw;
+    margin: auto;
+    color: $prim5;
+    background-color: #d0a87d50;
+    border-radius: 5px;
+    width: 100%;
+    border-bottom: 2px solid $prim6;
+    border-image: linear-gradient(45deg, $prim7, $prim6, $prim7) 1;
+
+    filter: drop-shadow(2px 2px 4px $prim4);
+  }
+
+  .buttonHolder{
+    margin-top: auto;
+    margin-bottom: 2.5vh;
+    padding-left: 5vw;
+    padding-right: 5vw;
+    display: flex;
+    justify-content: space-around;
+  }
+}

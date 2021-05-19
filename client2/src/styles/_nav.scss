@@ -1,0 +1,56 @@
+//Import colors
+@import 'colors';
+
+@font-face {
+  font-family: "Academy Engraved";
+  src: url(../assets/fonts/academy_engraved.ttf) format("truetype");
+}
+
+nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 8%;
+  width: 100%;
+  overflow: hidden;
+
+  background: url("../assets/images/navbar_background.jpg");
+  background-repeat: repeat;
+
+  border-width: 0;
+  border-bottom-width: 2px;
+  border-style: solid;
+  border-image: linear-gradient(45deg, $prim3, $prim5, $prim7, $prim5, $prim3) 1;
+
+  h1{
+    font-weight: bolder;
+    font-size: 4.2vh;
+    margin: 0px;
+    letter-spacing: 0.2em;
+    color: $prim10;
+    font-family: "Academy Engraved", serif;
+    text-shadow: 2px 2px $prim4;
+
+  }
+
+  .navItems{
+    .item{
+        .logoutBtn{
+            font-size: 2vh;
+            color: $prim10;
+            opacity: 0.5;
+            text-align: end;
+        }
+        .logoutBtn:hover{
+          opacity: 0.8;
+      }
+    }
+
+  }
+
+}
