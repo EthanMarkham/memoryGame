@@ -1,4 +1,4 @@
-import React, { useContext, useReducer, useEffect, useCallback, useState } from 'react';
+import React, { useContext, useReducer, useEffect, useState } from 'react';
 import { SocketContext } from '../../context/socket';
 import { useTransition, useSpring, useSprings, animated as a } from 'react-spring'
 import { squareTransitions, flipAnimations, hideGameInfo, gameOverTransition, hideBoardAnimation } from '../../helpers/transitions'
@@ -9,13 +9,36 @@ const GameOver = require("./game.over").default;
 const gameReducer = require('../../reducers/game').default;
 const useWindowSize = require('../../hooks/useWindowSize').default;
 const useTimer = require('../../hooks/useTimer').default;
-
-const gameState = require('../../helpers/initialState').gameState;
-
 const SERVER_URL = "http://localhost:5000";
 
+const initialState = {
+    gridSize: [0, 0],
+    game: {
+        id: null,
+        status: "WAITING",
+        squares: [],
+        round: 0,
+        message: '',
+        users: [],
+        listening: false
+    },
+    moveTimer: false,
+    labels: true,
+    endGameInfo: {
+        monthlyOrAlltime: 0,
+        show: false,
+        solo: false,
+        monthlyPos: -1,
+        allTimePos: -1,
+        allTimeCount: -1,
+        monthlyCount: -1,
+        monthlyTop: [],
+        allTimeTop: [],
+    }
+}
+
 export default function Game(props) {
-    const [state, dispatch] = useReducer(gameReducer, { me: props.me, ...gameState });
+    const [state, dispatch] = useReducer(gameReducer, { me: props.me, ...initialState });
     const windowSize = useWindowSize();
 
     const [time, toggleTimer] = useTimer(45, () => { });
@@ -123,7 +146,13 @@ export default function Game(props) {
                 style={gameOverSpring}
                 key={'gameOver35423'}
             >
-                {state.endGameInfo.show && <GameOver game={state.game} leaderboardInfo={state.endGameInfo} me={props.me} leaveGame={() => props.dispatch({ type: 'SWITCH_PAGE', payload: 2 })} />}
+                {state.endGameInfo.show && <GameOver
+                    game={state.game}
+                    leaderboardInfo={state.endGameInfo}
+                    me={props.me}
+                    toggleLeaderboard={data => dispatch({ type: 'TOGGLE_LEADERBOARD',  payload: data })}
+                    leaveGame={() => props.dispatch({ type: 'SWITCH_PAGE', payload: 2 })} />
+                }
             </a.div>
             {/*  GAME INFO */}
             <a.div

@@ -1,12 +1,24 @@
 import React, { Suspense, useEffect, useReducer } from "react";
 import { useTransition, animated as a } from 'react-spring'
 import { checkAuth } from './helpers/helpers';
-import { initialState } from './helpers/initialState';
 import { errorTransition, pageTransition } from './helpers/transitions';
 import { SocketContext, socket } from './context/socket';
 
 const reducer = require('./reducers/root').default
 const Loader = require("react-loader-spinner").default
+
+const initialState = {
+  auth: { 
+      username: 'Guest', 
+      token: localStorage.getItem('jwt'), 
+      isAuth: false 
+  },
+  pageIndex: 0, 
+  error: {
+      show: false,
+      message: '',
+  },
+}
 
 const pages = [
   () => null,

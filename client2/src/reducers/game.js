@@ -11,7 +11,7 @@ export default function gameReducer(state, action) { //PAGGES:  0 Loader || 1 Ga
             return copy
 
         case "SHOW_END_GAME":
-            copy.endGameInfo = { ...data.leaderboard, show: true };
+            copy.endGameInfo = { ...data.leaderboard, monthlyOrAlltime: copy.endGameInfo.monthlyOrAlltime, show: true };
             return copy;
 
         case "CLEAR_SQUARES":
@@ -20,7 +20,11 @@ export default function gameReducer(state, action) { //PAGGES:  0 Loader || 1 Ga
 
         case "TOGGLE_LABELS":
             copy.labels = (data !== undefined) ? data : !copy.labels;
-            return copy
+            return copy;
+
+        case "TOGGLE_LEADERBOARD":
+            copy.endGameInfo.monthlyOrAlltime = data;
+            return copy;
 
         case "SET_GRID":
             //checking if we need to return n
@@ -29,6 +33,7 @@ export default function gameReducer(state, action) { //PAGGES:  0 Loader || 1 Ga
             if (newGridCalc[0] === copy.gridSize[0] && newGridCalc[1] === copy.gridSize[1]) return copy; //no change
             copy.gridSize = newGridCalc;
             return copy;
+
         //seperate timer dispatcher??
         case "START_TIMER":
             copy.moveTimer = true;

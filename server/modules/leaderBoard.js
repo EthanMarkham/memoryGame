@@ -71,15 +71,10 @@ const GetLeaderboardPosition = (scoreData) => {
                         let allTimePos = allTimeScores.findIndex(a => a._id.toString() == scoreData._id.toString()) + 1;
                         let allTimeCount = allTimeScores.length;
                         let monthlyCount = monthlyScores.length;
-
-                        /*LOOOK UP BETTER WAY FOR THIS JOIN NOSQL STUFF */
-                        let userIDs = allTimeScores.slice(0, 99).map(a => a.userID)
-                            .concat(monthlyScores.slice(0, 99).map(a => a.userID))
-                            .reduce((acc, cur) => { 
-                                if (!acc) return cur.toString();
-                                else if (!acc.includes(cur)) return acc + ' ' + cur.toString();
-                            }, allTimeScores[0].userID.toString()).split(' ');
-                        User.find({_id: {$in: userIDs}}, (err, users) => {
+                        let allUserIDs = allTimeScores.slice(0, 99).map(a => a.userID)
+                            .concat(monthlyScores.slice(0, 99).map(a => a.userID));
+                        //pull needed ids from list just maded
+                        User.find({_id: {$in: allUserIDs}}, (err, users) => {
                             if (err) reject(err);
                             monthlyScores = mapToPublicData(monthlyScores.slice(0, 99), users, scoreData._id.toString());
                             allTimeScores = mapToPublicData(allTimeScores.slice(0, 99), users, scoreData._id.toString());
