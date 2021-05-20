@@ -3,21 +3,18 @@ const config = require('../config/config.json');
 const GameManager = require('../modules/game.manager')
 
 exports = module.exports = function (io) {
+  //Relay Game Info from manager
+  GameManager.events.on("GAME_LIST", games => io.to(`games`).emit('GAME_LIST', games));
 
-  GameManager.events.on("CLIENT_INFO", gameInfo => {
-    console.log('sending info', gameInfo.id)
-    io.to(`game:${gameInfo.id}`).emit('GAME_INFO', { game: gameInfo })
-  });
-  GameManager.events.on("GAME_LIST", games => {
-    console.log('sending games')
-    io.to(`games`).emit('GAME_LIST', games)
-  });
-  GameManager.events.on("GAME_MESSAGE", data => {
-    io.to(`game:${data.id}`).emit('ERROR', data.message) //switch this so its not error just temp
-  }); 
-  GameManager.events.on("GAME_TIMER", data => {
-    io.to(`game:${data.id}`).emit('GAME_TIMER', data.timeLeft) 
-  });
+  GameManager.events.on("CLIENT_INFO", gameInfo => io.to(`game:${gameInfo.id}`).emit('GAME_INFO', { game: gameInfo }));
+  GameManager.events.on("GAME_OVER", data => io.to(`game:${data.game.id}`).emit('GAME_OVER', data));
+  GameManager.events.on("GAME_MESSAGE", data => io.to(`game:${data.id}`).emit('ERROR', data.message)); //switch this so its not error just temp
+   
+  GameManager.events.on("START_TIMER", data => io.to(`game:${data.id}`).emit('START_TIMER'));
+  GameManager.events.on("OUT_OF_TIME", data => io.to(`game:${data.id}`).emit('OUT_OF_TIME', {game: data}));
+  GameManager.events.on("CLEAR_TIMER", data => io.to(`game:${data.id}`).emit('CLEAR_TIMER'));
+
+  //io listeners
   io.on('connection', (socket) => {
     socket.emit('connected')
 
@@ -32,9 +29,9 @@ exports = module.exports = function (io) {
     socket.on("GET_GAME", _ => handleGetGame());
     socket.on("GAME_CLICK", guess => handleGameClick(guess))
     socket.on("QUIT_GAME", gameID => handleQuitGame(gameID))
+    
     socket.on("LEAVE_GAME_ROOM", gameID => {
       socket.leave(`game:${gameID}`);
-      socket.emit("USER_STATUS", {game: false}); //emit user status for app to catch
     })
 
     socket.on("LOGIN", token => handleLogin(token))
@@ -79,8 +76,7 @@ exports = module.exports = function (io) {
     }
     const handleQuitGame = _ => {
       GameManager.RemoveUser(socket.handshake.session.userID)
-        .then(id => {
-          socket.leave(`game:${id}`);
+        .then(_ => {
           socket.emit('USER_STATUS', { game: false});
         })
         .catch(err => { console.log(err); socket.emit('ERROR', err.message) })

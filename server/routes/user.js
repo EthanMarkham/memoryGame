@@ -9,10 +9,10 @@ router.post("/register",
         validator.check("username", "Please Enter a Valid Username")
         .not()
         .isEmpty(),
-        validator.check("username", "Username Must be at least 4 chars!")
-        .isLength({min: 4}),
-        validator.check("password", "Password must be at least 4 chars!")
-        .isLength({min: 4})
+        validator.check("username", "Username must be between 4 and 12 chars!")
+        .isLength({min: 4, max: 12}),
+        validator.check("password", "Password  must be between 4 and 12 chars!")
+        .isLength({min: 4, max: 12}),
     ], userController.signUp)
     
 router.post(

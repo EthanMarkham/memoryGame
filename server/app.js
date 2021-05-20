@@ -3,9 +3,9 @@ const path = require('path');
 const logger = require('morgan');
 const cors = require('cors')
 const config = require('./config/config.json');
-
+const serverUtils = require('./utils/serverUtil');
 // Initiate Mongo Server
-require('./config/database.config')
+require('./utils/dbutil');
 const usersRouter = require('./routes/user');
 const adminRouter = require('./routes/admin');
 
@@ -46,6 +46,7 @@ app.use(express.urlencoded({
 app.use(express.static('public'))
 
 //routes
+app.use(serverUtils.postTrimmer); //trip post data white space
 app.use('/api/users', usersRouter);
 app.use('/api/admin', adminRouter)
 app.get('*', (req, res) => res.sendFile('index.html', {root: __dirname+'/public'}));

@@ -1,147 +1,157 @@
-$golden: #B79347;
-$niceBrown: #81571E;
-$darkBrown: #5b3625;
-$silver: #DEDEDE;
-$tan: #CBB989;
-$dullBrown: #A7967D;
+/*
+PRIM = 81581e || BROWN 
+*/
+$prim900: #4c2500;
+$prim800: #5b3308;
+$prim700: #67410f;
+$prim600: #764e18;
+$prim500: #81581e;
+$prim400: #996f3b;
+$prim300: #b08858;
+$prim200: #d0a87d;
+$prim100: #edc9a0;
+$prim50: #ffe9c0;
 
-$prim1: #4c2500;
-$prim2: #5b3308;
-$prim3: #67410f;
-$prim4: #764e18;
-$prim4-alpha: #764e1850;
-$prim5: #81581e;
-$prim6: #996f3b;
-$prim7: #b08858;
-$prim7-alpha: #b0885850;
-$prim8: #d0a87d;
-$prim9: #edc9a0;
-$prim10: #ffe9c0;
-$prim11: #fffff3;
+$comp900: #1e4781;
+$comp800: #2b64a1;
+$comp700: #3274b2;
+$comp600: #3c85c4;
+$comp500: #4493d1;
+$comp400: #59a1d7;
+$comp300: #72b1dd;
+$comp200: #96c7e7;
+$comp100: #bddcf0;
+$comp50: #e4f1f9;
 
-$comp1: #1e4781;
-$comp2: #2b64a1;
-$comp3: #3274b2;
-$comp4: #3c85c4;
-$comp5: #4493d1;
-$comp6: #59a1d7;
-$comp7: #72b1dd;
-$comp8: #96c7e7;
-$comp9: #bddcf0;
-$comp10: #e4f1f9;
-
-$analred1: #81261e;
-$analred2: #922c26;
-$analred3: #9f312b;
-$analred4: #b03931;
-$analred5: #bd4033;
-$analred6: #be4e49;
-$analred7: #bb6b69;
-$analred8: #d09291;
-$analred9: #ebc7cb;
-$analred10: #f7e9eb;
-
-$analgreen1:  #79811e;
-$analgreen2: #90a830;
-$analgreen3: #9ec039;
-$analgreen4: #add643;
-$analgreen5: #b8e94c;
-$analgreen6: #c1ed65;
-$analgreen7: #ccf181;
-$analgreen8: #daf6a5;
-$analgreen9: #e8f9c8;
-$analgreen10: #f6fde9;
-
-$triadgreen1: #23600c;
-$triadgreen2: #47811e;
-$triadgreen3: #5b9527;
-$triadgreen4: #6ea831;
-$triadgreen5: #7db838;
-$triadgreen6: #90c257;
-$triadgreen7: #a4cc75;
-$triadgreen8: #bedb9c;
-$triadgreen9: #d8e9c3;
-$triadgreen10: #eff6e7;
+$second900: #233038;
+$second800: #34444f;
+$second700: #425764;
+$second600: #516b7a;
+$second500: #5d7a8b;
+$second400: #758d9c;
+$second300: #8da2ae;
+$second200: #adbcc6;
+$second100: #cdd7dd;
+$second50: #eaeff3;
+/*
+ NEW PRIM = #516b7a
+*/
 
 
-$triadteal1: #1a6142;
-$triadteal2: #1e8158;
-$triadteal3: #219264;
-$triadteal4: #28a572;
-$triadteal5: #2eb47d;
-$triadteal6: #53c090;
-$triadteal7:#74cba4;
-$triadteal8:#9dd9bd;
-$triadteal9:#c3e8d6;
-$triadteal10: #e6f6ef;
 
+$analOne900: #81261e;
+$analOne800: #922c26;
+$analOne700: #9f312b;
+$analOne600: #b03931;
+$analOne500: #bd4033;
+$analOne400: #be4e49;
+$analOne300: #bb6b69;
+$analOne200: #d09291;
+$analOne100: #ebc7cb;
+$analOne50: #f7e9eb;
+
+$analTwo900:  #90a830;
+$analTwo800: #90a830;
+$analTwo700: #9ec039;
+$analTwo600: #add643;
+$analTwo500: #b8e94c;
+$analTwo400: #c1ed65;
+$analTwo300: #ccf181;
+$analTwo200: #daf6a5;
+$analTwo100: #e8f9c8;
+$analTwo50: #f6fde9;
+
+$triadOne900: #23600c;
+$triadOne800: #47811e;
+$triadOne700: #5b9527;
+$triadOne600: #6ea831;
+$triadOne500: #7db838;
+$triadOne400: #90c257;
+$triadOne300: #ccf181;
+$triadOne200: #daf6a5;
+$triadOne100: #e8f9c8;
+$triadOne50: #f6fde9;
+
+
+$triadTwo900: #1a6142;
+$triadTwo800: #1e8158;
+$triadTwo700: #219264;
+$triadTwo600: #28a572;
+$triadTwo500: #2eb47d;
+$triadTwo400: #53c090;
+$triadTwo300: #74cba4;
+$triadTwo200: #9dd9bd;
+$triadTwo100: #c3e8d6;
+$triadTwo50: #e6f6ef;
 
 /*
-$prim900: 233038;
-$prim800: 030303;
-$prim700: 67410f;
-$prim600: 764e18;
-$prim500: 81581e;
-$prim400: 996f3b;
-$prim300: b08858;
-$prim200: d0a87d;
-$prim100: edc9a0;
-$prim50: ffe9c0;
-$prim11: fffff3;
+PRIM = 
 
-$comp1: 1e4781;
-$comp2: 2b64a1;
-$comp3: 3274b2;
-$comp4: 3c85c4;
-$comp5: 4493d1;
-$comp6: 59a1d7;
-$comp7: 72b1dd;
-$comp8: 96c7e7;
-$comp9: bddcf0;
-$comp10: e4f1f9;
+$prim900: ;
+$prim800: ;
+$prim700: ;
+$prim600: ;
+$prim500: ;
+$prim400: ;
+$prim300: ;
+$prim200: ;
+$prim100: ;
+$prim50: ;
 
-$analred1: 81261e;
-$analred2: 922c26;
-$analred3: 9f312b;
-$analred4: b03931;
-$analred5: bd4033;
-$analred6: be4e49;
-$analred7: bb6b69;
-$analred8: d09291;
-$analred9: ebc7cb;
-$analred10: f7e9eb;
+$comp900: ;
+$comp800: ;
+$comp700: ;
+$comp600: ;
+$comp500: ;
+$comp400: ;
+$comp300: ;
+$comp200: ;
+$comp100: ;
+$comp50: ;
 
-$analgreen1:  79811e;
-$analgreen2: 90a830;
-$analgreen3: 9ec039;
-$analgreen4: add643;
-$analgreen5: b8e94c;
-$analgreen6: c1ed65;
-$analgreen7: ccf181;
-$analgreen8: daf6a5;
-$analgreen9: e8f9c8;
-$analgreen10: f6fde9;
+$analOne900: ;
+$analOne800: ;
+$analOne700: ;
+$analOne600: ;
+$analOne500: ;
+$analOne400: ;
+$analOne300: ;
+$analOne200: ;
+$analOne100: ;
+$analOne50: ;
 
-$triadgreen1: 23600c;
-$triadgreen2: 47811e;
-$triadgreen3: 5b9527;
-$triadgreen4: 6ea831;
-$triadgreen5: 7db838;
-$triadgreen6: 90c257;
-$triadgreen7: a4cc75;
-$triadgreen8: bedb9c;
-$triadgreen9: d8e9c3;
-$triadgreen10: eff6e7;
+$analTwo900:  ;
+$analTwo800: ;
+$analTwo700: ;
+$analTwo600: ;
+$analTwo500: ;
+$analTwo400: ;
+$analTwo300: ;
+$analTwo200: ;
+$analTwo100: ;
+$analTwo50: ;
+
+$triadOne900: ;
+$triadOne800: ;
+$triadOne700: ;
+$triadOne600: ;
+$triadOne500: ;
+$triadOne400: ;
+$triadOne300: ;
+$triadOne200: ;
+$triadOne100: ;
+$triadOne50: ;
 
 
-$triadteal1: 1a6142;
-$triadteal2: 1e8158;
-$triadteal3: 219264;
-$triadteal4: 28a572;
-$triadteal5: 2eb47d;
-$triadteal6: 53c090;
-$triadteal7:74cba4;
-$triadteal8:9dd9bd;
-$triadteal9:c3e8d6;
-$triadteal10: e6f6ef;
+$triadTwo900: ;
+$triadTwo800: ;
+$triadTwo700: ;
+$triadTwo600: ;
+$triadTwo500: ;
+$triadTwo400: ;
+$triadTwo300: ;
+$triadTwo200: ;
+$triadTwo9: ;
+$triadTwo10: ;
+
 */

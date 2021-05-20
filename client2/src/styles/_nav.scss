@@ -19,30 +19,29 @@ nav {
   width: 100%;
   overflow: hidden;
 
+  //background:  linear-gradient($prim400, $prim500);
   background: url("../assets/images/navbar_background.jpg");
   background-repeat: repeat;
-
-  border-width: 0;
-  border-bottom-width: 2px;
-  border-style: solid;
-  border-image: linear-gradient(45deg, $prim3, $prim5, $prim7, $prim5, $prim3) 1;
-
+  border-bottom: 1px solid $prim900;
+  
   h1{
     font-weight: bolder;
     font-size: 4.2vh;
     margin: 0px;
     letter-spacing: 0.2em;
-    color: $prim10;
+    color: $comp50;
     font-family: "Academy Engraved", serif;
-    text-shadow: 2px 2px $prim4;
-
+    text-shadow: 2px 2px $prim600;
+    padding: 3px 5px 3px 5px;
+    // background:  repeating-radial-gradient($prim400, $prim500 50px);
+    border-radius: 10px;
   }
 
   .navItems{
     .item{
         .logoutBtn{
             font-size: 2vh;
-            color: $prim10;
+            color: $comp100;
             opacity: 0.5;
             text-align: end;
         }

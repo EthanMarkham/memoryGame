@@ -1,8 +1,7 @@
 const Game = require("../model/game.model").Game;
-const User = require("../model/user.model");
+const User = require("../schemas/user.model");
 const events = require('events');
-const { arrEquals } = require('./arrayEquals')
-const { countdown } = require('./countdown');
+const { arrEquals } = require('../utils/arrayEquals')
 
 //NEED TO SWITCH FROM LIST FOR GAMES TO ID AS KEY. WAY BETTER AND LESS ERROR PRONE
 
@@ -77,9 +76,21 @@ var GameManager = module.exports = {
                 let newGame = new Game(user, info.playerCount, info.cardCount, gameName);
                 GameManager.games[newGame.id] = newGame;//
                 GameManager.EmitGames();
+
+                //add listeners to relay info to sockket
+                GameManager.games[newGame.id].events.on("GAME_INFO", data => GameManager.events.emit("CLIENT_INFO", data));
+                GameManager.games[newGame.id].events.on("GAME_OVER", data => GameManager.events.emit("GAME_OVER", data));
+                GameManager.games[newGame.id].events.on("START_TIMER", data =>  GameManager.events.emit("START_TIMER", data));
+                GameManager.games[newGame.id].events.on("OUT_OF_TIME", data =>  GameManager.events.emit("OUT_OF_TIME", data));
+                GameManager.games[newGame.id].events.on("CLEAR_TIMER", data =>  GameManager.events.emit("CLEAR_TIMER", data));
+
                 resolve(newGame) //send info back so client can join 
             } catch (err) { reject(err); };
         })
+    },
+    DeleteGame: gameID => {
+        GameManager.games[gameID].events.removeAllListeners();
+        GameManager.games[gameID] = null;
     },
     AddUser: (userID, gameID) => {
         return new Promise((resolve, reject) => {
@@ -87,9 +98,8 @@ var GameManager = module.exports = {
                 User.findById(userID)
                     .then(user => {
                         GameManager.games[gameID].AddUser(user);
-                        GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
                         GameManager.EmitGames(); //emit game changes if any
-                        resolve(GameManager.games[gameID].ClientInfo())  //send game info after added)
+                        resolve();
                     }).catch(err => reject(err))
             } catch (err) { reject(err) }
         })
@@ -101,18 +111,9 @@ var GameManager = module.exports = {
                 if (gameID == -1) reject({ error: true, message: "Game not found" })
                 GameManager.games[gameID].RemoveUser(userID)
                     .then(g => {
+                        if (g.status == "DELETE") GameManager.DeleteGame(gameID);
                         GameManager.EmitGames();
-                        if (g.status == "DELETE") {
-                            resolve(() => {
-                                GameManager.games[gameID] = null; //delete game
-                                return (gameID); //resolve id to leave room
-                            })
-                        }
-                        else {
-                            GameManager.SetMoveTimer(GameManager.games[gameID].id);
-                            GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
-                            resolve(gameID); //resolve gameID to broadcast new info
-                        }
+                        resolve(gameID);
                     })
             } catch (err) { reject(err) }
         })
@@ -121,75 +122,21 @@ var GameManager = module.exports = {
         return new Promise((resolve, reject) => {
             let gameID = GameManager.FindGameByUserID(userID)
             if (gameID == -1) reject({ error: true, message: "User not in game" })
-            if (GameManager.games[gameID].moveTimer) GameManager.games[gameID].moveTimer.stop(); //stop move timer after click
             //Handle Click
             GameManager.games[gameID].HandleClick(userID, guess)
-                .then(game => {
-                    GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
-                    //If resetting broadcast 2x
-                    if (game.status == "RESETTING") {
-                        setTimeout(() => {
-                            if (GameManager.games[gameID]) {//check that it exists incase it was deleted in timeout
-                                GameManager.games[gameID].ResetCards(true)
-                                    .then(_ => {
-                                        GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
-                                        GameManager.SetMoveTimer(gameID);
-                                        resolve();
-                                    })
-                            }
-                        }, 3000)
-                    }
-                    //If Gameober set timeout to delete game
-                    else if (game.status == "GAME_OVER") {
-                        if (GameManager.games[gameID].moveTimer) GameManager.games[gameID].moveTimer.stop();
-                        GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
-                        GameManager.EmitGames();
-                        setTimeout(() => {
-                            GameManager.games[gameID] = null;
-                        }, 10000)
-                        resolve()
-                    }
-                    else {
-                        GameManager.EmitInfo(GameManager.games[gameID].ClientInfo());
-                        GameManager.SetMoveTimer(gameID);
-                        resolve();
-                    }
-                })
                 .catch(e => reject(e))
         })
     },
-    SkipUserByID: userID => {
+    AdminSkipUser: gameID => {
         return new Promise((resolve, reject) => {
             try {
-                let gameID = FindIndexByUserID(userID)
-                GameManager.games[gameID].moveTimer.stop();
-                GameManager.games[gameID].NextTurn()
-                if (GameManager.games[gameID].ActiveUsers().length > 1) { //if more than 1 people start move timer
-                    GameManager.SetMoveTimer(GameManager.games[gameID].id);
-                }
-                resolve(() => GameManager.EmitInfo(GameManager.games[gameID].ClientInfo()))
+                GameManager.games[gameID].NextTurn();
+                GameManager.events.emit("GAME_MESSAGE", {message: 'User skipped by admin!', data: GameManager.games[gameID].ClientInfo});
+                resolve();
             }
-            catch (err) {
-                reject(err)
-            }
-        })
+            catch (err) { reject(err); }   
+        });
     },
-    SkipUser: gameID => {
-        return new Promise((resolve, reject) => {
-            try {
-                GameManager.games[gameID].moveTimer.stop();
-                GameManager.games[gameID].NextTurn()
-                if (GameManager.games[gameID].ActiveUsers().length > 1) { //if more than 1 people start move timer
-                    GameManager.SetMoveTimer(GameManager.games[gameID].id);
-                }
-                resolve(() => GameManager.EmitInfo(GameManager.games[gameID].ClientInfo()))
-            }
-            catch (err) {
-                reject(err)
-            }
-        })
-    },
-    EmitInfo: info => GameManager.events.emit("CLIENT_INFO", info),
 
     EmitGames: _ => {
         let games = GameManager.GetOpenGames();
@@ -204,25 +151,6 @@ var GameManager = module.exports = {
             return
         }
     },
-    EmitMessage: (id, message) => GameManager.events.emit("GAME_MESSAGE", { id: id, message: message }),
-    EmitTimer: (timeLeft, gameID) => GameManager.events.emit("GAME_TIMER", { id: gameID, timeLeft: timeLeft }),
-    SetMoveTimer: id => {
-        if (GameManager.games[id].moveTimer) GameManager.games[id].moveTimer.stop();
-        if (GameManager.games[id].ActiveUsers().length > 1) {
-            GameManager.games[id].moveTimer = new countdown({
-                seconds: 45,
-                onUpdateStatus: sec => GameManager.EmitTimer(sec, id),
-                onCounterEnd: _ => {
-                    if (GameManager.games[id]) { //double check object exists incase it was deleteed
-                        GameManager.SkipUser(id);
-                        GameManager.EmitInfo(GameManager.games[id].ClientInfo());
-                        GameManager.EmitMessage(id, "Times Up!");
-                    }
-                }
-            })
-            GameManager.games[id].moveTimer.start();
-        }
-    }
 }
 
 

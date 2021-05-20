@@ -11,7 +11,7 @@ body {
   //background-color: $prim1;
   overflow: hidden;
   font-family: "trajan-pro-3", serif;
-  color: $prim5;
+  color: $prim500;
 }
 
 /*main background*/
@@ -33,7 +33,7 @@ body {
   z-index: 2;
   will-change: display, opacity;
   display: flex;
-  background-color: $analred8;
+  background-color: $analOne300;
   width: 100%;
   height: fit-content;
   justify-content: center;
@@ -41,7 +41,7 @@ body {
   
   b {
     size: 4em;
-    color: $analred2;
+    color: $analOne800;
   }
   span {
     padding-left: 0.5em;
@@ -80,29 +80,6 @@ body {
 @import "gameOver";
 
 
-/*Media Queries*/
-@mixin responsive($maxWidth, $logoSize, $columns, $rows, $imageWidth, $imageHeight, $labelFontSize, $labelHeight, $columnSize, $rowSize) {
-  @media screen and (max-width: $maxWidth) {
-    nav {
-      h1 {
-        font-size: $logoSize;
-      }
-    }    
-  }
-  @media (min-width: 0) and (max-width: 767px) {
-    .gameInfo{
-        grid-template-columns: 1% 1fr 1fr 53% 15% 1%;
-    }
-  }
-  @media (min-width: 1350) {
-    .game>.gameInfo{
-        grid-template-columns: 1% 7% 7% auto 7% 1%;
-    }
-  }
-}
-
-
-
 /* SCROLL BARS */
 /* width */
 ::-webkit-scrollbar {
@@ -117,13 +94,13 @@ body {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: $prim8;
+  background: $prim300;
   border-radius: 100%;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: $prim4;
+  background: $prim600;
 }
 
 .justify-right{
@@ -132,11 +109,10 @@ body {
 
 
 
-
 //ACCENTS FOR DANGER // SUCCESS
 .danger-accent{
-  filter: drop-shadow(2px 2px 3px $analred4);
+  filter: drop-shadow(2px 2px 3px $analOne600);
 }
 .success-accent{
-  filter: drop-shadow(2px 2px 3px $analgreen4);
+  filter: drop-shadow(2px 2px 3px $triadOne600);
 }

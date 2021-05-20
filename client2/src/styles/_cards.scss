@@ -11,7 +11,8 @@
       width: 100%;
       justify-content: center;
       padding: 1vh 1vw 1vh 1vw;
-    
+
+
       .square{
         display: flex;
         will-change: transform, opacity;
@@ -37,8 +38,8 @@
           will-change: transform, opacity;
           z-index: 1;
 
-          border: 1px solid $prim3;
-          filter: drop-shadow(2px 2px 3px $prim3);
+          border: 1px solid $prim700;
+          filter: drop-shadow(2px 2px 3px $prim900);
         }
         .back{
           z-index: 2;
@@ -47,13 +48,19 @@
           z-index: 3;
           margin-left: 5%;
           padding-left: 2%;
-          padding-right: 2%;
+          padding-right: 1vw;
           font-weight: bold;
-          background-color: black;
+          background-color: $second900;
+          border-radius: 45deg;
           width: auto;
           color: white;
           font-size: 0.8em;
           align-self: flex-end;
+          overflow: hidden;
+        }
+        label:hover{
+          overflow: visible;
+          position: fixed;
         }
       }
       .square:disabled{

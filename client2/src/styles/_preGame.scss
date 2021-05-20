@@ -1,10 +1,5 @@
 @import "colors";
 
-@mixin coolBorder{
-    border: 4px groove $niceBrown;
-    border-bottom: 4px ridge $niceBrown;
-    filter: drop-shadow(5px 5px 4px $niceBrown);
-}
 .pregameContainer{
   width: 100%;
   //padding-top: 2vh;
@@ -47,20 +42,19 @@
   h2{
     text-align: center;
     letter-spacing: 0.2em;
-    font-size: 1.6em;
+    font-size: 1.2em;
     font-weight: bolder;
-    padding: 1vh;
+    padding: 0.4vh;
     padding-left: 1.2vw;
     padding-right: 1vw;
     margin: auto;
-    color: $prim5;
-    background-color: #d0a87d50;
-    border-radius: 5px;
-    width: 100%;
-    border-bottom: 2px solid $prim6;
-    border-image: linear-gradient(45deg, $prim7, $prim6, $prim7) 1;
+    color: $prim50;
 
-    filter: drop-shadow(2px 2px 4px $prim4);
+    background:  linear-gradient(90deg, #d0a87d50, $prim300, #d0a87d50);
+    width: 100%;
+    border-bottom: 2px solid $prim300;
+    border-image: linear-gradient(90deg, #d0a87d20, #d0a87d, #d0a87d20);
+    filter: drop-shadow(2px 2px 4px $prim600);
   }
 
   .buttonHolder{
@@ -71,4 +65,17 @@
     display: flex;
     justify-content: space-around;
   }
+}
+.niceBorder{
+  position: absolute;
+  padding: 0 !important;
+  overflow: hidden;
+  //background:  linear-gradient(180deg, $prim5, $prim7, $prim5, $prim2);
+  background:  linear-gradient($prim600, $prim900);
+  border-width: 1px 0 1px 0px;
+  border-radius: 0;
+  height: 5px;
+  width: 100%;
+  margin: 0;
+  z-index: 100;
 }

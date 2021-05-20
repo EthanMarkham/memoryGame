@@ -1,4 +1,5 @@
 import { config } from 'react-spring'
+import { initialState } from './initialState'
 
 export const squareTransitions = {
     from: { opacity: 0 },

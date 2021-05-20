@@ -1,7 +1,7 @@
 const validator = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../model/user.model");
+const User = require("../schemas/user.model");
 const config = require('../config/config.json');
 
 module.exports.signUp = async (req, res) => {
@@ -38,7 +38,7 @@ module.exports.signUp = async (req, res) => {
 
         const payload = { user: { id: user.id } }
 
-        jwt.sign(payload, config.secret, { expiresIn: '2 days' },
+        jwt.sign(payload, config.secret, { expiresIn: '60 days' },
             (err, token) => {
                 if (err) throw err;
                 res.redirect(`/api/users/me/${token}`);

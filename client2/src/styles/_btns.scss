@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "Academy Engraved";
+  src: url(../assets/fonts/academy_engraved.ttf) format("truetype");
+}
 .btn{
     display: block;
     cursor: pointer;
@@ -6,15 +10,17 @@
     padding: 0.5vh 0.5vh 0.5vh 1vh;
     text-align: center;
   
-    font-weight: 550;
+    font-family: "Academy Engraved", serif;
+    font-size: 0.8em;
+    font-weight: 700;
     letter-spacing: 0.1em;
   
-    color: $prim4;
-    background: linear-gradient(45deg, $prim6, $prim8, $prim6);
+    color: white;
+    background: linear-gradient($second500, $second400);
 
-    border: 1px solid $prim6;
+    border: 1px solid $second500;
     border-radius: 7px;
-    filter: drop-shadow(2px 2px 1px $prim5);
+    filter: drop-shadow(2px 2px 1px $second900);
   }
   
   .btn-outline{
@@ -25,7 +31,7 @@
   }
   
   .btn-block{
-    width: 100%;
+    width: 80%;
   }
   
   .btn:disabled{
@@ -33,6 +39,6 @@
     text-decoration: none !important; 
   }
   .btn:hover{
-    color: $prim9;
+    color: $analTwo50;
     //flex-basis: 200%;
   }
