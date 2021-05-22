@@ -40,20 +40,20 @@
   }
 
   h2{
+    width: 100%;
+    height: 50px;
     text-align: center;
     letter-spacing: 0.2em;
     font-size: 1.2em;
-    font-weight: bolder;
+    font-weight: 300;
+    
     padding: 0.4vh;
     padding-left: 1.2vw;
     padding-right: 1vw;
-    margin: auto;
-    color: $prim50;
+    margin: 0;
+    color: $prim100;
 
-    background:  linear-gradient(90deg, #d0a87d50, $prim300, #d0a87d50);
-    width: 100%;
-    border-bottom: 2px solid $prim300;
-    border-image: linear-gradient(90deg, #d0a87d20, #d0a87d, #d0a87d20);
+    background:  linear-gradient(180deg, $second900, #d0a87d10);
     filter: drop-shadow(2px 2px 4px $prim600);
   }
 
@@ -65,17 +65,4 @@
     display: flex;
     justify-content: space-around;
   }
-}
-.niceBorder{
-  position: absolute;
-  padding: 0 !important;
-  overflow: hidden;
-  //background:  linear-gradient(180deg, $prim5, $prim7, $prim5, $prim2);
-  background:  linear-gradient($prim600, $prim900);
-  border-width: 1px 0 1px 0px;
-  border-radius: 0;
-  height: 5px;
-  width: 100%;
-  margin: 0;
-  z-index: 100;
 }

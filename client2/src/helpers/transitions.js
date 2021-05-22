@@ -35,11 +35,20 @@ export const timerTransition = {
 
 }
 export const pageTransition = {
-    from: { opacity: 0, }, //rotateY(90deg) transform: 'translate(-100%)'
+    from: { opacity: 0, }, //rotateY(90deg) 
     enter: { opacity: 1, }, //rotateY(0deg) transform: 'translate(0);'
     leave: { opacity: 0, }, //rotateY(90deg) transform: 'translate(100%)'
     keys: item => 'page' + item,
-    config: config.default
+    config: {duration: 300}
+}
+
+export const preGameTransition = {
+    from: { transform: 'translate(-100%)' }, //rotateY(90deg) 
+    enter: { transform: 'translate(0)' }, //rotateY(0deg) 
+    leave: { transform: 'translate(100%)', opacity: 0 }, //rotateY(90deg) 
+    keys: item => 'preGamePage' + item,
+    keys: item => 'page' + item,
+    config: config.gentle
 }
 
 export const endGameTransition = {

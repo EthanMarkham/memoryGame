@@ -7,13 +7,14 @@
 }
 
 nav {
+  position: relative;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
 
-  padding-left: 5%;
+  padding-left: 10px;
   padding-right: 5%;
   height: 8%;
   width: 100%;
@@ -22,9 +23,17 @@ nav {
   //background:  linear-gradient($prim400, $prim500);
   background: url("../assets/images/navbar_background.jpg");
   background-repeat: repeat;
-  border-bottom: 1px solid $prim900;
-  
-  h1{
+
+  border-bottom: 5px solid $second900;
+  border-image: linear-gradient(90deg, $second900, $second700, $second900) 1;
+  canvas{
+    height: 100% !important;
+    width: 90% !important;
+    //max-width: 800px !important;
+    overflow: visible !important;
+  }
+
+  /*h1{
     font-weight: bolder;
     font-size: 4.2vh;
     margin: 0px;
@@ -35,9 +44,11 @@ nav {
     padding: 3px 5px 3px 5px;
     // background:  repeating-radial-gradient($prim400, $prim500 50px);
     border-radius: 10px;
-  }
+  }*/
 
   .navItems{
+    position: absolute;
+    right: 2em;
     .item{
         .logoutBtn{
             font-size: 2vh;

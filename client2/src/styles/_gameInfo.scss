@@ -9,11 +9,7 @@
   position: relative;
   margin: auto;
 
-  background: $prim300; //add alpha ?
-  background:  repeating-radial-gradient($prim400, $prim700 50px);
- // background:  linear-gradient(180deg, $prim600, $comp600);
- background: url("../assets/images/wood.jpg");
- background-size: cover;
+  background:  linear-gradient($second500, $second900);
 
   *>{
     overflow: hidden;
@@ -36,17 +32,12 @@
     flex: 1 1;
     display: flex;
     justify-content: space-evenly;
-    grid-row-start: 2;
 
     font-size: 0.8rem;
     font-weight: 800;
     color: $prim500;
   }
-  .gameStats, #game-timer, .userStats {
-    border: 1px solid $prim900;
-    border-radius: 4px;
-    filter: drop-shadow(1px 1px 2px $prim400);
-  }
+
   .gameStats {
     border: 0;
     max-width: 150px;
@@ -146,9 +137,12 @@
     font-weight: 600;    
     width: 75%;
 
-    border-style: solid;
+    border: 1px solid $second500;
+    border-radius: 4px;
+    filter: drop-shadow(1px 1px 2px $prim400);
+    /* border-style: solid;
     border-image: linear-gradient(45deg, $prim700, $prim500, $prim300, $prim500, $prim300) 1;
-    border-width: 2px;
+    border-width: 2px; */
 
     .stat{
       padding-left: 3%;
@@ -234,4 +228,18 @@
 
 #round-message{
   padding: 0;
+}
+
+.niceBorder{
+  position: absolute;
+  padding: 0 !important;
+  overflow: hidden;
+  //background:  linear-gradient(180deg, $prim5, $prim7, $prim5, $prim2);
+  background:  linear-gradient($second600, $second900);
+  border-width: 1px 0 1px 0px;
+  border-radius: 0;
+  height: 5px;
+  width: 100%;
+  margin: 0;
+  z-index: 100;
 }

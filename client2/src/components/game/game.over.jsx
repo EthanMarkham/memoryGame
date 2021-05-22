@@ -1,3 +1,5 @@
+import { LiquidDistortionText  } from "react-text-fun";
+
 export default function GameOver({ toggleLeaderboard, leaderboardInfo, leaveGame, game, me }) {
   const { round, users } = game;
   let rank, allTimeRank;
@@ -9,7 +11,22 @@ export default function GameOver({ toggleLeaderboard, leaderboardInfo, leaveGame
     //check for position stuff here and add in message
     return (
       <div className="gameover">
-        <header className="header"><h1>Game Over!</h1></header>
+        <div className="title" id='gameOverMessage'>
+          <LiquidDistortionText 
+            text={"GAME OVER"}
+            fontSize={40}
+            speed={0.1}
+            volatility={0.02}
+            //generic
+            fontFamily={"trajan-pro-3"}
+            fill={"#d0a87d"}
+            appendTo={'gameOverMessage'}
+            paddingTop={10}
+            paddingBottom={10}
+            paddingLeft={20}
+            paddingRight={20}
+          />
+        </div>
         <div className="gameStats">
           <span className="message">Nice Work! It took you <b>{round} attempts</b>!</span>
           <span className="message">You placed <b>{rank} </b> for monthly scores!</span>

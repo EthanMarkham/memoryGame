@@ -51,22 +51,15 @@ body {
 .page-container {
   width: 100%;
   height: 92%;
-  position: fixed;
+  position: relative;
   z-index: 1;
-
-  .animatedDiv {
-    width: 100%;
-    height: 92%;
-    position: fixed;
-    will-change: transform, opacity;
-    //DO I NEED>?>>
-    .game{
-      width: 100%;
-      height: 100%;
-    }
-  }
 }
-
+.animatedDiv {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  will-change: transform, position;
+}
 /*Imports*/
 @import "form";
 @import "btns";
@@ -116,3 +109,4 @@ body {
 .success-accent{
   filter: drop-shadow(2px 2px 3px $triadOne600);
 }
+
